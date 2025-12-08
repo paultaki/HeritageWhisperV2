@@ -200,12 +200,12 @@ interface FamilyPrompt {
 const CATEGORIES = [
   { id: 'childhood', label: 'Childhood', icon: Baby, color: '#203954', hoverColor: '#2d4d6e' },
   { id: 'school', label: 'School Days', icon: GraduationCap, color: '#3E6A5A', hoverColor: '#4f7d6b' },
-  { id: 'work', label: 'Work & Career', icon: Briefcase, color: '#CBA46A', hoverColor: '#d4b07d' },
+  { id: 'work', label: 'Work & Career', icon: Briefcase, color: '#3E6A5A', hoverColor: '#4f7d6b' },
   { id: 'family', label: 'Family Life', icon: Home, color: '#203954', hoverColor: '#2d4d6e' },
   { id: 'places', label: 'Places & Travel', icon: MapPin, color: '#3E6A5A', hoverColor: '#4f7d6b' },
-  { id: 'hobbies', label: 'Hobbies & Interests', icon: Music, color: '#CBA46A', hoverColor: '#d4b07d' },
+  { id: 'hobbies', label: 'Hobbies & Interests', icon: Music, color: '#203954', hoverColor: '#2d4d6e' },
   { id: 'food', label: 'Food & Traditions', icon: Utensils, color: '#3E6A5A', hoverColor: '#4f7d6b' },
-  { id: 'milestones', label: 'Life Milestones', icon: Star, color: '#CBA46A', hoverColor: '#d4b07d' },
+  { id: 'milestones', label: 'Life Milestones', icon: Star, color: '#203954', hoverColor: '#2d4d6e' },
 ];
 
 // Featured prompt card component
@@ -223,9 +223,9 @@ function FeaturedPromptCard({ prompt, onRecord }: { prompt: any; onRecord: (id: 
 
       <div className="relative">
         {/* Badge */}
-        <div className="mb-6 inline-flex items-center gap-2 rounded-full px-4 py-2 backdrop-blur border-2" style={{ backgroundColor: 'rgba(255, 253, 247, 0.9)', borderColor: '#ED8936' }}>
-          <Sparkles className="h-5 w-5" style={{ color: '#ED8936' }} />
-          <span className="text-base font-semibold" style={{ color: '#2C5282' }}>Today's Featured Question</span>
+        <div className="mb-6 inline-flex items-center gap-2 rounded-full px-4 py-2 backdrop-blur border-2" style={{ backgroundColor: '#F4E6CC', borderColor: '#CBA46A' }}>
+          <Sparkles className="h-5 w-5" style={{ color: '#CBA46A' }} />
+          <span className="text-base font-semibold" style={{ color: '#203954' }}>Today's Featured Question</span>
         </div>
 
         {/* Question */}
@@ -369,8 +369,8 @@ function FamilyPromptCard({
 
       {/* From badge - Enhanced visibility */}
       <div className="mb-4">
-        <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border-2" style={{ backgroundColor: 'rgba(255, 255, 255, 0.9)', borderColor: '#CBA46A' }}>
-          <Heart className="h-4 w-4 fill-current" style={{ color: '#CBA46A' }} />
+        <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border-2" style={{ backgroundColor: 'rgba(255, 255, 255, 0.9)', borderColor: '#D2C9BD' }}>
+          <Heart className="h-4 w-4 fill-current" style={{ color: '#203954' }} />
           <span className="text-sm font-semibold" style={{ color: '#1F1F1F' }}>
             From {prompt.submittedBy.name}
             {prompt.submittedBy.relationship && ` • ${prompt.submittedBy.relationship}`}
@@ -388,13 +388,13 @@ function FamilyPromptCard({
         onClick={() => onRecord(prompt.id, prompt.prompt_text, 'family', prompt)}
         size="lg"
         className="w-full text-white text-base py-3 md:py-4 px-4 md:px-6 h-auto border-0 rounded-xl shadow-md hover:shadow-lg transition-all duration-300"
-        style={{ background: '#CBA46A' }}
+        style={{ background: '#203954' }}
         onMouseEnter={(e) => {
           e.currentTarget.style.background = '#3E6A5A';
           e.currentTarget.style.transform = 'translateY(-2px)';
         }}
         onMouseLeave={(e) => {
-          e.currentTarget.style.background = '#CBA46A';
+          e.currentTarget.style.background = '#203954';
           e.currentTarget.style.transform = 'translateY(0)';
         }}
       >
@@ -664,7 +664,7 @@ export default function PromptsV2Page() {
           ) : undefined
         }
       />
-      
+
       {/* Mobile Header */}
       <MobilePageHeader
         title="Story Ideas"
@@ -690,294 +690,294 @@ export default function PromptsV2Page() {
         {/* Main content */}
         <main className="w-full pb-24 md:pb-0 px-4 md:px-6">
 
-        {/* Help overlay */}
-        <AnimatePresence>
-          {showHelp && (
-            <motion.div
-              initial={{ opacity: 0, y: -20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              className="border-b px-6 py-4"
-              style={{ backgroundColor: '#F7F2EC', borderColor: '#203954' }}
-            >
-              <div style={{ maxWidth: "1200px", margin: "0 auto" }}>
-                <h3 className="font-semibold mb-2 text-lg" style={{ color: '#203954' }}>How to use this page:</h3>
-                <ul className="space-y-1 text-base" style={{ color: '#1F1F1F' }}>
-                  <li>• Click "Record" on any question to start recording your story</li>
-                  <li>• Click the bookmark icon to save a question for later</li>
-                  <li>• Questions from family members appear with special styling</li>
-                  <li>• Browse categories at the bottom to find more topics</li>
-                </ul>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
+          {/* Help overlay */}
+          <AnimatePresence>
+            {showHelp && (
+              <motion.div
+                initial={{ opacity: 0, y: -20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                className="border-b px-6 py-4"
+                style={{ backgroundColor: '#F7F2EC', borderColor: '#203954' }}
+              >
+                <div style={{ maxWidth: "1200px", margin: "0 auto" }}>
+                  <h3 className="font-semibold mb-2 text-lg" style={{ color: '#203954' }}>How to use this page:</h3>
+                  <ul className="space-y-1 text-base" style={{ color: '#1F1F1F' }}>
+                    <li>• Click "Record" on any question to start recording your story</li>
+                    <li>• Click the bookmark icon to save a question for later</li>
+                    <li>• Questions from family members appear with special styling</li>
+                    <li>• Browse categories at the bottom to find more topics</li>
+                  </ul>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
 
-        {/* Content */}
-        <div className="py-8 max-w-7xl mx-auto">
-          {/* Featured Prompt */}
-          <section className="mb-12">
-            <FeaturedPromptCard prompt={featuredPrompt} onRecord={handleRecord} />
-          </section>
-
-          {/* Family Questions (if any) */}
-          {familyPrompts.length > 0 && (
+          {/* Content */}
+          <div className="py-8 max-w-7xl mx-auto">
+            {/* Featured Prompt */}
             <section className="mb-12">
-              <div className="mb-6 flex items-center gap-3">
-                <Heart className="h-7 w-7 fill-current" style={{ color: '#CBA46A' }} />
-                <h2 className="text-3xl font-bold" style={{ color: '#1F1F1F' }}>
-                  Your Family Wants to Know
-                </h2>
-              </div>
-
-              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                {familyPrompts.map((prompt) => (
-                  <FamilyPromptCard
-                    key={prompt.id}
-                    prompt={prompt}
-                    onRecord={handleRecord}
-                    onDismiss={handleDismissFamilyPrompt}
-                  />
-                ))}
-              </div>
+              <FeaturedPromptCard prompt={featuredPrompt} onRecord={handleRecord} />
             </section>
-          )}
 
-          {/* Quick Start */}
-          {quickStartPrompts.length > 0 && (
-            <section className="mb-12">
-              <div className="mb-6">
-                <h2 className="text-3xl font-bold mb-2" style={{ color: '#1F1F1F' }}>
-                  Quick Start
-                </h2>
-                <p className="text-lg" style={{ color: '#1F1F1F' }}>
-                  Easy questions to get you started
-                </p>
-              </div>
+            {/* Family Questions (if any) */}
+            {familyPrompts.length > 0 && (
+              <section className="mb-12">
+                <div className="mb-6 flex items-center gap-3">
+                  <Heart className="h-7 w-7" style={{ color: '#203954' }} />
+                  <h2 className="text-3xl font-bold" style={{ color: '#1F1F1F' }}>
+                    Your Family Wants to Know
+                  </h2>
+                </div>
 
-              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                {quickStartPrompts.map((prompt) => (
-                  <SimplePromptCard
-                    key={prompt.id}
-                    prompt={prompt}
-                    onRecord={handleRecord}
-                    onSave={handleSave}
-                    isSaved={queuedPrompts.some(q => q.id === prompt.id)}
-                  />
-                ))}
-              </div>
-            </section>
-          )}
-
-          {/* Saved for Later */}
-          {queuedPrompts.length > 0 && (
-            <section className="mb-12">
-              <div className="mb-6 flex items-center gap-3">
-                <Bookmark className="h-7 w-7 fill-current" style={{ color: '#CBA46A' }} />
-                <h2 className="text-3xl font-bold" style={{ color: '#1F1F1F' }}>
-                  Saved for Later
-                </h2>
-              </div>
-
-              <div className="rounded-2xl p-6 border-2 shadow-sm" style={{ backgroundColor: '#FFFDF7', borderColor: '#CBA46A' }}>
                 <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                  {queuedPrompts.map((prompt) => (
+                  {familyPrompts.map((prompt) => (
+                    <FamilyPromptCard
+                      key={prompt.id}
+                      prompt={prompt}
+                      onRecord={handleRecord}
+                      onDismiss={handleDismissFamilyPrompt}
+                    />
+                  ))}
+                </div>
+              </section>
+            )}
+
+            {/* Quick Start */}
+            {quickStartPrompts.length > 0 && (
+              <section className="mb-12">
+                <div className="mb-6">
+                  <h2 className="text-3xl font-bold mb-2" style={{ color: '#1F1F1F' }}>
+                    Quick Start
+                  </h2>
+                  <p className="text-lg" style={{ color: '#1F1F1F' }}>
+                    Easy questions to get you started
+                  </p>
+                </div>
+
+                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                  {quickStartPrompts.map((prompt) => (
                     <SimplePromptCard
                       key={prompt.id}
                       prompt={prompt}
                       onRecord={handleRecord}
                       onSave={handleSave}
-                      isSaved={true}
+                      isSaved={queuedPrompts.some(q => q.id === prompt.id)}
                     />
                   ))}
                 </div>
-              </div>
-            </section>
-          )}
+              </section>
+            )}
 
-          {/* Browse by Category */}
-          <section>
-            <div className="mb-6">
-              <h2 className="text-3xl font-bold mb-2" style={{ color: '#1F1F1F' }}>
-                Browse Topics
-              </h2>
-              <p className="text-lg" style={{ color: '#1F1F1F' }}>
-                Explore questions by category
-              </p>
-            </div>
+            {/* Saved for Later */}
+            {queuedPrompts.length > 0 && (
+              <section className="mb-12">
+                <div className="mb-6 flex items-center gap-3">
+                  <Bookmark className="h-7 w-7" style={{ color: '#203954' }} />
+                  <h2 className="text-3xl font-bold" style={{ color: '#1F1F1F' }}>
+                    Saved for Later
+                  </h2>
+                </div>
 
-            <div className="grid gap-4 grid-cols-2 md:grid-cols-4">
-              {CATEGORIES.map((category) => {
-                const Icon = category.icon;
-                return (
-                  <motion.button
-                    key={category.id}
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                    onClick={() => setSelectedCategory(category.id)}
-                    className="group relative overflow-hidden rounded-2xl bg-white p-6 shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100 flex flex-col items-center justify-center text-center"
-                  >
-                    <div
-                      className="mb-3 inline-flex h-14 w-14 items-center justify-center rounded-xl text-white shadow-lg transition-all duration-300 border border-white/20"
-                      style={{ backgroundColor: category.color }}
-                      onMouseEnter={(e) => {
-                        e.currentTarget.style.backgroundColor = category.hoverColor;
-                        e.currentTarget.style.transform = 'translateY(-2px)';
-                        e.currentTarget.style.boxShadow = '0 10px 25px -5px rgba(0, 0, 0, 0.2), 0 8px 10px -6px rgba(0, 0, 0, 0.1)';
-                      }}
-                      onMouseLeave={(e) => {
-                        e.currentTarget.style.backgroundColor = category.color;
-                        e.currentTarget.style.transform = 'translateY(0)';
-                        e.currentTarget.style.boxShadow = '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1)';
-                      }}
-                    >
-                      <Icon className="h-7 w-7" />
-                    </div>
-                    <h3 className="font-semibold text-gray-900 text-lg">
-                      {category.label}
-                    </h3>
-                  </motion.button>
-                );
-              })}
-            </div>
-          </section>
-        </div>
+                <div className="rounded-2xl p-6 border-2 shadow-sm" style={{ backgroundColor: '#FFFDF7', borderColor: '#D2C9BD' }}>
+                  <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                    {queuedPrompts.map((prompt) => (
+                      <SimplePromptCard
+                        key={prompt.id}
+                        prompt={prompt}
+                        onRecord={handleRecord}
+                        onSave={handleSave}
+                        isSaved={true}
+                      />
+                    ))}
+                  </div>
+                </div>
+              </section>
+            )}
 
-        {/* Mode Selection Modal */}
-        <ModeSelectionModal
-          isOpen={modeSelection.isOpen}
-          onClose={modeSelection.closeModal}
-          onSelectQuickStory={modeSelection.openQuickRecorder}
-          promptQuestion={modeSelection.promptQuestion}
-        />
-
-        {/* Quick Story Recorder */}
-        <QuickStoryRecorder
-          isOpen={modeSelection.quickRecorderOpen}
-          onClose={modeSelection.closeQuickRecorder}
-          promptQuestion={modeSelection.promptQuestion}
-        />
-
-        {/* Category Modal */}
-        <Dialog open={!!selectedCategory} onOpenChange={() => setSelectedCategory(null)}>
-          <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
-            <DialogHeader>
-              <DialogTitle className="text-3xl">
-                {selectedCategory && CATEGORIES.find(c => c.id === selectedCategory)?.label} Questions
-              </DialogTitle>
-            </DialogHeader>
-            <div className="mt-6 grid gap-4">
-              {selectedCategory && CATEGORY_PROMPTS[selectedCategory]?.map((question, index) => (
-                <motion.div
-                  key={index}
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: index * 0.05 }}
-                >
-                  <SimplePromptCard
-                    prompt={{
-                      id: `${selectedCategory}-${index}`,
-                      prompt_text: question,
-                      source: 'catalog'
-                    }}
-                    onRecord={(id, text) => {
-                      handleRecord(id, text, 'catalog');
-                      setSelectedCategory(null);
-                    }}
-                    onSave={(id, text) => {
-                      handleSave(id, text, 'catalog');
-                    }}
-                  />
-                </motion.div>
-              ))}
-            </div>
-          </DialogContent>
-        </Dialog>
-
-        {/* Dismiss Family Prompt Confirmation */}
-        <ConfirmModal
-          isOpen={!!promptToDismiss}
-          title="Dismiss Question?"
-          message={`Are you sure you want to dismiss this question from ${promptToDismiss?.submittedBy.name}?\n\n"${promptToDismiss?.prompt_text}"\n\nYou can always ask them to submit it again if you change your mind.`}
-          confirmText="Dismiss"
-          cancelText="Keep It"
-          onConfirm={confirmDismiss}
-          onCancel={() => setPromptToDismiss(null)}
-          variant="danger"
-        />
-
-        {/* Submit Question Dialog */}
-        <Dialog open={showSubmitQuestionDialog} onOpenChange={setShowSubmitQuestionDialog}>
-          <DialogContent className="max-w-lg">
-            <DialogHeader>
-              <DialogTitle className="text-2xl">
-                Submit a Question for {activeContext?.storytellerName}
-              </DialogTitle>
-            </DialogHeader>
-            <div className="space-y-4 py-4">
-              <div className="space-y-2">
-                <Label htmlFor="question" className="text-base font-medium">
-                  Your Question <span className="text-red-500">*</span>
-                </Label>
-                <Textarea
-                  id="question"
-                  placeholder="What question would you like them to answer?"
-                  value={questionText}
-                  onChange={(e) => setQuestionText(e.target.value)}
-                  className="min-h-[120px] text-base"
-                  maxLength={500}
-                />
-                <p className="text-sm text-gray-500">
-                  {questionText.length}/500 characters
+            {/* Browse by Category */}
+            <section>
+              <div className="mb-6">
+                <h2 className="text-3xl font-bold mb-2" style={{ color: '#1F1F1F' }}>
+                  Browse Topics
+                </h2>
+                <p className="text-lg" style={{ color: '#1F1F1F' }}>
+                  Explore questions by category
                 </p>
               </div>
-            </div>
-            <DialogFooter>
-              <Button
-                variant="outline"
-                onClick={() => {
-                  setShowSubmitQuestionDialog(false);
-                  setQuestionText("");
-                }}
-                disabled={submitQuestionMutation.isPending}
-              >
-                Cancel
-              </Button>
-              <Button
-                onClick={() => {
-                  if (questionText.trim().length < 10) {
-                    toast({
-                      title: "Question too short",
-                      description: "Please write at least 10 characters",
-                      variant: "destructive",
+
+              <div className="grid gap-4 grid-cols-2 md:grid-cols-4">
+                {CATEGORIES.map((category) => {
+                  const Icon = category.icon;
+                  return (
+                    <motion.button
+                      key={category.id}
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      onClick={() => setSelectedCategory(category.id)}
+                      className="group relative overflow-hidden rounded-2xl bg-white p-6 shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100 flex flex-col items-center justify-center text-center"
+                    >
+                      <div
+                        className="mb-3 inline-flex h-14 w-14 items-center justify-center rounded-xl text-white shadow-lg transition-all duration-300 border border-white/20"
+                        style={{ backgroundColor: category.color }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.backgroundColor = category.hoverColor;
+                          e.currentTarget.style.transform = 'translateY(-2px)';
+                          e.currentTarget.style.boxShadow = '0 10px 25px -5px rgba(0, 0, 0, 0.2), 0 8px 10px -6px rgba(0, 0, 0, 0.1)';
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.backgroundColor = category.color;
+                          e.currentTarget.style.transform = 'translateY(0)';
+                          e.currentTarget.style.boxShadow = '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1)';
+                        }}
+                      >
+                        <Icon className="h-7 w-7" />
+                      </div>
+                      <h3 className="font-semibold text-gray-900 text-lg">
+                        {category.label}
+                      </h3>
+                    </motion.button>
+                  );
+                })}
+              </div>
+            </section>
+          </div>
+
+          {/* Mode Selection Modal */}
+          <ModeSelectionModal
+            isOpen={modeSelection.isOpen}
+            onClose={modeSelection.closeModal}
+            onSelectQuickStory={modeSelection.openQuickRecorder}
+            promptQuestion={modeSelection.promptQuestion}
+          />
+
+          {/* Quick Story Recorder */}
+          <QuickStoryRecorder
+            isOpen={modeSelection.quickRecorderOpen}
+            onClose={modeSelection.closeQuickRecorder}
+            promptQuestion={modeSelection.promptQuestion}
+          />
+
+          {/* Category Modal */}
+          <Dialog open={!!selectedCategory} onOpenChange={() => setSelectedCategory(null)}>
+            <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto rounded-3xl" style={{ backgroundColor: '#FFFDF7' }}>
+              <DialogHeader>
+                <DialogTitle className="text-3xl">
+                  {selectedCategory && CATEGORIES.find(c => c.id === selectedCategory)?.label} Questions
+                </DialogTitle>
+              </DialogHeader>
+              <div className="mt-6 grid gap-4">
+                {selectedCategory && CATEGORY_PROMPTS[selectedCategory]?.map((question, index) => (
+                  <motion.div
+                    key={index}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: index * 0.05 }}
+                  >
+                    <SimplePromptCard
+                      prompt={{
+                        id: `${selectedCategory}-${index}`,
+                        prompt_text: question,
+                        source: 'catalog'
+                      }}
+                      onRecord={(id, text) => {
+                        handleRecord(id, text, 'catalog');
+                        setSelectedCategory(null);
+                      }}
+                      onSave={(id, text) => {
+                        handleSave(id, text, 'catalog');
+                      }}
+                    />
+                  </motion.div>
+                ))}
+              </div>
+            </DialogContent>
+          </Dialog>
+
+          {/* Dismiss Family Prompt Confirmation */}
+          <ConfirmModal
+            isOpen={!!promptToDismiss}
+            title="Dismiss Question?"
+            message={`Are you sure you want to dismiss this question from ${promptToDismiss?.submittedBy.name}?\n\n"${promptToDismiss?.prompt_text}"\n\nYou can always ask them to submit it again if you change your mind.`}
+            confirmText="Dismiss"
+            cancelText="Keep It"
+            onConfirm={confirmDismiss}
+            onCancel={() => setPromptToDismiss(null)}
+            variant="danger"
+          />
+
+          {/* Submit Question Dialog */}
+          <Dialog open={showSubmitQuestionDialog} onOpenChange={setShowSubmitQuestionDialog}>
+            <DialogContent className="max-w-lg">
+              <DialogHeader>
+                <DialogTitle className="text-2xl">
+                  Submit a Question for {activeContext?.storytellerName}
+                </DialogTitle>
+              </DialogHeader>
+              <div className="space-y-4 py-4">
+                <div className="space-y-2">
+                  <Label htmlFor="question" className="text-base font-medium">
+                    Your Question <span className="text-red-500">*</span>
+                  </Label>
+                  <Textarea
+                    id="question"
+                    placeholder="What question would you like them to answer?"
+                    value={questionText}
+                    onChange={(e) => setQuestionText(e.target.value)}
+                    className="min-h-[120px] text-base"
+                    maxLength={500}
+                  />
+                  <p className="text-sm text-gray-500">
+                    {questionText.length}/500 characters
+                  </p>
+                </div>
+              </div>
+              <DialogFooter>
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setShowSubmitQuestionDialog(false);
+                    setQuestionText("");
+                  }}
+                  disabled={submitQuestionMutation.isPending}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  onClick={() => {
+                    if (questionText.trim().length < 10) {
+                      toast({
+                        title: "Question too short",
+                        description: "Please write at least 10 characters",
+                        variant: "destructive",
+                      });
+                      return;
+                    }
+                    if (!storytellerId) {
+                      toast({
+                        title: "Error",
+                        description: "No storyteller selected",
+                        variant: "destructive",
+                      });
+                      return;
+                    }
+                    submitQuestionMutation.mutate({
+                      storyteller_id: storytellerId,
+                      prompt_text: questionText,
                     });
-                    return;
-                  }
-                  if (!storytellerId) {
-                    toast({
-                      title: "Error",
-                      description: "No storyteller selected",
-                      variant: "destructive",
-                    });
-                    return;
-                  }
-                  submitQuestionMutation.mutate({
-                    storyteller_id: storytellerId,
-                    prompt_text: questionText,
-                  });
-                }}
-                disabled={submitQuestionMutation.isPending}
-                className="border-0 rounded-xl shadow-md hover:shadow-lg transition-all duration-300"
-                style={{ backgroundColor: '#203954', color: 'white' }}
-                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#3E6A5A'}
-                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#203954'}
-              >
-                {submitQuestionMutation.isPending ? "Submitting..." : "Submit Question"}
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
-      </main>
+                  }}
+                  disabled={submitQuestionMutation.isPending}
+                  className="border-0 rounded-xl shadow-md hover:shadow-lg transition-all duration-300"
+                  style={{ backgroundColor: '#203954', color: 'white' }}
+                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#3E6A5A'}
+                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#203954'}
+                >
+                  {submitQuestionMutation.isPending ? "Submitting..." : "Submit Question"}
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+        </main>
       </div>
     </div>
   );

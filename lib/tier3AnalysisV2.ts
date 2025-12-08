@@ -16,11 +16,12 @@
  */
 import { toSeverity } from "@/lib/typesafe";
 
-import { generateAnchorHash } from "./promptGenerationV2";
+import { generateAnchorHash, extractEntities, ExtractedEntities } from "./promptGenerationV2";
 import { sanitizeForGPT, sanitizeEntity } from "./sanitization";
 import { validatePromptQuality, scorePromptQuality } from "./promptQuality";
 import { chat } from "./ai/gatewayClient";
 import { getModelConfig } from "./ai/modelConfig";
+import { detectTimelineGaps, formatGapsForContext, TimelineCoverage } from "./timelineAnalysis";
 
 interface Story {
   id: string;
@@ -64,10 +65,23 @@ export async function performTier3Analysis(
   else if (storyCount >= 30 && storyCount <= 50) promptCount = 2;
   else promptCount = 1;
 
-  const systemPrompt = buildMemoryArchaeologistPrompt(storyCount, promptCount);
-  const userPrompt = buildUserPrompt(stories);
+  // Extract entities from ALL stories for cross-story analysis
+  const allEntities = aggregateEntities(stories);
 
-  // Get model configuration (GPT-5 with reasoning effort if enabled)
+  // Detect timeline gaps
+  const timelineCoverage = detectTimelineGaps(stories);
+
+  console.log(`[Tier 3 V2] Entities extracted:`, {
+    people: allEntities.people.length,
+    places: allEntities.places.length,
+    objects: allEntities.objects.length,
+    timelineGaps: timelineCoverage.gaps.length,
+  });
+
+  const systemPrompt = buildMemoryArchaeologistPrompt(storyCount, promptCount);
+  const userPrompt = buildUserPrompt(stories, allEntities, timelineCoverage);
+
+  // Get model configuration (GPT-4o for emotional intelligence)
   const modelConfig = getModelConfig("tier3", storyCount);
   
   console.log(
@@ -82,8 +96,9 @@ export async function performTier3Analysis(
         { role: "user", content: userPrompt },
       ],
       reasoning_effort: toSeverity(modelConfig.reasoning_effort),
-      temperature: 0.7,
+      temperature: 0.8, // Higher for creativity in memory archaeology
       max_tokens: 2000,
+      response_format: { type: "json_object" }, // Ensure valid JSON response
     });
 
     // Log telemetry for monitoring
@@ -284,23 +299,137 @@ function getMemoryStrategy(phase: string, count: number, promptCount: number): s
 }
 
 /**
- * Build user prompt with all stories
+ * Aggregate entities across all stories
+ * Tracks mention counts for prioritization
  */
-function buildUserPrompt(stories: Story[]): string {
+interface AggregatedEntities {
+  people: Array<{ name: string; count: number }>;
+  places: Array<{ name: string; count: number }>;
+  objects: Array<{ name: string; count: number }>;
+  emotions: string[];
+  coveredYears: number[];
+}
+
+function aggregateEntities(stories: Story[]): AggregatedEntities {
+  const peopleCounts = new Map<string, number>();
+  const placesCounts = new Map<string, number>();
+  const objectsCounts = new Map<string, number>();
+  const allEmotions = new Set<string>();
+  const coveredYears: number[] = [];
+
+  for (const story of stories) {
+    // Extract entities from this story
+    const entities = extractEntities(story.transcription || "");
+
+    // Count people mentions
+    for (const person of entities.people) {
+      const normalized = person.toLowerCase().trim();
+      peopleCounts.set(normalized, (peopleCounts.get(normalized) || 0) + 1);
+    }
+
+    // Count place mentions
+    for (const place of entities.places) {
+      const normalized = place.toLowerCase().trim();
+      placesCounts.set(normalized, (placesCounts.get(normalized) || 0) + 1);
+    }
+
+    // Count object mentions
+    for (const obj of entities.objects) {
+      const normalized = obj.toLowerCase().trim();
+      objectsCounts.set(normalized, (objectsCounts.get(normalized) || 0) + 1);
+    }
+
+    // Collect emotions
+    for (const emotion of entities.emotions) {
+      allEmotions.add(emotion);
+    }
+
+    // Collect story years
+    if (story.story_year) {
+      coveredYears.push(story.story_year);
+    }
+  }
+
+  // Sort by mention count (most mentioned first)
+  const sortByCount = (map: Map<string, number>) =>
+    Array.from(map.entries())
+      .sort((a, b) => b[1] - a[1])
+      .map(([name, count]) => ({ name, count }));
+
+  return {
+    people: sortByCount(peopleCounts),
+    places: sortByCount(placesCounts),
+    objects: sortByCount(objectsCounts),
+    emotions: Array.from(allEmotions),
+    coveredYears: coveredYears.sort((a, b) => a - b),
+  };
+}
+
+/**
+ * Build user prompt with all stories, extracted entities, and timeline gaps
+ */
+function buildUserPrompt(
+  stories: Story[],
+  entities: AggregatedEntities,
+  timeline: TimelineCoverage
+): string {
+  // Format story summaries (keep it concise to save tokens)
   const storyTexts = stories
     .map((s, i) => {
       const sanitizedTranscript = sanitizeForGPT(s.transcription || "");
-      const sanitizedLesson = s.lesson_learned 
-        ? `\nLesson Learned: ${sanitizeForGPT(s.lesson_learned)}` 
+      const sanitizedLesson = s.lesson_learned
+        ? `\nLesson: ${sanitizeForGPT(s.lesson_learned)}`
         : "";
-      const year = s.story_year ? `\nYear: ${s.story_year}` : "";
-      
-      return `Story ${i + 1}:${year}
+      const year = s.story_year ? ` (${s.story_year})` : "";
+
+      return `Story ${i + 1}${year}: "${s.title}"
 ${sanitizedTranscript}${sanitizedLesson}`;
     })
     .join("\n\n---\n\n");
 
-  return `Analyze these stories with intimacy and insight:\n\n${storyTexts}`;
+  // Format extracted entities with mention counts
+  const peopleList = entities.people.length > 0
+    ? entities.people.slice(0, 10).map(p => `${p.name} (${p.count}x)`).join(", ")
+    : "None extracted yet";
+
+  const placesList = entities.places.length > 0
+    ? entities.places.slice(0, 8).map(p => `${p.name} (${p.count}x)`).join(", ")
+    : "None extracted yet";
+
+  const objectsList = entities.objects.length > 0
+    ? entities.objects.slice(0, 6).map(o => `${o.name} (${o.count}x)`).join(", ")
+    : "None extracted yet";
+
+  // Format covered decades
+  const decades = entities.coveredYears.length > 0
+    ? [...new Set(entities.coveredYears.map(y => `${Math.floor(y / 10) * 10}s`))].join(", ")
+    : "Unknown";
+
+  // Format timeline gaps
+  const gapsInfo = formatGapsForContext(timeline);
+
+  return `STORY COUNT: ${stories.length}
+
+EXTRACTED ENTITIES (use these to ask about DIFFERENT moments):
+- People: ${peopleList}
+- Places: ${placesList}
+- Objects: ${objectsList}
+- Emotions mentioned: ${entities.emotions.join(", ") || "None detected"}
+
+TIME PERIODS COVERED: ${decades}
+
+TIMELINE GAPS: ${gapsInfo}
+
+---
+
+USER'S STORIES:
+
+${storyTexts}
+
+---
+
+Generate memory-triggering questions that reference the entities above and ask about DIFFERENT moments.
+Return as JSON array.`;
 }
 
 /**
