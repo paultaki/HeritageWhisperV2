@@ -47,6 +47,12 @@ export default function MobileBookViewV2({
   const [viewMode, setViewMode] = useState<'chronological' | 'chapters'>('chronological');
   // Autoplay state - tracks if we should autoplay and which story
   const [shouldAutoplay, setShouldAutoplay] = useState(autoplay && !!initialStoryId);
+  // Track if we've handled the initial navigation to prevent re-running
+  const [initialNavigationDone, setInitialNavigationDone] = useState(false);
+  // Track which storyId we last navigated to
+  const [lastNavigatedStoryId, setLastNavigatedStoryId] = useState<string | null>(null);
+  // Track if we've done the initial scroll to prevent re-scrolling
+  const [initialScrollDone, setInitialScrollDone] = useState(false);
 
   // Fetch stories
   const storytellerId = activeContext?.storytellerId;
@@ -238,12 +244,19 @@ export default function MobileBookViewV2({
   }, []);
 
   // Handle scroll events to update current index
+  // Note: We need to avoid updating during initial navigation setup
   const handleScroll = useCallback(() => {
     if (!pagerRef.current) return;
+    // Don't update currentIndex during initial scroll setup - it can cause race conditions
+    if (!initialScrollDone) {
+      console.log('[MobileBookView DEBUG] handleScroll ignored - initial scroll not done');
+      return;
+    }
     const width = pagerRef.current.clientWidth || 1;
     const newIndex = Math.round(pagerRef.current.scrollLeft / width);
+    console.log('[MobileBookView DEBUG] handleScroll updating:', { newIndex, scrollLeft: pagerRef.current.scrollLeft, width });
     setCurrentIndex(newIndex);
-  }, []);
+  }, [initialScrollDone]);
 
   // Navigate to previous/next page
   const handlePrevious = useCallback(() => {
@@ -353,13 +366,6 @@ export default function MobileBookViewV2({
     }
   }, []);
 
-  // Track if we've handled the initial navigation to prevent re-running
-  const [initialNavigationDone, setInitialNavigationDone] = useState(false);
-  // Track which storyId we last navigated to
-  const [lastNavigatedStoryId, setLastNavigatedStoryId] = useState<string | null>(null);
-  // Track if we've done the initial scroll to prevent re-scrolling
-  const [initialScrollDone, setInitialScrollDone] = useState(false);
-
   // Reset navigation state when initialStoryId changes (new navigation from Timeline)
   useEffect(() => {
     if (initialStoryId && initialStoryId !== lastNavigatedStoryId) {
@@ -375,6 +381,21 @@ export default function MobileBookViewV2({
     const pageIndex = bookPages.findIndex(
       (page) => page.type === "story" && page.story.id === initialStoryId
     );
+
+    // DEBUG: Log the search
+    console.log('[MobileBookView DEBUG] Finding story:', {
+      initialStoryId,
+      bookPagesCount: bookPages.length,
+      foundIndex: pageIndex,
+      // Show page structure for debugging
+      pageTypes: bookPages.map((p, i) => ({
+        index: i,
+        type: p.type,
+        storyId: p.type === 'story' ? p.story.id : undefined,
+        title: p.type === 'story' ? p.story.title?.substring(0, 20) : p.type === 'decade' ? p.title : undefined
+      }))
+    });
+
     return pageIndex >= 0 ? pageIndex : null;
   }, [initialStoryId, bookPages]);
 
@@ -382,6 +403,11 @@ export default function MobileBookViewV2({
   // This runs as a layout effect to happen before the browser paints
   useLayoutEffect(() => {
     if (targetPageIndex !== null && !initialNavigationDone) {
+      console.log('[MobileBookView DEBUG] Setting currentIndex:', {
+        targetPageIndex,
+        initialNavigationDone,
+        initialStoryId
+      });
       setCurrentIndex(targetPageIndex);
       setInitialNavigationDone(true);
       setLastNavigatedStoryId(initialStoryId!);
@@ -395,19 +421,41 @@ export default function MobileBookViewV2({
     if (initialScrollDone) return;
     if (currentIndex === 0) {
       // If we're supposed to be at page 0, no scroll needed
+      console.log('[MobileBookView DEBUG] At page 0, no scroll needed');
       setInitialScrollDone(true);
       return;
     }
 
     const width = pagerRef.current.clientWidth;
+    const targetScrollLeft = currentIndex * width;
+
+    console.log('[MobileBookView DEBUG] Scrolling:', {
+      currentIndex,
+      pagerWidth: width,
+      targetScrollLeft,
+      currentScrollLeft: pagerRef.current.scrollLeft
+    });
+
     if (width > 0) {
       // Set scroll position without animation to prevent visual jump
       pagerRef.current.style.scrollBehavior = 'auto';
-      pagerRef.current.scrollLeft = currentIndex * width;
+      pagerRef.current.scrollLeft = targetScrollLeft;
+
+      // Verify scroll was set
+      console.log('[MobileBookView DEBUG] After scroll:', {
+        actualScrollLeft: pagerRef.current.scrollLeft,
+        expected: targetScrollLeft
+      });
+
       // Restore smooth scrolling for future navigations
       requestAnimationFrame(() => {
         if (pagerRef.current) {
           pagerRef.current.style.scrollBehavior = '';
+          // Final verification
+          console.log('[MobileBookView DEBUG] After RAF:', {
+            finalScrollLeft: pagerRef.current.scrollLeft,
+            finalPage: Math.round(pagerRef.current.scrollLeft / width)
+          });
         }
       });
       setInitialScrollDone(true);
