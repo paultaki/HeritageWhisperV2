@@ -97,6 +97,7 @@ function BookV4PageContent() {
   const searchParams = useSearchParams();
 
   const urlStoryId = searchParams?.get('storyId') || undefined;
+  const urlAutoplay = searchParams?.get('autoplay') === '1';
 
   // State initialization from sessionStorage
   const [isBookOpen, setIsBookOpen] = useState(() => {
@@ -551,6 +552,8 @@ function BookV4PageContent() {
 
   // URL parameter navigation
   const [navigatedStoryId, setNavigatedStoryId] = useState<string | null>(null);
+  // Autoplay state - tracks which story should autoplay (cleared after first render)
+  const [autoplayStoryId, setAutoplayStoryId] = useState<string | null>(null);
 
   useEffect(() => {
     if (!urlStoryId || sortedStories.length === 0 || spreads.length === 0) return;
@@ -583,9 +586,13 @@ function BookV4PageContent() {
       setCurrentMobilePage(storyIndex + 2);
       setIsBookOpen(true);
       setNavigatedStoryId(urlStoryId);
+      // Set autoplay if requested - will be consumed by BookPageV4
+      if (urlAutoplay) {
+        setAutoplayStoryId(urlStoryId);
+      }
       window.history.replaceState({}, '', '/book');
     }
-  }, [urlStoryId, sortedStories, spreads, navigatedStoryId]);
+  }, [urlStoryId, urlAutoplay, sortedStories, spreads, navigatedStoryId]);
 
   // Loading state
   if (isLoading || isFetching || !data) {
@@ -663,6 +670,7 @@ function BookV4PageContent() {
             <MobileBookViewV2
               initialStoryId={urlStoryId}
               caveatFont={caveat.className}
+              autoplay={urlAutoplay}
             />
           </Suspense>
         </div>
@@ -708,6 +716,7 @@ function BookV4PageContent() {
           <MobileBookViewV2
             initialStoryId={urlStoryId}
             caveatFont={caveat.className}
+            autoplay={urlAutoplay}
           />
         </Suspense>
       </div>
@@ -813,6 +822,8 @@ function BookV4PageContent() {
                 isOwnAccount={isOwnAccount}
                 viewMode={viewMode}
                 isPriority={currentSpreadIndex === 0}
+                autoplay={autoplayStoryId !== null && currentSpread.right && typeof currentSpread.right !== 'string' && !('type' in currentSpread.right) && (currentSpread.right as Story).id === autoplayStoryId}
+                onAutoplayConsumed={() => setAutoplayStoryId(null)}
               />
 
               {/* Left page */}
@@ -828,6 +839,8 @@ function BookV4PageContent() {
                 isOwnAccount={isOwnAccount}
                 viewMode={viewMode}
                 isPriority={currentSpreadIndex === 0}
+                autoplay={autoplayStoryId !== null && currentSpread.left && typeof currentSpread.left !== 'string' && !('type' in currentSpread.left) && (currentSpread.left as Story).id === autoplayStoryId}
+                onAutoplayConsumed={() => setAutoplayStoryId(null)}
               />
 
               {/* Spine */}

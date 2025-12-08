@@ -52,7 +52,6 @@ export const MemoryCard = React.memo(
     birthYear,
     onOpenOverlay,
     useV2Features = false,
-    isViewerMode = false,
     customActionLabel,
     onCustomAction,
   }: MemoryCardProps & { customActionLabel?: string; onCustomAction?: (story: Story) => void }) {
@@ -241,13 +240,6 @@ export const MemoryCard = React.memo(
       return `${mins}:${secs.toString().padStart(2, "0")}`;
     };
 
-    // Format duration as "X min" for viewer mode (simpler, non-interactive display)
-    const formatDurationSimple = (seconds?: number) => {
-      if (!seconds || isNaN(seconds)) return "";
-      const mins = Math.ceil(seconds / 60);
-      return `${mins} min`;
-    };
-
     const handlePlayAudio = (e: React.MouseEvent) => {
       e.stopPropagation();
 
@@ -379,10 +371,7 @@ export const MemoryCard = React.memo(
         );
 
         // Navigate to book view for all stories
-        // For viewer mode with audio, add autoplay flag
-        const hasAudio = story.audioUrl && story.audioUrl.trim() !== "";
-        const autoplayParam = isViewerMode && hasAudio ? "&autoplay=1" : "";
-        router.push(`/book?storyId=${story.id}${autoplayParam}`);
+        router.push(`/book?storyId=${story.id}`);
       }
     };
 
@@ -529,22 +518,11 @@ export const MemoryCard = React.memo(
               {!customActionLabel && (
                 <div className="flex-shrink-0">
                   {hasAudio ? (
-                    isViewerMode ? (
-                      // Viewer mode: static duration badge (non-interactive)
-                      <span
-                        className="px-3 py-1.5 rounded-full text-sm font-medium"
-                        style={{ color: 'var(--hw-text-muted, #8A8378)', backgroundColor: 'var(--hw-section-bg, #EFE6DA)' }}
-                      >
-                        {formatDurationSimple(story.durationSeconds)}
-                      </span>
-                    ) : (
-                      // Owner mode: interactive play button
-                      <PlayPillButton
-                        isPlaying={isPlaying}
-                        progress={progress}
-                        onClick={handlePlayAudio}
-                      />
-                    )
+                    <PlayPillButton
+                      isPlaying={isPlaying}
+                      progress={progress}
+                      onClick={handlePlayAudio}
+                    />
                   ) : (
                     <button
                       className="w-11 h-11 md:w-auto md:h-auto md:px-4 md:py-2 rounded-full bg-stone-100 hover:bg-stone-200 text-stone-700 text-sm font-semibold flex items-center justify-center md:gap-1.5 transition-colors"
@@ -579,11 +557,7 @@ export const MemoryCard = React.memo(
 
             {/* Helper text */}
             <p className="text-xs text-stone-400 mt-3 text-center">
-              {isViewerMode
-                ? "Tap to open this story"
-                : hasAudio
-                  ? "Tap to listen to this story"
-                  : "Tap to read this story"}
+              {hasAudio ? "Tap to listen to this story" : "Tap to read this story"}
             </p>
           </div>
         </div >
@@ -723,8 +697,8 @@ export const MemoryCard = React.memo(
             </div>
           )}
 
-          {/* Book-style audio button overlay on photo (hidden in V2 and viewer mode) */}
-          {story.audioUrl && !useV2Features && !isViewerMode && (
+          {/* Book-style audio button overlay on photo (hidden in V2) */}
+          {story.audioUrl && !useV2Features && (
             <button
               onClick={handlePlayAudio}
               className="absolute right-4 bottom-4 hover:scale-105 transition-transform"
@@ -785,20 +759,6 @@ export const MemoryCard = React.memo(
               </div>
             </button>
           )}
-
-          {/* Viewer mode: static duration badge on photo (non-V2) */}
-          {story.audioUrl && !useV2Features && isViewerMode && story.durationSeconds && (
-            <div
-              className="absolute right-4 bottom-4 px-3 py-1.5 rounded-full text-sm font-medium"
-              style={{
-                color: 'var(--hw-text-muted, #8A8378)',
-                backgroundColor: 'rgba(255, 255, 255, 0.9)',
-                backdropFilter: 'blur(4px)'
-              }}
-            >
-              {formatDurationSimple(story.durationSeconds)}
-            </div>
-          )}
         </div>
 
         <div className="hw-card-body relative">
@@ -830,16 +790,7 @@ export const MemoryCard = React.memo(
                     <span>{customActionLabel}</span>
                     <Plus className="w-4 h-4" />
                   </button>
-                ) : isViewerMode ? (
-                  // Viewer mode: static duration badge (non-interactive)
-                  <span
-                    className="px-3 py-1.5 rounded-full text-sm font-medium"
-                    style={{ color: 'var(--hw-text-muted, #8A8378)', backgroundColor: 'var(--hw-section-bg, #EFE6DA)' }}
-                  >
-                    {formatDurationSimple(story.durationSeconds)}
-                  </span>
                 ) : (
-                  // Owner mode: interactive play button
                   <PlayPillButton
                     isPlaying={isPlaying}
                     progress={progress}
@@ -919,8 +870,7 @@ export const MemoryCard = React.memo(
       prevProps.isDarkTheme === nextProps.isDarkTheme &&
       prevProps.colorScheme === nextProps.colorScheme &&
       prevProps.birthYear === nextProps.birthYear &&
-      prevProps.useV2Features === nextProps.useV2Features &&
-      prevProps.isViewerMode === nextProps.isViewerMode
+      prevProps.useV2Features === nextProps.useV2Features
     );
   },
 );

@@ -1,0 +1,32 @@
+/**
+ * TimelineHeader Component
+ *
+ * Page header for the timeline view with logo and navigation.
+ * Now uses universal MobilePageHeader component for consistency.
+ *
+ * Created: January 25, 2025
+ * Updated: January 2025 - Migrated to universal header
+ */
+
+"use client";
+
+import React from "react";
+import type { TimelineHeaderProps } from "@/types/timeline";
+import { MobilePageHeader } from "@/components/PageHeader";
+
+/**
+ * TimelineHeader - Sticky page header
+ */
+export function TimelineHeader({
+  isDark,
+  currentColorScheme,
+  rightContent,
+}: TimelineHeaderProps & { rightContent?: React.ReactNode }) {
+  return (
+    <MobilePageHeader
+      title="Timeline"
+      subtitle="Your life's journey"
+      rightContent={rightContent}
+    />
+  );
+}

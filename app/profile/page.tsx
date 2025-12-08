@@ -61,7 +61,7 @@ import { ManagePasskeys } from "@/components/auth/ManagePasskeys";
 import { DesktopPageHeader, MobilePageHeader } from "@/components/PageHeader";
 import { useSubscription } from "@/hooks/use-subscription";
 import { Badge } from "@/components/ui/badge";
-import { NotificationsSection, PrivacySection, AISettingsSection, PasswordSection, PasskeySection } from "./sections";
+import { NotificationsSection, PrivacySection, AISettingsSection, PasswordSection, PasskeySection, PersonalInfoSection, MembershipSection } from "./sections";
 
 export default function Profile() {
   const router = useRouter();
@@ -504,287 +504,33 @@ export default function Profile() {
 
         <div className="space-y-8">
           {/* Profile Photo & Basic Info */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-lg font-bold">
-                <User className="w-5 h-5" />
-                Personal Information
-              </CardTitle>
-              <CardDescription>
-                Update your profile photo and basic information
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <form onSubmit={handleSaveProfile} className="space-y-6">
-                {/* Profile Photo */}
-                <div className="flex flex-col md:flex-row items-start md:items-center gap-4">
-                  <ProfilePhotoUploader
-                    currentPhotoUrl={profilePhoto}
-                    onPhotoUpdate={handlePhotoUpdate}
-                    disabled={updateProfileMutation.isPending}
-                  />
-                  <div className="flex-1 pt-4">
-                    <h4 className="font-medium text-base mb-1">Profile Photo</h4>
-                    <p className="text-base text-[var(--hw-text-secondary)]">
-                      Click the camera icon to upload a new photo. You can zoom and reposition before saving.
-                    </p>
-                  </div>
-                </div>
-
-                <Separator />
-
-                <div className="grid gap-4">
-                  <div>
-                    <Label htmlFor="name" className="text-base font-medium">
-                      Full Name
-                    </Label>
-                    <Input
-                      id="name"
-                      type="text"
-                      value={name}
-                      onChange={(e) => setName(e.target.value)}
-                      className="mt-2 h-14 text-base"
-                      placeholder="Your full name"
-                      required
-                    />
-                  </div>
-
-                  <div>
-                    <Label htmlFor="email" className="text-base font-medium">
-                      Email
-                    </Label>
-                    <Input
-                      id="email"
-                      type="email"
-                      value={email}
-                      className="mt-2 h-14 text-base"
-                      disabled
-                      placeholder="your@email.com"
-                    />
-                    <p className="text-base text-[var(--hw-text-secondary)] mt-1">
-                      Email cannot be changed
-                    </p>
-                  </div>
-
-                  <div>
-                    <Label className="text-base font-medium">
-                      Birthday
-                    </Label>
-                    <div className="grid grid-cols-3 gap-2 mt-2">
-                      <div>
-                        <Label htmlFor="birthMonth" className="text-sm text-[var(--hw-text-secondary)] mb-1 block">
-                          Month
-                        </Label>
-                        <select
-                          id="birthMonth"
-                          value={birthMonth}
-                          onChange={(e) => setBirthMonth(e.target.value)}
-                          className="w-full h-14 text-base rounded-md border border-input bg-background px-3 py-2"
-                        >
-                          <option value="">--</option>
-                          <option value="1">January</option>
-                          <option value="2">February</option>
-                          <option value="3">March</option>
-                          <option value="4">April</option>
-                          <option value="5">May</option>
-                          <option value="6">June</option>
-                          <option value="7">July</option>
-                          <option value="8">August</option>
-                          <option value="9">September</option>
-                          <option value="10">October</option>
-                          <option value="11">November</option>
-                          <option value="12">December</option>
-                        </select>
-                      </div>
-                      <div>
-                        <Label htmlFor="birthDay" className="text-sm text-[var(--hw-text-secondary)] mb-1 block">
-                          Day
-                        </Label>
-                        <select
-                          id="birthDay"
-                          value={birthDay}
-                          onChange={(e) => setBirthDay(e.target.value)}
-                          className="w-full h-14 text-base rounded-md border border-input bg-background px-3 py-2"
-                        >
-                          <option value="">--</option>
-                          {Array.from({ length: 31 }, (_, i) => i + 1).map((day) => (
-                            <option key={day} value={day.toString()}>
-                              {day}
-                            </option>
-                          ))}
-                        </select>
-                      </div>
-                      <div>
-                        <Label htmlFor="birthYear" className="text-sm text-[var(--hw-text-secondary)] mb-1 block">
-                          Year
-                        </Label>
-                        <Input
-                          id="birthYear"
-                          type="number"
-                          value={birthYear}
-                          onChange={(e) => setBirthYear(e.target.value)}
-                          className="h-14 text-base"
-                          placeholder="1952"
-                          min="1920"
-                          max="2010"
-                          required
-                        />
-                      </div>
-                    </div>
-                    <p className="text-base text-[var(--hw-text-secondary)] mt-2">
-                      Your birthday is used to organize your timeline and calculate ages
-                    </p>
-                  </div>
-
-                  <div>
-                    <Label htmlFor="bio" className="text-base font-medium">
-                      About / Bio
-                    </Label>
-                    <Textarea
-                      id="bio"
-                      value={bio}
-                      onChange={(e) => setBio(e.target.value)}
-                      className="mt-2 min-h-[100px] text-base leading-relaxed"
-                      placeholder="Tell us a little about yourself..."
-                      maxLength={500}
-                    />
-                    <p className="text-base text-[var(--hw-text-secondary)] mt-1">
-                      {bio.length}/500 characters
-                    </p>
-                  </div>
-                </div>
-
-                <Button
-                  type="submit"
-                  className="w-full min-h-[60px] text-lg font-medium bg-[var(--hw-primary)] hover:bg-[var(--hw-primary-hover)] text-white"
-                  disabled={updateProfileMutation.isPending}
-                >
-                  <Save className="w-5 h-5 mr-2" />
-                  {updateProfileMutation.isPending
-                    ? "Saving..."
-                    : "Save Changes"}
-                </Button>
-              </form>
-            </CardContent>
-          </Card>
+          <PersonalInfoSection
+            name={name}
+            setName={setName}
+            email={email}
+            birthYear={birthYear}
+            setBirthYear={setBirthYear}
+            birthMonth={birthMonth}
+            setBirthMonth={setBirthMonth}
+            birthDay={birthDay}
+            setBirthDay={setBirthDay}
+            bio={bio}
+            setBio={setBio}
+            profilePhoto={profilePhoto}
+            onSaveProfile={handleSaveProfile}
+            onPhotoUpdate={handlePhotoUpdate}
+            isPending={updateProfileMutation.isPending}
+          />
 
           {/* Subscription & Storage */}
           {user.isPaid !== undefined && (
-            <Card className={isPaid ? "border-2 border-amber-200" : ""}>
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <CardTitle className="flex items-center gap-2">
-                    <CreditCard className="w-5 h-5" />
-                    Membership Status
-                  </CardTitle>
-                  <Badge
-                    className={
-                      isPaid
-                        ? "bg-gradient-to-r from-amber-500 to-amber-600 text-white"
-                        : "bg-gray-100 text-gray-600"
-                    }
-                  >
-                    {isPaid ? "Premium" : "Free"}
-                  </Badge>
-                </div>
-                <CardDescription>
-                  {isPaid
-                    ? "Thank you for being a premium member! Enjoy unlimited family sharing."
-                    : "Upgrade to Premium to unlock family sharing features"}
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {/* Storage Usage */}
-                <div>
-                  <div className="flex items-center justify-between mb-2">
-                    <div className="flex items-center gap-2">
-                      <HardDrive className="w-5 h-5 text-[var(--hw-text-secondary)]" />
-                      <span className="text-base font-medium">Storage Used</span>
-                    </div>
-                    <span className="text-base text-[var(--hw-text-secondary)]">
-                      {storageUsedGB} GB / {storageLimitGB} GB
-                    </span>
-                  </div>
-                  <div className="w-full bg-[var(--hw-section-bg)] rounded-full h-2">
-                    <div
-                      className="rounded-full h-2 transition-all"
-                      style={{
-                        width: `${storagePercent}%`,
-                        backgroundColor: isPaid ? 'var(--hw-accent-gold)' : 'var(--hw-primary)'
-                      }}
-                    />
-                  </div>
-                </div>
-
-                {/* Feature List for Free Users */}
-                {!isPaid && (
-                  <div className="rounded-lg bg-[var(--hw-section-bg)] p-4 space-y-2">
-                    <p className="text-base font-semibold text-[var(--hw-text-primary)] mb-3">Unlock with Premium:</p>
-                    <div className="space-y-2">
-                      <div className="flex items-center gap-2 text-base text-[var(--hw-text-secondary)]">
-                        <span className="text-[var(--hw-error)]">✕</span>
-                        <span>Share stories with family members</span>
-                      </div>
-                      <div className="flex items-center gap-2 text-base text-[var(--hw-text-secondary)]">
-                        <span className="text-[var(--hw-error)]">✕</span>
-                        <span>Family can submit questions</span>
-                      </div>
-                      <div className="flex items-center gap-2 text-base text-[var(--hw-text-secondary)]">
-                        <span className="text-[var(--hw-error)]">✕</span>
-                        <span>Track family engagement</span>
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                {/* Action Buttons */}
-                {!isPaid ? (
-                  <Button
-                    onClick={() => router.push('/upgrade?reason=profile')}
-                    className="w-full min-h-[60px] text-lg font-medium bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white"
-                  >
-                    <ArrowUpCircle className="w-5 h-5 mr-2" />
-                    Upgrade to Premium - $79/year
-                  </Button>
-                ) : (
-                  <Button
-                    onClick={async () => {
-                      try {
-                        if (!session?.access_token) {
-                          throw new Error('No active session');
-                        }
-
-                        const response = await fetch('/api/stripe/customer-portal', {
-                          method: 'POST',
-                          headers: {
-                            'Authorization': `Bearer ${session.access_token}`,
-                          },
-                        });
-
-                        if (!response.ok) {
-                          throw new Error('Failed to create portal session');
-                        }
-
-                        const { url } = await response.json();
-                        window.location.href = url;
-                      } catch (error) {
-                        console.error('Error opening customer portal:', error);
-                        toast({
-                          title: 'Error',
-                          description: 'Failed to open subscription management. Please try again.',
-                          variant: 'destructive',
-                        });
-                      }
-                    }}
-                    variant="outline"
-                    className="w-full min-h-[48px] text-base font-medium"
-                  >
-                    <CreditCard className="w-5 h-5 mr-2" />
-                    Manage Subscription
-                  </Button>
-                )}
-              </CardContent>
-            </Card>
+            <MembershipSection
+              isPaid={isPaid}
+              storageUsedGB={storageUsedGB}
+              storageLimitGB={storageLimitGB}
+              storagePercent={storagePercent}
+              sessionToken={session?.access_token}
+            />
           )}
 
           {/* Password Change */}

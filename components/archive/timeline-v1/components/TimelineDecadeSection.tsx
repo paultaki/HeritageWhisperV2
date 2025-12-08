@@ -46,7 +46,6 @@ export const TimelineDecadeSection = React.memo(
     highlightedStoryId,
     returnHighlightId,
     useV2Features = false,
-    isViewerMode = false,
     getGhostAction,
   }: TimelineDecadeSectionProps & { getGhostAction?: (story: any) => { label: string; onClick: (story: any) => void } | undefined }) {
     return (
@@ -120,7 +119,6 @@ export const TimelineDecadeSection = React.memo(
                 onOpenOverlay={onOpenOverlay}
                 birthYear={birthYear}
                 useV2Features={useV2Features}
-                isViewerMode={isViewerMode}
                 customActionLabel={ghostAction?.label}
                 onCustomAction={ghostAction?.onClick}
               />

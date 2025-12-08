@@ -1,0 +1,119 @@
+.hw-play-pill {
+    --progress: 0;
+    /* 0 to 1 */
+    /* Updated to use soft primary background */
+    --pill-bg: var(--hw-primary-soft, #E0E5ED);
+    --pill-text: var(--hw-primary, #203954);
+    --pill-border: transparent;
+
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.4rem 0.8rem;
+    border-radius: 999px;
+    border: 1px solid var(--pill-border);
+    background: var(--pill-bg);
+    color: var(--pill-text);
+    font-size: 0.75rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 120ms ease, transform 120ms ease, box-shadow 120ms ease;
+    outline: none;
+}
+
+.hw-play-pill:hover,
+.hw-play-pill:focus-visible {
+    /* Slightly darker on hover */
+    background: #D1D9E4; 
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.hw-play-pill:active {
+    transform: translateY(0);
+}
+
+.hw-play-pill__icon {
+    position: relative;
+    width: 22px;
+    height: 22px;
+    border-radius: 999px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.hw-play-pill__ring {
+    position: absolute;
+    inset: 0;
+    transform: rotate(-90deg);
+    /* start at top */
+    width: 100%;
+    height: 100%;
+}
+
+.hw-play-pill__ring-track {
+    fill: none;
+    stroke: rgba(32, 57, 84, 0.15);
+    stroke-width: 2;
+}
+
+.hw-play-pill__ring-progress {
+    fill: none;
+    stroke: var(--hw-primary, #203954);
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-dasharray: 82;
+    /* approx 2πr for r=13 */
+    stroke-dashoffset: calc(82 - 82 * var(--progress));
+    transition: stroke-dashoffset 80ms linear;
+}
+
+.hw-play-pill__triangle {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    /* Icons are centered by flexbox now */
+}
+
+.hw-play-pill__label {
+    white-space: nowrap;
+}
+
+@media (max-width: 768px) {
+    .hw-play-pill {
+        padding: 0;
+        width: 44px;
+        height: 44px;
+        justify-content: center;
+        border: none;
+        /* Keep the background on mobile too for consistency, or make it transparent if preferred */
+        background: var(--pill-bg); 
+    }
+
+    .hw-play-pill:hover,
+    .hw-play-pill:focus-visible {
+        background: #D1D9E4;
+        box-shadow: none;
+    }
+
+    .hw-play-pill__label {
+        display: none;
+    }
+
+    .hw-play-pill__icon {
+        margin: 0;
+        width: 44px;
+        height: 44px;
+    }
+
+    .hw-play-pill__ring-track {
+        stroke: rgba(32, 57, 84, 0.15);
+        stroke-width: 2.5;
+    }
+
+    .hw-play-pill__ring-progress {
+        stroke-width: 2.5;
+    }
+}

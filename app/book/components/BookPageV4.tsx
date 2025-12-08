@@ -61,6 +61,8 @@ interface BookPageV4Props {
   isOwnAccount?: boolean;
   viewMode?: 'chronological' | 'chapters';
   isPriority?: boolean; // Whether images should load with priority (for first visible spread)
+  autoplay?: boolean; // Auto-start audio playback (for Timeline → Book View transition)
+  onAutoplayConsumed?: () => void; // Callback after autoplay triggers
 }
 
 /**
@@ -78,7 +80,7 @@ interface BookPageV4Props {
  * - Hover-only edit button
  */
 export const BookPageV4 = React.forwardRef<HTMLDivElement, BookPageV4Props>(
-  ({ story, pageNum, onScroll, position, allStories = [], onNavigateToStory, fontSize = 18, isOwnAccount = true, viewMode = 'chronological', isPriority = false }, ref) => {
+  ({ story, pageNum, onScroll, position, allStories = [], onNavigateToStory, fontSize = 18, isOwnAccount = true, viewMode = 'chronological', isPriority = false, autoplay = false, onAutoplayConsumed }, ref) => {
     const pageRef = React.useRef<HTMLDivElement>(null);
     const [scrollState, setScrollState] = React.useState<{
       hasScroll: boolean;
@@ -585,7 +587,7 @@ export const BookPageV4 = React.forwardRef<HTMLDivElement, BookPageV4Props>(
                 }}
                 aria-label="Scroll down to continue reading"
               >
-                <StoryContentV4 story={story as Story} position={position} pageNum={pageNum} fontSize={fontSize} isOwnAccount={isOwnAccount} isPriority={isPriority} />
+                <StoryContentV4 story={story as Story} position={position} pageNum={pageNum} fontSize={fontSize} isOwnAccount={isOwnAccount} isPriority={isPriority} autoplay={autoplay} onAutoplayConsumed={onAutoplayConsumed} />
               </div>
 
               {/* Gradient fade indicator - shows when there's more content below */}
@@ -615,7 +617,7 @@ BookPageV4.displayName = "BookPageV4";
 /**
  * StoryContentV4 - Enhanced Story Content with Premium Styling
  */
-function StoryContentV4({ story, position, pageNum, fontSize = 18, isOwnAccount = true, isPriority = false }: { story: Story; position: "left" | "right"; pageNum: number; fontSize?: number; isOwnAccount?: boolean; isPriority?: boolean }) {
+function StoryContentV4({ story, position, pageNum, fontSize = 18, isOwnAccount = true, isPriority = false, autoplay = false, onAutoplayConsumed }: { story: Story; position: "left" | "right"; pageNum: number; fontSize?: number; isOwnAccount?: boolean; isPriority?: boolean; autoplay?: boolean; onAutoplayConsumed?: () => void }) {
   const router = useRouter();
 
   // Photo state
@@ -814,7 +816,17 @@ function StoryContentV4({ story, position, pageNum, fontSize = 18, isOwnAccount 
       {/* Waveform Audio Player */}
       {story.audioUrl && (
         <div className="mb-3">
-          <WaveformAudioPlayer src={story.audioUrl} durationSeconds={story.durationSeconds ?? undefined} />
+          <WaveformAudioPlayer
+            src={story.audioUrl}
+            durationSeconds={story.durationSeconds ?? undefined}
+            autoplay={autoplay}
+            onPlayStateChange={(isPlaying) => {
+              // Clear autoplay flag after playback starts
+              if (isPlaying && autoplay && onAutoplayConsumed) {
+                onAutoplayConsumed();
+              }
+            }}
+          />
         </div>
       )}
 

@@ -16,6 +16,7 @@ import BookTableOfContents from "./BookTableOfContents";
 export default function MobileBookViewV2({
   initialStoryId,
   caveatFont,
+  autoplay = false,
 }: MobileBookViewV2Props) {
   const router = useRouter();
   const { activeContext } = useAccountContext();
@@ -38,6 +39,8 @@ export default function MobileBookViewV2({
   });
   const [isTocOpen, setIsTocOpen] = useState(false);
   const [viewMode, setViewMode] = useState<'chronological' | 'chapters'>('chronological');
+  // Autoplay state - tracks if we should autoplay and which story
+  const [shouldAutoplay, setShouldAutoplay] = useState(autoplay && !!initialStoryId);
 
   // Fetch stories
   const storytellerId = activeContext?.storytellerId;
@@ -431,6 +434,8 @@ export default function MobileBookViewV2({
           // Find first story page index for priority loading
           const firstStoryIndex = bookPages.findIndex(p => p.type === "story");
           const isPriority = page.type === "story" && index === firstStoryIndex;
+          // Autoplay only for the target story page when active
+          const isAutoplayPage = shouldAutoplay && page.type === "story" && page.story.id === initialStoryId && index === currentIndex;
 
           return (
             <BookPageRenderer
@@ -441,6 +446,8 @@ export default function MobileBookViewV2({
               pageNumber={index + 1}
               isPriority={isPriority}
               onStorySelect={handleStorySelect}
+              autoplay={isAutoplayPage}
+              onAutoplayConsumed={() => setShouldAutoplay(false)}
             />
           );
         })}

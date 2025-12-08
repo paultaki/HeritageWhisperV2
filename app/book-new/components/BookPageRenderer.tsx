@@ -17,6 +17,8 @@ export default function BookPageRenderer({
   pageNumber,
   isPriority = false,
   onStorySelect,
+  autoplay = false,
+  onAutoplayConsumed,
 }: BookPageRendererProps) {
   switch (page.type) {
     case "cover":
@@ -102,6 +104,8 @@ export default function BookPageRenderer({
           caveatFont={caveatFont}
           pageNumber={pageNumber}
           isPriority={isPriority}
+          autoplay={autoplay}
+          onAutoplayConsumed={onAutoplayConsumed}
         />
       );
 

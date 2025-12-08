@@ -197,10 +197,9 @@ interface CenteredMemoryCardProps {
   customActionLabel?: string;
   onCustomAction?: (story: Story) => void;
   isGhostStory?: boolean;
-  isViewerMode?: boolean;
 }
 
-function CenteredMemoryCard({ story, position, index, isDark = false, showDecadeMarker = false, decadeLabel, birthYear, onOpenOverlay, useV2Features = false, customActionLabel, onCustomAction, isGhostStory = false, isViewerMode = false }: CenteredMemoryCardProps) {
+function CenteredMemoryCard({ story, position, index, isDark = false, showDecadeMarker = false, decadeLabel, birthYear, onOpenOverlay, useV2Features = false, customActionLabel, onCustomAction, isGhostStory = false }: CenteredMemoryCardProps) {
   const router = useRouter();
 
   // Narrow story type for traits access
@@ -478,10 +477,7 @@ function CenteredMemoryCard({ story, position, index, isDark = false, showDecade
       );
 
       // Always navigate to book view - user can edit from there if needed
-      // For viewer mode with audio, add autoplay flag
-      const hasAudio = story.audioUrl && story.audioUrl.trim() !== "";
-      const autoplayParam = isViewerMode && hasAudio ? "&autoplay=1" : "";
-      router.push(`/book?storyId=${story.id}${autoplayParam}`);
+      router.push(`/book?storyId=${story.id}`);
     }
   };
 
@@ -607,8 +603,8 @@ function CenteredMemoryCard({ story, position, index, isDark = false, showDecade
               </>
             )}
 
-            {/* Book-style audio button overlaid on photo (hidden in V2 and viewer mode) */}
-            {story.audioUrl && !useV2Features && !isViewerMode && (
+            {/* Book-style audio button overlaid on photo (hidden in V2) */}
+            {story.audioUrl && !useV2Features && (
               <button
                 onClick={(e) => {
                   e.stopPropagation();
@@ -664,20 +660,6 @@ function CenteredMemoryCard({ story, position, index, isDark = false, showDecade
                 </div>
               </button>
             )}
-
-            {/* Viewer mode: static duration badge on photo (non-V2) */}
-            {story.audioUrl && !useV2Features && isViewerMode && story.durationSeconds && (
-              <div
-                className="absolute right-4 bottom-4 px-3 py-1.5 rounded-full text-sm font-medium z-10"
-                style={{
-                  color: 'var(--hw-text-muted, #8A8378)',
-                  backgroundColor: 'rgba(255, 255, 255, 0.9)',
-                  backdropFilter: 'blur(4px)'
-                }}
-              >
-                {Math.ceil(story.durationSeconds / 60)} min
-              </div>
-            )}
           </div>
 
           {/* White Card Section Below Photo - Compact horizontal layout */}
@@ -718,22 +700,11 @@ function CenteredMemoryCard({ story, position, index, isDark = false, showDecade
                   <Plus className="w-4 h-4" />
                 </button>
               ) : story.audioUrl && story.audioUrl.trim() !== "" ? (
-                isViewerMode ? (
-                  // Viewer mode: static duration badge (non-interactive)
-                  <span
-                    className="px-3 py-1.5 rounded-full text-sm font-medium"
-                    style={{ color: 'var(--hw-text-muted, #8A8378)', backgroundColor: 'var(--hw-section-bg, #EFE6DA)' }}
-                  >
-                    {Math.ceil((story.durationSeconds || 0) / 60)} min
-                  </span>
-                ) : (
-                  // Owner mode: interactive play button
-                  <PlayPillButton
-                    isPlaying={isPlaying}
-                    progress={progress}
-                    onClick={handlePlayAudio}
-                  />
-                )
+                <PlayPillButton
+                  isPlaying={isPlaying}
+                  progress={progress}
+                  onClick={handlePlayAudio}
+                />
               ) : null}
             </div>
           </div>
@@ -822,25 +793,14 @@ function CenteredMemoryCard({ story, position, index, isDark = false, showDecade
                   <Plus className="w-4 h-4" />
                 </button>
               ) : hasAudio ? (
-                isViewerMode ? (
-                  // Viewer mode: static duration badge (non-interactive)
-                  <span
-                    className="px-3 py-1.5 rounded-full text-sm font-medium"
-                    style={{ color: 'var(--hw-text-muted, #8A8378)', backgroundColor: 'var(--hw-section-bg, #EFE6DA)' }}
-                  >
-                    {Math.ceil((story.durationSeconds || 0) / 60)} min
-                  </span>
-                ) : (
-                  // Owner mode: interactive play button
-                  <PlayPillButton
-                    isPlaying={isPlaying}
-                    progress={progress}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handlePlayAudio(e);
-                    }}
-                  />
-                )
+                <PlayPillButton
+                  isPlaying={isPlaying}
+                  progress={progress}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handlePlayAudio(e);
+                  }}
+                />
               ) : (
                 <button
                   className="px-4 py-2 rounded-full bg-stone-100 hover:bg-stone-200 text-stone-700 text-sm font-semibold flex items-center gap-1.5 transition-colors"
@@ -857,11 +817,7 @@ function CenteredMemoryCard({ story, position, index, isDark = false, showDecade
 
           {/* Helper text */}
           <p className="text-xs text-stone-400 mt-3 text-center">
-            {isViewerMode
-              ? "Tap to open this story"
-              : hasAudio
-                ? "Tap to listen to this story"
-                : "Tap to read this story"}
+            {hasAudio ? "Tap to listen to this story" : "Tap to read this story"}
           </p>
         </div>
       </div>
@@ -1459,7 +1415,6 @@ export function TimelineDesktop({ useV2Features = false }: { useV2Features?: boo
                             decadeLabel={showDecadeMarker ? decadeLabel : undefined}
                             birthYear={birthYear}
                             useV2Features={useV2Features}
-                            isViewerMode={!isViewingOwnAccount}
                             isGhostStory={(story as any).isGhostStory === true}
                             customActionLabel={isGhostMode && (story as any).templateId ? (
                               (story as any).templateId === 'birth-story' ? 'Add birth info' :

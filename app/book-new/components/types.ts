@@ -48,6 +48,7 @@ export interface PageNavigationState {
 export interface MobileBookViewV2Props {
   initialStoryId?: string; // Optional story ID to jump to on load
   caveatFont?: string; // Handwritten font class name
+  autoplay?: boolean; // Auto-start audio when initial story loads (for Timeline → Book View transition)
 }
 
 /**
@@ -59,6 +60,8 @@ export interface BookPageCardProps {
   caveatFont?: string; // Handwritten font class name
   pageNumber?: number; // Page number for display in bottom corner
   isPriority?: boolean; // Whether images should load with priority (for first visible story)
+  autoplay?: boolean; // Auto-start audio playback
+  onAutoplayConsumed?: () => void; // Callback when autoplay triggers
 }
 
 /**
@@ -68,6 +71,7 @@ export interface BookAudioPlayerProps {
   audioUrl: string;
   durationSeconds?: number; // Pre-loaded duration from database (fixes 0:00 display for recorded audio)
   onPlayStateChange?: (isPlaying: boolean) => void;
+  autoplay?: boolean; // Auto-start audio playback
 }
 
 /**
@@ -128,4 +132,6 @@ export interface BookPageRendererProps {
   pageNumber?: number; // Page number for display
   isPriority?: boolean; // Whether images should load with priority (for first story)
   onStorySelect?: (storyId: string) => void; // For TOC page navigation
+  autoplay?: boolean; // Auto-start audio playback for story pages
+  onAutoplayConsumed?: () => void; // Callback when autoplay triggers
 }

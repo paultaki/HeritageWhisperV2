@@ -8,6 +8,7 @@ type WaveformAudioPlayerProps = {
   durationSeconds?: number; // Pre-loaded duration from database (fixes 0:00 display for recorded audio)
   className?: string;
   onPlayStateChange?: (isPlaying: boolean) => void;
+  autoplay?: boolean; // Auto-start playback when component mounts (for Timeline → Book View transition)
 };
 
 /**
@@ -37,7 +38,8 @@ export default function WaveformAudioPlayer({
   src,
   durationSeconds,
   className = "",
-  onPlayStateChange
+  onPlayStateChange,
+  autoplay = false
 }: WaveformAudioPlayerProps) {
   const audioRef = useRef<HTMLAudioElement>(null);
   const scrubBarRef = useRef<HTMLDivElement>(null);
@@ -207,6 +209,23 @@ export default function WaveformAudioPlayer({
       audio.removeEventListener("ended", handleEnded);
     };
   }, [onPlayStateChange, updateProgress]);
+
+  // Autoplay effect - triggers playback when autoplay prop is true
+  useEffect(() => {
+    if (autoplay && audioRef.current && !isPlaying) {
+      // Small delay to ensure audio is ready
+      const timer = setTimeout(() => {
+        if (audioRef.current) {
+          audioRef.current.play().catch((error) => {
+            // Silently fail if browser blocks autoplay (common on mobile without user gesture)
+            console.log('[WaveformAudioPlayer] Autoplay blocked by browser:', error.message);
+          });
+        }
+      }, 300);
+
+      return () => clearTimeout(timer);
+    }
+  }, [autoplay]); // Only trigger on autoplay change, not isPlaying
 
   // Keyboard handler
   const handleKeyDown = useCallback((e: React.KeyboardEvent) => {

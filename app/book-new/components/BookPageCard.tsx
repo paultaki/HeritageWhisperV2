@@ -23,7 +23,7 @@ function formatDate(dateString: string | undefined): string {
   }
 }
 
-export default function BookPageCard({ story, isActive, caveatFont, pageNumber, isPriority = false }: BookPageCardProps) {
+export default function BookPageCard({ story, isActive, caveatFont, pageNumber, isPriority = false, autoplay = false, onAutoplayConsumed }: BookPageCardProps) {
   const scrollerRef = useRef<HTMLDivElement>(null);
   const [scrollState, setScrollState] = useState<{ hasScroll: boolean; isAtBottom: boolean }>({
     hasScroll: false,
@@ -366,7 +366,17 @@ export default function BookPageCard({ story, isActive, caveatFont, pageNumber, 
             {/* Audio player */}
             {story.audioUrl && (
               <div className="mt-[11px]">
-                <BookAudioPlayer audioUrl={story.audioUrl} durationSeconds={story.durationSeconds ?? undefined} />
+                <BookAudioPlayer
+                  audioUrl={story.audioUrl}
+                  durationSeconds={story.durationSeconds ?? undefined}
+                  autoplay={autoplay}
+                  onPlayStateChange={(isPlaying) => {
+                    // Clear autoplay flag after playback starts
+                    if (isPlaying && autoplay && onAutoplayConsumed) {
+                      onAutoplayConsumed();
+                    }
+                  }}
+                />
               </div>
             )}
 

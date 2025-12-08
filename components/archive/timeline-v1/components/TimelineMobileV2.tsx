@@ -363,7 +363,6 @@ export function TimelineMobileV2() {
                       highlightedStoryId={navigation.highlightedStoryId}
                       returnHighlightId={navigation.returnHighlightId}
                       useV2Features={true}
-                      isViewerMode={!isViewingOwnAccount}
                       getGhostAction={getGhostAction}
                     />
                   ))}

@@ -136,7 +136,6 @@ export interface MemoryCardProps {
   birthYear: number;
   onOpenOverlay?: (story: Story) => void;
   useV2Features?: boolean; // Enable V2 senior-friendly UX improvements
-  isViewerMode?: boolean; // True for family viewers - hides inline play, navigates to Book View with autoplay
 }
 
 /** Props for TimelineDecadeSection component */
@@ -155,7 +154,6 @@ export interface TimelineDecadeSectionProps {
   highlightedStoryId: string | null;
   returnHighlightId: string | null;
   useV2Features?: boolean; // Enable V2 senior-friendly UX improvements
-  isViewerMode?: boolean; // True for family viewers - hides inline play, navigates to Book View with autoplay
 }
 
 /** Props for TimelineHeader component */

@@ -18,6 +18,7 @@ export default function BookAudioPlayer({
   audioUrl,
   durationSeconds,
   onPlayStateChange,
+  autoplay = false,
 }: BookAudioPlayerProps) {
   const audioRef = useRef<HTMLAudioElement>(null);
   const scrubBarRef = useRef<HTMLDivElement>(null);
@@ -40,6 +41,23 @@ export default function BookAudioPlayer({
       setDuration(durationSeconds);
     }
   }, [durationSeconds]);
+
+  // Autoplay effect - triggers playback when autoplay prop is true
+  useEffect(() => {
+    if (autoplay && audioRef.current && !isPlaying) {
+      // Small delay to ensure audio is ready
+      const timer = setTimeout(() => {
+        if (audioRef.current) {
+          audioRef.current.play().catch((error) => {
+            // Silently fail if browser blocks autoplay (common on mobile without user gesture)
+            console.log('[BookAudioPlayer] Autoplay blocked by browser:', error.message);
+          });
+        }
+      }, 300);
+
+      return () => clearTimeout(timer);
+    }
+  }, [autoplay]); // Only trigger on autoplay change, not isPlaying
 
   // Toggle play/pause
   const togglePlay = useCallback(() => {
