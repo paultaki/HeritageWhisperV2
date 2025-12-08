@@ -81,8 +81,16 @@ export function isValidOrigin(origin: string): boolean {
 
 /**
  * Get expected origin for verification
+ * Returns an array to support both www and non-www variants
  */
-export function getExpectedOrigin(): string {
+export function getExpectedOrigin(): string | string[] {
+  // For production, accept both www and non-www variants
+  if (ORIGIN.includes("heritagewhisper.com")) {
+    return [
+      "https://heritagewhisper.com",
+      "https://www.heritagewhisper.com",
+    ];
+  }
   return ORIGIN;
 }
 

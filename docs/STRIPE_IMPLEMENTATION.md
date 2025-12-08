@@ -62,7 +62,7 @@ NEXT_PUBLIC_APP_URL=https://dev.heritagewhisper.com  # Base URL for redirect
 URLs
 
 # Supabase (already configured)
-NEXT_PUBLIC_SUPABASE_URL=https://tjycibrhoammxohemyhq.supabase.co
+NEXT_PUBLIC_SUPABASE_URL=https://pwuzksomxnbdndeeivzf.supabase.co
 SUPABASE_SERVICE_ROLE_KEY=your_service_key
 ```
 
@@ -125,7 +125,7 @@ subscription_status TEXT DEFAULT 'none'  -- 'none' | 'active' | 'canceled' | 'pa
 npm run db:push
 
 # Generate TypeScript types
-npx supabase gen types typescript --project-id tjycibrhoammxohemyhq > shared/schema.ts
+npx supabase gen types typescript --project-id pwuzksomxnbdndeeivzf > shared/schema.ts
 ```
 
 ---
@@ -578,7 +578,7 @@ NEXT_PUBLIC_APP_URL=https://heritagewhisper.com
 - **Cause:** Types not regenerated after migration
 - **Fix:** Run type generation:
   ```bash
-  npx supabase gen types typescript --project-id tjycibrhoammxohemyhq
+  npx supabase gen types typescript --project-id pwuzksomxnbdndeeivzf
   ```
 
 ---

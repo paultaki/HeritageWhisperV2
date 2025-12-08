@@ -355,7 +355,7 @@ graph TB
 
 **Production Environment:**
 - **Frontend:** Vercel (https://dev.heritagewhisper.com)
-- **Database:** Supabase (project: tjycibrhoammxohemyhq)
+- **Database:** Supabase (project: pwuzksomxnbdndeeivzf)
 - **Storage:** Supabase Storage (PUBLIC bucket)
 - **Region:** US East (primary)
 - **Build Time:** ~59 seconds (after PDFShift migration)

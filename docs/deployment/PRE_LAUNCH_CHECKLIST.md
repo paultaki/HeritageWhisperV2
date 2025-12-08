@@ -42,7 +42,7 @@
   - **Authorized redirect URIs:**
     - `https://heritagewhisper.com/auth/callback`
     - `https://www.heritagewhisper.com/auth/callback`
-    - `https://tjycibrhoammxohemyhq.supabase.co/auth/v1/callback`
+    - `https://pwuzksomxnbdndeeivzf.supabase.co/auth/v1/callback`
   - Copy Client ID and Client Secret
 
 - [ ] **Configure OAuth in Supabase**
@@ -151,7 +151,7 @@ Value: v=DMARC1; p=none; rua=mailto:postmaster@heritagewhisper.com
   NEXT_PUBLIC_SITE_URL=https://heritagewhisper.com
 
   # Supabase (same as dev, but verify)
-  NEXT_PUBLIC_SUPABASE_URL=https://tjycibrhoammxohemyhq.supabase.co
+  NEXT_PUBLIC_SUPABASE_URL=https://pwuzksomxnbdndeeivzf.supabase.co
   NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJ...
   SUPABASE_SERVICE_ROLE_KEY=eyJ...
 

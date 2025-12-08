@@ -63,7 +63,7 @@ case $choice in
         echo "🔧 Applying migration to PRODUCTION database..."
         echo ""
         echo "You'll need your database connection string."
-        echo "Find it at: https://app.supabase.io/project/tjycibrhoammxohemyhq/settings/database"
+        echo "Find it at: https://app.supabase.io/project/pwuzksomxnbdndeeivzf/settings/database"
         echo ""
         read -p "Enter your DATABASE_URL (or press Enter to use from .env.local): " db_url
 
@@ -130,7 +130,7 @@ echo "Next Steps:"
 echo "========================================="
 echo ""
 echo "1. ✅ Verify the fix in Supabase dashboard:"
-echo "   https://app.supabase.io/project/tjycibrhoammxohemyhq/database/tables"
+echo "   https://app.supabase.io/project/pwuzksomxnbdndeeivzf/database/tables"
 echo "   - Check that RLS badge appears next to each table"
 echo ""
 echo "2. 🔍 Re-run the security linter:"

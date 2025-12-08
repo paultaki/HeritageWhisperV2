@@ -617,7 +617,7 @@ git commit -m "chore: update hard-coded domain fallbacks for production
 ### Phase 3: CONFIGURE THIRD-PARTY SERVICES (20-30 minutes)
 
 #### Step 3.1: Supabase Dashboard
-- [ ] Go to: https://supabase.com/dashboard/project/tjycibrhoammxohemyhq/auth/url-configuration
+- [ ] Go to: https://supabase.com/dashboard/project/pwuzksomxnbdndeeivzf/auth/url-configuration
 - [ ] **Add Redirect URLs:**
   - `https://heritagewhisper.com/auth/callback`
   - `https://heritagewhisper.com/auth/reset-password`
@@ -935,7 +935,7 @@ Migration is successful when:
 **Complete list for .env.local (production):**
 ```bash
 # Supabase
-NEXT_PUBLIC_SUPABASE_URL=https://tjycibrhoammxohemyhq.supabase.co
+NEXT_PUBLIC_SUPABASE_URL=https://pwuzksomxnbdndeeivzf.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=<your-anon-key>
 SUPABASE_SERVICE_ROLE_KEY=<your-service-role-key>
 SUPABASE_JWT_SECRET=<your-jwt-secret>

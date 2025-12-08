@@ -28,7 +28,7 @@ fi
 
 # Apply migration
 echo "📤 Applying migration to Supabase..."
-psql "postgresql://postgres.tjycibrhoammxohemyhq:Redsox69Redsox@aws-0-us-west-1.pooler.supabase.com:6543/postgres" -f migrations/0012_setup_admin_and_feedback.sql
+psql "postgresql://postgres.pwuzksomxnbdndeeivzf:Redsox69Redsox@aws-0-us-west-1.pooler.supabase.com:6543/postgres" -f migrations/0012_setup_admin_and_feedback.sql
 
 if [ $? -eq 0 ]; then
     echo "✅ Migration applied successfully!"

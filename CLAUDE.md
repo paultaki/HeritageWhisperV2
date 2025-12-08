@@ -34,7 +34,7 @@ lsof -ti:3000 | xargs kill -9     # Kill port 3000
 ## Tech Stack
 
 - **Framework:** Next.js 15 with App Router
-- **Database:** PostgreSQL via Supabase (project: tjycibrhoammxohemyhq)
+- **Database:** PostgreSQL via Supabase (project: pwuzksomxnbdndeeivzf)
 - **Auth:** Supabase Auth + WebAuthn passkeys
 - **Storage:** Supabase Storage (bucket: heritage-whisper-files)
 - **AI:** AssemblyAI (transcription) + OpenAI (GPT-4o, Realtime API)

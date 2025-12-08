@@ -1,7 +1,7 @@
 # Database Migrations History
 
 **Last Updated:** November 18, 2025
-**Database:** PostgreSQL via Supabase (project: tjycibrhoammxohemyhq)
+**Database:** PostgreSQL via Supabase (project: pwuzksomxnbdndeeivzf)
 
 ## Purpose of This Document
 

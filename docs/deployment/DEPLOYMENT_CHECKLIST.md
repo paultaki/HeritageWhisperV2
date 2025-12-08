@@ -12,7 +12,7 @@ PDFSHIFT_API_KEY=sk_9661a98e63679aeec5c28308e4b89fea5d8ce357
 NEXT_PUBLIC_SITE_URL=https://dev.heritagewhisper.com
 
 # Already configured (verify they exist)
-NEXT_PUBLIC_SUPABASE_URL=https://tjycibrhoammxohemyhq.supabase.co
+NEXT_PUBLIC_SUPABASE_URL=https://pwuzksomxnbdndeeivzf.supabase.co
 SUPABASE_SERVICE_ROLE_KEY=sb_secret_...
 NEXT_PUBLIC_SUPABASE_ANON_KEY=sb_publishable_...
 ```

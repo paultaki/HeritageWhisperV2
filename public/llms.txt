@@ -30,7 +30,7 @@
 - Service role key used in 107 files - audit recommended
 
 ### Technology Stack
-- Database: PostgreSQL 17+ via Supabase (project: tjycibrhoammxohemyhq)
+- Database: PostgreSQL 17+ via Supabase (project: pwuzksomxnbdndeeivzf)
 - API: Next.js 15 App Router with TypeScript
 - Auth: Supabase Auth + WebAuthn passkeys
 - State: TanStack Query v5
@@ -128,7 +128,7 @@ When answering questions about HeritageWhisper:
 
 _Schema File Reference: /shared/schema.ts_
 
-_Production Database: Supabase project tjycibrhoammxohemyhq_
+_Production Database: Supabase project pwuzksomxnbdndeeivzf_
 
 _Last verified: October 31, 2025_
 

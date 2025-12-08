@@ -31,7 +31,7 @@ HeritageWhisperV2 uses a **three-layer data architecture**:
 - **UI Layer (React/TypeScript):** TanStack Query v5 for state management
 
 **Key Technologies:**
-- Database: PostgreSQL 17+ via Supabase (project: tjycibrhoammxohemyhq)
+- Database: PostgreSQL 17+ via Supabase (project: pwuzksomxnbdndeeivzf)
 - Schema Definition: Drizzle ORM for type-safe schemas (shared/schema.ts)
 - API: Next.js 15 App Router API routes using Supabase client directly
 - State: TanStack Query v5 + React Context
@@ -326,7 +326,7 @@ See **[DATA_FLOW_PATTERNS.md](DATA_FLOW_PATTERNS.md)** for detailed sequences:
 
 **Schema File Reference:** [`/shared/schema.ts`](shared/schema.ts)
 
-**Production Database:** Supabase project `tjycibrhoammxohemyhq` (PostgreSQL 17+)
+**Production Database:** Supabase project `pwuzksomxnbdndeeivzf` (PostgreSQL 17+)
 
 **Row Level Security:** Enabled on all 22 tables with optimized `(SELECT auth.uid())` pattern
 

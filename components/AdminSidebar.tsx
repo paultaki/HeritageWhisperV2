@@ -105,7 +105,7 @@ const NAV_SECTIONS: NavSection[] = [
   {
     title: "External Services",
     items: [
-      { label: "Supabase", href: "https://supabase.com/dashboard/project/tjycibrhoammxohemyhq", icon: Database },
+      { label: "Supabase", href: "https://supabase.com/dashboard/project/pwuzksomxnbdndeeivzf", icon: Database },
       { label: "Vercel", href: "https://vercel.com/pauls-projects-667765b0/heritage-whisper-v2", icon: Cloud },
       { label: "AI Gateway", href: "https://vercel.com/pauls-projects-667765b0/heritage-whisper-v2/observability/ai", icon: Zap },
       { label: "PDFShift", href: "https://app.pdfshift.io/env/", icon: FileText },
