@@ -59,6 +59,10 @@ export function TimelineHeroHeader({
   // Get header state - all logic centralized here
   const headerState = getTimelineHeaderState(fullContext);
 
+  // Debug logging - remove after fixing
+  console.log('[TimelineHeroHeader] viewerContext:', viewerContext);
+  console.log('[TimelineHeroHeader] headerState:', headerState);
+
   // Handle add memory button click
   const handleAddMemory = () => {
     if (onAddMemory) {

@@ -22,7 +22,7 @@ export default function MobileBookViewV2({
   const { activeContext, isLoading: isContextLoading } = useAccountContext();
   const pagerRef = useRef<HTMLDivElement>(null);
 
-  console.log('[MobileBookViewV2] Render - activeContext:', activeContext, 'isContextLoading:', isContextLoading);
+  console.log('[MobileBookViewV2] Render - activeContext:', activeContext, 'isContextLoading:', isContextLoading, 'initialStoryId:', initialStoryId);
 
   // State - initialize from sessionStorage for position persistence
   // BUT if initialStoryId is provided, we'll override this once bookPages are ready

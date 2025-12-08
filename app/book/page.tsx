@@ -555,6 +555,20 @@ function BookV4PageContent() {
   // Autoplay state - tracks which story should autoplay (cleared after first render)
   const [autoplayStoryId, setAutoplayStoryId] = useState<string | null>(null);
 
+  // Capture storyId for mobile BEFORE the navigation effect clears the URL
+  // This fixes the race condition where lazy-loaded MobileBookViewV2 sees undefined
+  const [mobileTargetStoryId, setMobileTargetStoryId] = useState<string | undefined>(undefined);
+  const [mobileAutoplay, setMobileAutoplay] = useState(false);
+
+  // Capture URL params immediately when they appear (before navigation effect clears them)
+  useEffect(() => {
+    if (urlStoryId && urlStoryId !== mobileTargetStoryId) {
+      console.log('[BookPage] Capturing storyId for mobile:', urlStoryId, 'autoplay:', urlAutoplay);
+      setMobileTargetStoryId(urlStoryId);
+      setMobileAutoplay(urlAutoplay);
+    }
+  }, [urlStoryId, urlAutoplay, mobileTargetStoryId]);
+
   useEffect(() => {
     if (!urlStoryId || sortedStories.length === 0 || spreads.length === 0) return;
     if (navigatedStoryId === urlStoryId) return;
@@ -668,9 +682,9 @@ function BookV4PageContent() {
         <div className="lg:hidden">
           <Suspense fallback={MobileLoadingFallback}>
             <MobileBookViewV2
-              initialStoryId={urlStoryId}
+              initialStoryId={mobileTargetStoryId}
               caveatFont={caveat.className}
-              autoplay={urlAutoplay}
+              autoplay={mobileAutoplay}
             />
           </Suspense>
         </div>
@@ -714,9 +728,9 @@ function BookV4PageContent() {
       <div className="lg:hidden">
         <Suspense fallback={MobileLoadingFallback}>
           <MobileBookViewV2
-            initialStoryId={urlStoryId}
+            initialStoryId={mobileTargetStoryId}
             caveatFont={caveat.className}
-            autoplay={urlAutoplay}
+            autoplay={mobileAutoplay}
           />
         </Suspense>
       </div>

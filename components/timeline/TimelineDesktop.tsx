@@ -953,6 +953,11 @@ export function TimelineDesktop({ useV2Features = false }: { useV2Features?: boo
   const storytellerId = activeContext?.storytellerId || user?.id;
   const isViewingOwnAccount = activeContext?.type === 'own';
 
+  // Debug logging - remove after fixing
+  console.log('[TimelineDesktop] activeContext:', activeContext);
+  console.log('[TimelineDesktop] isViewingOwnAccount:', isViewingOwnAccount);
+  console.log('[TimelineDesktop] user:', user);
+
   // Dual authentication: Use JWT for owners, HttpOnly cookie for family viewers
   // Note: Family session token is now in HttpOnly cookie, sent automatically with credentials: 'include'
   const authToken = session?.access_token || (familySession ? 'cookie' : null);

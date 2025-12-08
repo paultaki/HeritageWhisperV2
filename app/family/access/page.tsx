@@ -1,10 +1,10 @@
 'use client';
 
-import { useEffect, useState, useCallback, Suspense, useRef } from 'react';
+import { useEffect, useState, Suspense, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Loader2, Users, CheckCircle, XCircle, Clock } from 'lucide-react';
+import { Loader2, XCircle, Clock } from 'lucide-react';
 import { useAuth } from '@/lib/auth';
 
 // Storage key for signed-in users' active storyteller context
@@ -19,19 +19,7 @@ interface AccountContext {
   relationship: string | null;
 }
 
-// Session data from /api/family/verify response
-// Note: sessionToken is no longer included - it's set as HttpOnly cookie
-interface SessionData {
-  storytellerId: string;
-  storytellerName: string;
-  familyMemberName: string;
-  relationship: string | null;
-  permissionLevel: 'viewer' | 'contributor';
-  expiresAt: string;
-  firstAccess: boolean;
-}
-
-type Status = 'loading' | 'success' | 'error';
+type Status = 'loading' | 'error';
 
 function FamilyAccessContent() {
   const router = useRouter();
@@ -39,10 +27,6 @@ function FamilyAccessContent() {
   const { user, isLoading: isAuthLoading } = useAuth();
   const [status, setStatus] = useState<Status>('loading');
   const [error, setError] = useState<string | null>(null);
-  const [sessionData, setSessionData] = useState<SessionData | null>(null);
-  const [showWelcome, setShowWelcome] = useState(false);
-  const [countdown, setCountdown] = useState(5);
-  const [isSignedIn, setIsSignedIn] = useState(false);
   const verificationStarted = useRef(false);
 
   // Wait for auth to load, then verify token
@@ -62,48 +46,8 @@ function FamilyAccessContent() {
     }
 
     verificationStarted.current = true;
-    setIsSignedIn(!!user);
     verifyToken(token, !!user);
   }, [searchParams, isAuthLoading, user]);
-
-  // Memoized redirect handler to prevent stale closures
-  const handleContinue = useCallback(() => {
-    if (!sessionData) return;
-
-    if (isSignedIn) {
-      // For signed-in users: Store as active storyteller context
-      // This allows the account context hook to pick it up automatically
-      const viewerContext: AccountContext = {
-        storytellerId: sessionData.storytellerId,
-        storytellerName: sessionData.storytellerName,
-        type: 'viewing',
-        permissionLevel: sessionData.permissionLevel,
-        relationship: sessionData.relationship,
-      };
-      localStorage.setItem(STORYTELLER_CONTEXT_KEY, JSON.stringify(viewerContext));
-
-      // NOTE: family_session token is now stored as HttpOnly cookie by /api/family/verify
-      // No need to store it in localStorage - browser sends cookie automatically
-    }
-    // For non-signed-in users: Session is already set via HttpOnly cookie by /api/family/verify
-    // No localStorage needed - the cookie is sent with all requests automatically
-
-    // Navigate to timeline
-    // Using window.location for full page load to ensure hooks re-initialize
-    window.location.href = '/timeline';
-  }, [sessionData, isSignedIn]);
-
-  // Countdown timer effect
-  useEffect(() => {
-    if (showWelcome && countdown > 0) {
-      const timer = setTimeout(() => {
-        setCountdown(countdown - 1);
-      }, 1000);
-      return () => clearTimeout(timer);
-    } else if (showWelcome && countdown === 0) {
-      handleContinue();
-    }
-  }, [showWelcome, countdown, handleContinue]);
 
   async function verifyToken(token: string, userIsSignedIn: boolean) {
     try {
@@ -116,19 +60,7 @@ function FamilyAccessContent() {
         throw new Error(data.error || 'Verification failed');
       }
 
-      // Build session data for UI display
-      // Note: sessionToken is NOT in the response - it's set as HttpOnly cookie
-      const familySession: SessionData = {
-        storytellerId: data.storyteller.id,
-        storytellerName: data.storyteller.name,
-        familyMemberName: data.familyMember.name || 'Family Member',
-        relationship: data.familyMember.relationship,
-        permissionLevel: data.familyMember.permissionLevel || 'viewer',
-        expiresAt: data.expiresAt,
-        firstAccess: true,
-      };
-
-      // For signed-in users: Also store storyteller context for account switcher
+      // For signed-in users: Store storyteller context for account switcher
       // The family_session token is already set as HttpOnly cookie by the server
       if (userIsSignedIn) {
         const viewerContext: AccountContext = {
@@ -139,15 +71,10 @@ function FamilyAccessContent() {
           relationship: data.familyMember.relationship,
         };
         localStorage.setItem(STORYTELLER_CONTEXT_KEY, JSON.stringify(viewerContext));
-
-        console.log('[FamilyAccess] Signed-in user - stored viewer context:', viewerContext);
-      } else {
-        console.log('[FamilyAccess] Non-signed-in user - session set via HttpOnly cookie');
       }
 
-      setSessionData(familySession);
-      setStatus('success');
-      setShowWelcome(true);
+      // Redirect immediately to timeline after successful verification
+      window.location.href = '/timeline';
     } catch (err: any) {
       console.error('Token verification error:', err);
       setStatus('error');
@@ -204,73 +131,6 @@ function FamilyAccessContent() {
             >
               Go to Homepage
             </Button>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
-
-  // Success State - Welcome Screen
-  if (status === 'success' && showWelcome && sessionData) {
-    return (
-      <div className="hw-page flex items-center justify-center p-4 bg-gradient-to-br from-amber-50 via-orange-50 to-rose-50">
-        <Card className="max-w-2xl w-full border-amber-200 shadow-xl">
-          <CardContent className="pt-12 pb-12">
-            <div className="text-center mb-8">
-              <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center">
-                <Users className="w-10 h-10 text-white" />
-              </div>
-              <h1 className="text-3xl font-serif font-bold text-gray-800 mb-3">
-                👋 Welcome{sessionData.familyMemberName ? `, ${sessionData.familyMemberName}` : ''}!
-              </h1>
-              <p className="text-xl text-gray-700 leading-relaxed">
-                {sessionData.storytellerName} has invited you to view their life stories.
-              </p>
-            </div>
-
-            <div className="bg-white rounded-xl p-6 mb-8 border border-gray-200">
-              <h3 className="font-semibold text-gray-800 mb-4 flex items-center gap-2">
-                <CheckCircle className="w-5 h-5 text-green-600" />
-                You can now:
-              </h3>
-              <ul className="space-y-3">
-                <li className="flex items-start gap-3 text-gray-700">
-                  <span className="text-amber-500 font-bold">•</span>
-                  <span>View their timeline of memories and milestones</span>
-                </li>
-                <li className="flex items-start gap-3 text-gray-700">
-                  <span className="text-amber-500 font-bold">•</span>
-                  <span>Read their stories with photos and context</span>
-                </li>
-                <li className="flex items-start gap-3 text-gray-700">
-                  <span className="text-amber-500 font-bold">•</span>
-                  <span>Listen to audio recordings in their own voice</span>
-                </li>
-                <li className="flex items-start gap-3 text-gray-700">
-                  <span className="text-amber-500 font-bold">•</span>
-                  <span>Browse their memory book organized by decade</span>
-                </li>
-              </ul>
-            </div>
-
-            <div className="text-center">
-              <Button
-                onClick={handleContinue}
-                size="lg"
-                className="bg-gradient-to-r from-amber-500 via-orange-400 to-rose-400 hover:from-amber-600 hover:via-orange-500 hover:to-rose-500 text-white font-semibold shadow-lg hover:shadow-xl transition-all duration-300 h-14 px-8 text-lg"
-              >
-                Continue to Timeline
-              </Button>
-              <p className="text-sm text-gray-500 mt-4">
-                Redirecting automatically in {countdown} second{countdown !== 1 ? 's' : ''}...
-              </p>
-            </div>
-
-            <div className="mt-8 pt-6 border-t border-gray-200 text-center">
-              <p className="text-sm text-gray-600">
-                Your access will remain active for 30 days. You can return anytime using the same link.
-              </p>
-            </div>
           </CardContent>
         </Card>
       </div>
