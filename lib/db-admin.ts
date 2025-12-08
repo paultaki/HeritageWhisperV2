@@ -21,10 +21,11 @@ export async function getUserByEmail(
 ): Promise<{ id: string; email: string } | null> {
   const supabase = getAdminClient();
 
+  // Use ilike for case-insensitive email matching
   const { data, error } = await supabase
     .from("users")
     .select("id, email")
-    .eq("email", email)
+    .ilike("email", email)
     .single();
 
   if (error) {
