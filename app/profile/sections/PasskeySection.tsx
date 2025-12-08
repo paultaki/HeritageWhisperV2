@@ -14,7 +14,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Fingerprint, Plus } from "lucide-react";
+import { Fingerprint, Plus, Eye, EyeOff } from "lucide-react";
 import { PasskeyAuth } from "@/components/auth/PasskeyAuth";
 import { ManagePasskeys } from "@/components/auth/ManagePasskeys";
 import { useToast } from "@/hooks/use-toast";
@@ -28,6 +28,7 @@ export function PasskeySection({ email }: PasskeySectionProps) {
   const { toast } = useToast();
   const [showPasskeySetup, setShowPasskeySetup] = useState(false);
   const [passkeyPassword, setPasskeyPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
 
   const handlePasskeySetupSuccess = () => {
     setShowPasskeySetup(false);
@@ -52,6 +53,7 @@ export function PasskeySection({ email }: PasskeySectionProps) {
     setShowPasskeySetup(open);
     if (!open) {
       setPasskeyPassword("");
+      setShowPassword(false);
     }
   };
 
@@ -100,14 +102,28 @@ export function PasskeySection({ email }: PasskeySectionProps) {
                 <Label htmlFor="passkey-password" className="text-base font-medium">
                   Current Password
                 </Label>
-                <Input
-                  id="passkey-password"
-                  type="password"
-                  value={passkeyPassword}
-                  onChange={(e) => setPasskeyPassword(e.target.value)}
-                  className="mt-2 h-14 text-base"
-                  placeholder="Enter your password"
-                />
+                <div className="relative mt-2">
+                  <Input
+                    id="passkey-password"
+                    type={showPassword ? "text" : "password"}
+                    value={passkeyPassword}
+                    onChange={(e) => setPasskeyPassword(e.target.value)}
+                    className="h-14 text-base pr-12"
+                    placeholder="Enter your password"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 p-1"
+                    aria-label={showPassword ? "Hide password" : "Show password"}
+                  >
+                    {showPassword ? (
+                      <EyeOff className="h-5 w-5" />
+                    ) : (
+                      <Eye className="h-5 w-5" />
+                    )}
+                  </button>
+                </div>
               </div>
 
               {passkeyPassword && (

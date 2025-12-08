@@ -279,7 +279,7 @@ function SimplePromptCard({
       whileHover={{ y: -4 }}
       onHoverStart={() => setIsHovered(true)}
       onHoverEnd={() => setIsHovered(false)}
-      className="group relative rounded-2xl bg-white p-4 shadow-sm hover:shadow-lg transition-all duration-200 border border-gray-100"
+      className="group relative rounded-2xl bg-white p-5 md:p-6 shadow-sm hover:shadow-lg transition-all duration-200 border border-gray-100"
     >
       {/* Icon or category indicator */}
       {Icon && (
@@ -289,7 +289,7 @@ function SimplePromptCard({
       )}
 
       {/* Question text */}
-      <p className="mb-4 text-lg font-medium text-gray-900 leading-relaxed">
+      <p className="mb-5 text-lg md:text-xl font-medium text-gray-900 leading-relaxed">
         {prompt.prompt_text}
       </p>
 
@@ -848,7 +848,7 @@ export default function PromptsV2Page() {
                   {selectedCategory && CATEGORIES.find(c => c.id === selectedCategory)?.label} Questions
                 </DialogTitle>
               </DialogHeader>
-              <div className="mt-6 grid gap-4">
+              <div className="mt-6 grid gap-5 max-w-2xl mx-auto">
                 {selectedCategory && CATEGORY_PROMPTS[selectedCategory]?.map((question, index) => (
                   <motion.div
                     key={index}
