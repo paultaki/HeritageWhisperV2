@@ -19,10 +19,10 @@ export default function MobileBookViewV2({
   autoplay = false,
 }: MobileBookViewV2Props) {
   const router = useRouter();
-  const { activeContext } = useAccountContext();
+  const { activeContext, isLoading: isContextLoading } = useAccountContext();
   const pagerRef = useRef<HTMLDivElement>(null);
 
-  console.log('[MobileBookViewV2] Render - activeContext:', activeContext);
+  console.log('[MobileBookViewV2] Render - activeContext:', activeContext, 'isContextLoading:', isContextLoading);
 
   // State - initialize from sessionStorage for position persistence
   // BUT if initialStoryId is provided, we'll override this once bookPages are ready
@@ -404,8 +404,10 @@ export default function MobileBookViewV2({
     }
   }, [initialStoryId, bookPages.length, initialNavigationDone]); // Only run when initialStoryId or page count changes
 
-  // Loading state
-  if (isLoading) {
+  // Loading state - wait for both context and data to load
+  // On first load, isContextLoading is true while activeContext is null
+  // Once context loads, the query enables and isLoading becomes true while fetching
+  if (isContextLoading || isLoading || (!data && storytellerId)) {
     return (
       <div className="flex h-[100dvh] w-screen items-center justify-center bg-neutral-950">
         <div className="text-center">

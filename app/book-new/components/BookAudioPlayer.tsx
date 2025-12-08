@@ -45,19 +45,28 @@ export default function BookAudioPlayer({
   // Autoplay effect - triggers playback when autoplay prop is true
   useEffect(() => {
     if (autoplay && audioRef.current && !isPlaying) {
-      // Small delay to ensure audio is ready
+      const audio = audioRef.current;
+
+      // Small delay to ensure audio is ready and event listeners are attached
       const timer = setTimeout(() => {
-        if (audioRef.current) {
-          audioRef.current.play().catch((error) => {
-            // Silently fail if browser blocks autoplay (common on mobile without user gesture)
-            console.log('[BookAudioPlayer] Autoplay blocked by browser:', error.message);
-          });
+        if (audio) {
+          audio.play()
+            .then(() => {
+              // Manually sync state in case event listener missed the play event
+              // This handles race conditions where listeners might not be ready
+              setIsPlaying(true);
+              onPlayStateChange?.(true);
+            })
+            .catch((error) => {
+              // Silently fail if browser blocks autoplay (common on mobile without user gesture)
+              console.log('[BookAudioPlayer] Autoplay blocked by browser:', error.message);
+            });
         }
       }, 300);
 
       return () => clearTimeout(timer);
     }
-  }, [autoplay]); // Only trigger on autoplay change, not isPlaying
+  }, [autoplay, onPlayStateChange]); // Include onPlayStateChange to ensure we have latest callback
 
   // Toggle play/pause
   const togglePlay = useCallback(() => {
