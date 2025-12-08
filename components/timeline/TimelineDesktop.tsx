@@ -55,6 +55,8 @@ import PlayPauseButton from "@/components/ui/PlayPauseButton";
 import DecadeNav, { type DecadeEntry } from "@/components/ui/DecadeNav";
 import { StoryPhotoWithBlurExtend } from "@/components/StoryPhotoWithBlurExtend";
 import { PlayPillButton } from "@/components/timeline/PlayPillButton";
+import { TimelineHeroHeader } from "@/components/timeline/TimelineHeroHeader";
+import type { TimelineViewerContext } from "@/lib/timelineHeader";
 
 const logoUrl = "/final logo/logo-new.svg";
 
@@ -1358,15 +1360,17 @@ export function TimelineDesktop({ useV2Features = false }: { useV2Features?: boo
       </div>
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 pt-[114px] pb-12 md:pt-[114px] md:pb-20">
-        {/* Title Section */}
-        <div className="text-center mb-[114px]">
-          <h2 className="text-5xl md:text-7xl font-light tracking-tight mb-6" style={{ color: isDark ? '#b0b3b8' : '#111827' }}>
-            {activeContext?.storytellerName ? `${activeContext.storytellerName}'s Journey` : "Life's Journey"}
-          </h2>
-          <p className="text-xl max-w-2xl mx-auto text-center" style={{ color: isDark ? '#8a8d92' : '#4b5563' }}>
-            A timeline of memories, moments, and milestones that shaped {activeContext?.type === 'viewing' ? 'their' : 'your'} life.
-          </p>
-        </div>
+        {/* Dynamic Hero Header - adapts based on viewer relationship */}
+        <TimelineHeroHeader
+          viewerContext={{
+            storytellerName: activeContext?.storytellerName || user?.name || 'Your Stories',
+            viewerName: user?.name || null,
+            viewerIsOwner: isViewingOwnAccount,
+            isPublicShare: false, // Public share not yet implemented
+          }}
+          isDark={isDark}
+          onAddMemory={() => router.push('/recording')}
+        />
 
         {/* Timeline Container */}
         <div ref={timelineContainerRef} className="relative">

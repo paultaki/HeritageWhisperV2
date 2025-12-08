@@ -122,8 +122,16 @@ function useAccountContextInternal() {
     if (storedStorytellerIdOnly && storedStorytellerIdOnly.startsWith('{')) {
       try {
         const storedContext = JSON.parse(storedStorytellerIdOnly) as AccountContext;
-        // Accept stored context if it's either own account or viewing mode
-        if (storedContext.storytellerId === user.id || storedContext.type === 'viewing') {
+
+        // IMPORTANT: If the logged-in user IS the storyteller in the stored context,
+        // they should be treated as owner, not viewer (fixes stale family session bug)
+        if (storedContext.type === 'viewing' && storedContext.storytellerId === user.id) {
+          console.log('[useAccountContext] Owner logged in with stale viewer context, resetting to own account');
+          localStorage.removeItem(STORAGE_KEY);
+          // Fall through to default own account setup below
+        }
+        // Accept stored context if it's own account OR viewing someone else's account
+        else if (storedContext.storytellerId === user.id || storedContext.type === 'viewing') {
           setActiveContext(storedContext);
           setIsLoading(false);
           return;

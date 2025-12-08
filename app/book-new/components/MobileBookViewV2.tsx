@@ -25,7 +25,13 @@ export default function MobileBookViewV2({
   console.log('[MobileBookViewV2] Render - activeContext:', activeContext);
 
   // State - initialize from sessionStorage for position persistence
+  // BUT if initialStoryId is provided, we'll override this once bookPages are ready
   const [currentIndex, setCurrentIndex] = useState(() => {
+    // If we have an initialStoryId, start at 0 and let the navigation effect handle it
+    // This prevents briefly showing the wrong page from sessionStorage
+    if (initialStoryId) {
+      return 0;
+    }
     if (typeof window !== 'undefined') {
       const saved = sessionStorage.getItem('book-mobile-page');
       if (saved) {
@@ -347,9 +353,26 @@ export default function MobileBookViewV2({
     }
   }, []);
 
+  // Track if we've handled the initial navigation to prevent re-running
+  const [initialNavigationDone, setInitialNavigationDone] = useState(false);
+  // Track which storyId we last navigated to
+  const [lastNavigatedStoryId, setLastNavigatedStoryId] = useState<string | null>(null);
+
+  // Reset navigation state when initialStoryId changes (new navigation from Timeline)
+  useEffect(() => {
+    if (initialStoryId && initialStoryId !== lastNavigatedStoryId) {
+      setInitialNavigationDone(false);
+      // Also reset autoplay state for new navigation
+      if (autoplay) {
+        setShouldAutoplay(true);
+      }
+    }
+  }, [initialStoryId, lastNavigatedStoryId, autoplay]);
+
   // Jump to initial story if provided, OR restore saved position
   useEffect(() => {
     if (bookPages.length === 0) return;
+    if (initialNavigationDone) return;
 
     // Priority 1: initialStoryId from URL/props
     if (initialStoryId) {
@@ -357,16 +380,29 @@ export default function MobileBookViewV2({
         (page) => page.type === "story" && page.story.id === initialStoryId
       );
       if (pageIndex >= 0) {
-        setTimeout(() => scrollToIndex(pageIndex), 100);
+        // Set currentIndex IMMEDIATELY to prevent showing wrong page
+        setCurrentIndex(pageIndex);
+        setInitialNavigationDone(true);
+        setLastNavigatedStoryId(initialStoryId);
+        // Then scroll to that position (immediate, no delay)
+        requestAnimationFrame(() => {
+          if (pagerRef.current) {
+            const width = pagerRef.current.clientWidth;
+            pagerRef.current.scrollLeft = pageIndex * width;
+          }
+        });
         return;
       }
     }
 
     // Priority 2: Restore saved position (with bounds check)
     if (currentIndex > 0 && currentIndex < bookPages.length) {
+      setInitialNavigationDone(true);
       setTimeout(() => scrollToIndex(currentIndex), 100);
+    } else {
+      setInitialNavigationDone(true);
     }
-  }, [initialStoryId, bookPages.length]); // Only run when initialStoryId or page count changes
+  }, [initialStoryId, bookPages.length, initialNavigationDone]); // Only run when initialStoryId or page count changes
 
   // Loading state
   if (isLoading) {
