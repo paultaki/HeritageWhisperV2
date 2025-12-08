@@ -4,6 +4,7 @@ import { useState, useRef, useCallback, useEffect, useMemo, useLayoutEffect } fr
 import { useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useRouter } from "next/navigation";
+import { useAuth } from "@/lib/auth";
 import { useAccountContext } from "@/hooks/use-account-context";
 import { supabase } from "@/lib/supabase";
 import { Story } from "@/shared/schema";
@@ -19,10 +20,15 @@ export default function MobileBookViewV2({
   autoplay = false,
 }: MobileBookViewV2Props) {
   const router = useRouter();
+  const { user } = useAuth();
   const { activeContext, isLoading: isContextLoading } = useAccountContext();
   const pagerRef = useRef<HTMLDivElement>(null);
 
-  console.log('[MobileBookViewV2] Render - activeContext:', activeContext, 'isContextLoading:', isContextLoading, 'initialStoryId:', initialStoryId);
+  // Use same fallback logic as parent BookV4PageContent
+  const storytellerId = activeContext?.storytellerId || user?.id;
+  const queryEnabled = !isContextLoading && ((!!user && !!user.id) || !!activeContext);
+
+  console.log('[MobileBookViewV2] Render - storytellerId:', storytellerId, 'queryEnabled:', queryEnabled, 'initialStoryId:', initialStoryId);
 
   // State - initialize from sessionStorage for position persistence
   // BUT if initialStoryId is provided, we'll override this once bookPages are ready
@@ -55,7 +61,6 @@ export default function MobileBookViewV2({
   const [initialScrollDone, setInitialScrollDone] = useState(false);
 
   // Fetch stories
-  const storytellerId = activeContext?.storytellerId;
   const { data, isLoading } = useQuery<{ stories: Story[] }>({
     queryKey: ["/api/stories", storytellerId],
     queryFn: async () => {
@@ -66,7 +71,7 @@ export default function MobileBookViewV2({
       const response = await apiRequest("GET", url);
       return response.json();
     },
-    enabled: !!storytellerId,
+    enabled: queryEnabled,
   });
 
   // Fetch chapters
@@ -80,7 +85,7 @@ export default function MobileBookViewV2({
       const response = await apiRequest("GET", url);
       return response.json();
     },
-    enabled: !!storytellerId,
+    enabled: queryEnabled,
   });
 
   // Reset view mode if no chapters
