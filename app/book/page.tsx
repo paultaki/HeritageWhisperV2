@@ -682,9 +682,9 @@ function BookV4PageContent() {
         <div className="lg:hidden">
           <Suspense fallback={MobileLoadingFallback}>
             <MobileBookViewV2
-              initialStoryId={mobileTargetStoryId}
+              initialStoryId={urlStoryId || mobileTargetStoryId}
               caveatFont={caveat.className}
-              autoplay={mobileAutoplay}
+              autoplay={urlAutoplay || mobileAutoplay}
             />
           </Suspense>
         </div>
@@ -728,9 +728,9 @@ function BookV4PageContent() {
       <div className="lg:hidden">
         <Suspense fallback={MobileLoadingFallback}>
           <MobileBookViewV2
-            initialStoryId={mobileTargetStoryId}
+            initialStoryId={urlStoryId || mobileTargetStoryId}
             caveatFont={caveat.className}
-            autoplay={mobileAutoplay}
+            autoplay={urlAutoplay || mobileAutoplay}
           />
         </Suspense>
       </div>
