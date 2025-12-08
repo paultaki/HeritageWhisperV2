@@ -92,7 +92,7 @@ function FamilyAccessContent() {
             <h2 className="text-2xl font-serif font-bold text-gray-800 mb-2">
               Verifying your invitation...
             </h2>
-            <p className="text-gray-600">
+            <p className="text-gray-600 text-center">
               Please wait while we set up your access
             </p>
           </CardContent>

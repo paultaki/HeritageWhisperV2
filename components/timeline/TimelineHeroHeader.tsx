@@ -59,10 +59,6 @@ export function TimelineHeroHeader({
   // Get header state - all logic centralized here
   const headerState = getTimelineHeaderState(fullContext);
 
-  // Debug logging - remove after fixing
-  console.log('[TimelineHeroHeader] viewerContext:', viewerContext);
-  console.log('[TimelineHeroHeader] headerState:', headerState);
-
   // Handle add memory button click
   const handleAddMemory = () => {
     if (onAddMemory) {
@@ -93,7 +89,7 @@ export function TimelineHeroHeader({
           {/* Warm subtext */}
           {headerState.greetingSubtext && (
             <p
-              className="text-xl md:text-2xl max-w-2xl mx-auto mb-8"
+              className="text-xl md:text-2xl max-w-2xl mx-auto mb-8 text-center"
               style={{ color: textSecondary }}
             >
               {headerState.greetingSubtext}
