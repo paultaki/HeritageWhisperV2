@@ -41,6 +41,7 @@ import {
 import { DesktopPageHeader, MobilePageHeader } from "@/components/PageHeader";
 import { UpgradeModal } from "@/components/upgrade/UpgradeModal";
 import { useSubscription } from "@/hooks/use-subscription";
+import { useNavVisibility } from "@/contexts/NavVisibilityContext";
 import { FamilyMemberCard } from "@/components/family/FamilyMemberCard";
 import { PendingInviteCard } from "@/components/family/PendingInviteCard";
 import { PrivacyInfoCard } from "@/components/family/PrivacyInfoCard";
@@ -89,6 +90,9 @@ export default function FamilyPage() {
   const { isPaid, canInviteFamily } = useSubscription();
   const [upgradeModalOpen, setUpgradeModalOpen] = useState(false);
 
+  // Nav visibility for hiding nav when invite dialog is open
+  const { hideNav, showNav } = useNavVisibility();
+
   // Invite form state
   const [inviteName, setInviteName] = useState("");
   const [inviteEmail, setInviteEmail] = useState("");
@@ -100,6 +104,15 @@ export default function FamilyPage() {
 
   // Pending invites collapse state
   const [pendingExpanded, setPendingExpanded] = useState(true);
+
+  // Hide/show navigation bar when invite dialog opens/closes
+  useEffect(() => {
+    if (inviteDialogOpen) {
+      hideNav();
+    } else {
+      showNav();
+    }
+  }, [inviteDialogOpen, hideNav, showNav]);
 
   // Redirect to login if not authenticated (wait for auth to finish loading)
   useEffect(() => {

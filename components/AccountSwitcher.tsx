@@ -27,6 +27,12 @@ export function AccountSwitcher() {
 
   const [isOpen, setIsOpen] = useState(false);
 
+  // Filter out the user's own account from family storytellers
+  // (own account is shown separately at the top)
+  const familyStorytellers = availableStorytellers.filter(
+    (s) => s.storytellerId !== user?.id
+  );
+
   // Show loading only if context is loading OR if we don't have either user or activeContext
   if (isLoading || !activeContext) {
     return (
@@ -52,8 +58,8 @@ export function AccountSwitcher() {
     setIsOpen(false);
   };
 
-  // Show compact button if no other storytellers available
-  if (availableStorytellers.length === 0) {
+  // Show compact button if no family storytellers available (only own account)
+  if (familyStorytellers.length === 0) {
     return (
       <Button variant="ghost" size="sm" className="gap-2">
         <User className="h-4 w-4" />
@@ -114,14 +120,14 @@ export function AccountSwitcher() {
           {isOwnAccount && <Check className="h-5 w-5 text-amber-600" />}
         </DropdownMenuItem>
 
-        {availableStorytellers.length > 0 && (
+        {familyStorytellers.length > 0 && (
           <React.Fragment key="family-section">
             <DropdownMenuSeparator />
             <DropdownMenuLabel className="text-xs text-gray-600 font-semibold uppercase tracking-wider">
               Family Stories
             </DropdownMenuLabel>
 
-            {availableStorytellers.map((storyteller) => {
+            {familyStorytellers.map((storyteller) => {
               const isActive = activeContext.storytellerId === storyteller.storytellerId;
 
               return (

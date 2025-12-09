@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getPasskeySession } from "@/lib/iron-session";
+import { logger } from "@/lib/logger";
 
 // SECURITY: Use centralized admin client (enforces server-only via import)
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
@@ -12,6 +13,7 @@ import { supabaseAdmin } from "@/lib/supabaseAdmin";
 export async function GET(request: NextRequest) {
   try {
     let userId: string | undefined;
+    let userEmail: string | undefined;
 
     // 1. Try passkey session first
     const passkeySession = await getPasskeySession();
@@ -36,16 +38,27 @@ export async function GET(request: NextRequest) {
       } = await supabaseAdmin.auth.getUser(token);
 
       if (authError || !user) {
-        console.error('[AvailableAccounts] Auth error:', authError);
+        logger.error('[AvailableAccounts] Auth error:', authError);
         return NextResponse.json(
           { error: 'Invalid authentication' },
           { status: 401 }
         );
       }
       userId = user.id;
+      userEmail = user.email;
     }
 
-    if (process.env.NEXT_PUBLIC_DEBUG === 'true') console.log('[AvailableAccounts] Fetching collaborations for user:', userId);
+    // Get user's email if not already set
+    if (!userEmail) {
+      const { data: userData } = await supabaseAdmin
+        .from('users')
+        .select('email')
+        .eq('id', userId)
+        .single();
+      userEmail = userData?.email;
+    }
+
+    logger.debug('[AvailableAccounts] Fetching collaborations for user:', userId, 'email:', userEmail);
 
     // Use the RPC function to get available storytellers
     const { data: storytellers, error: rpcError } = await supabaseAdmin.rpc(
@@ -53,33 +66,90 @@ export async function GET(request: NextRequest) {
       { p_user_id: userId }
     );
 
+    let finalStorytellers = storytellers || [];
+
     if (rpcError) {
-      // If the RPC function doesn't exist yet, return self as only account
+      // If the RPC function doesn't exist yet, do direct query
       if (rpcError.message?.includes('function') && rpcError.message?.includes('does not exist')) {
-        console.log('[AvailableAccounts] RPC function not yet created - returning self only');
-        return NextResponse.json({
-          storytellers: [{
-            storytellerId: userId,
-            storytellerName: 'My Stories',
-            permissionLevel: 'owner',
-            relationship: null,
-            lastViewedAt: null,
-          }],
-        });
+        logger.warn('[AvailableAccounts] RPC function not yet created - using direct query');
+        finalStorytellers = [];
+      } else {
+        logger.error('[AvailableAccounts] RPC error:', rpcError);
+        // Continue with direct query fallback
+        finalStorytellers = [];
       }
-      console.error('[AvailableAccounts] RPC error:', rpcError);
-      return NextResponse.json(
-        { error: 'Failed to fetch available accounts' },
-        { status: 500 }
-      );
     }
 
-    if (process.env.NEXT_PUBLIC_DEBUG === 'true') {
-      console.log('[AvailableAccounts] Found', storytellers?.length || 0, 'storytellers');
+    logger.debug('[AvailableAccounts] RPC returned', finalStorytellers.length, 'storytellers');
+
+    // Fallback: If RPC returns only self (owner), also check family_members directly
+    // This handles case sensitivity issues and ensures we don't miss any relationships
+    if (userEmail && finalStorytellers.length <= 1) {
+      logger.debug('[AvailableAccounts] Checking family_members directly for email:', userEmail);
+
+      // Case-insensitive email match using ILIKE
+      const { data: familyAccess, error: familyError } = await supabaseAdmin
+        .from('family_members')
+        .select(`
+          user_id,
+          relationship,
+          permission_level,
+          last_accessed_at,
+          users!inner (
+            id,
+            name,
+            email
+          )
+        `)
+        .ilike('email', userEmail)  // Case-insensitive match
+        .eq('status', 'active');
+
+      if (familyError) {
+        logger.error('[AvailableAccounts] Family members query error:', familyError);
+      } else if (familyAccess && familyAccess.length > 0) {
+        logger.debug('[AvailableAccounts] Found', familyAccess.length, 'family relationships via direct query');
+
+        // Add any family members not already in the list
+        const existingIds = new Set(finalStorytellers.map((s: any) => s.storyteller_id));
+
+        for (const fm of familyAccess) {
+          if (!existingIds.has(fm.user_id)) {
+            const storyteller = (fm as any).users;
+            finalStorytellers.push({
+              storyteller_id: fm.user_id,
+              storyteller_name: storyteller?.name || storyteller?.email || 'Storyteller',
+              permission_level: fm.permission_level || 'viewer',
+              relationship: fm.relationship,
+              last_viewed_at: fm.last_accessed_at,
+            });
+            logger.debug('[AvailableAccounts] Added family member:', storyteller?.name, 'via direct query');
+          }
+        }
+      }
     }
+
+    // Ensure self is always in the list
+    const hasOwn = finalStorytellers.some((s: any) => s.storyteller_id === userId);
+    if (!hasOwn) {
+      const { data: selfData } = await supabaseAdmin
+        .from('users')
+        .select('name')
+        .eq('id', userId)
+        .single();
+
+      finalStorytellers.unshift({
+        storyteller_id: userId,
+        storyteller_name: selfData?.name || 'My Stories',
+        permission_level: 'owner',
+        relationship: null,
+        last_viewed_at: null,
+      });
+    }
+
+    logger.debug('[AvailableAccounts] Final count:', finalStorytellers.length, 'storytellers');
 
     // Map database snake_case to camelCase for frontend
-    const mappedStorytellers = (storytellers || []).map((st: any) => ({
+    const mappedStorytellers = finalStorytellers.map((st: any) => ({
       storytellerId: st.storyteller_id,
       storytellerName: st.storyteller_name,
       permissionLevel: st.permission_level,
@@ -93,7 +163,7 @@ export async function GET(request: NextRequest) {
     });
 
   } catch (err) {
-    console.error('[AvailableAccounts] Error:', err);
+    logger.error('[AvailableAccounts] Error:', err);
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
