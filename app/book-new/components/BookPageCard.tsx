@@ -381,7 +381,12 @@ export default function BookPageCard({ story, isActive, caveatFont, pageNumber, 
             {/* Transcription */}
             <div className="mt-5 space-y-4 text-[18px] leading-8 text-stone-800 font-serif" style={{ fontFamily: "Crimson Text, serif" }}>
               {paragraphs.map((paragraph, index) => (
-                <p key={index}>{paragraph}</p>
+                <p
+                  key={index}
+                  className={index === 0 ? "book-drop-cap" : ""}
+                >
+                  {paragraph}
+                </p>
               ))}
             </div>
 

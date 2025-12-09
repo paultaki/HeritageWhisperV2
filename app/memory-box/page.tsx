@@ -191,14 +191,14 @@ export default function MemoryBoxV2Page() {
     }
   }, []);
 
-  // Hide floating nav when recording or adding treasures
+  // Hide floating nav when recording, adding treasures, or viewing memory overlay
   useEffect(() => {
-    if (modeSelection.quickRecorderOpen || addTreasureModalOpen) {
+    if (modeSelection.quickRecorderOpen || addTreasureModalOpen || overlayOpen) {
       hideNav();
     } else {
       showNav();
     }
-  }, [modeSelection.quickRecorderOpen, addTreasureModalOpen, hideNav, showNav]);
+  }, [modeSelection.quickRecorderOpen, addTreasureModalOpen, overlayOpen, hideNav, showNav]);
 
   const {
     data: stories = [],
