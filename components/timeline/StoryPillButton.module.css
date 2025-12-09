@@ -1,0 +1,63 @@
+/**
+ * StoryPillButton styles
+ *
+ * Visual indicator pill showing "Open story" or "Read story"
+ * Inherits design language from PlayPillButton but simplified (no progress ring)
+ */
+
+.hw-story-pill {
+    /* Use soft primary background */
+    --pill-bg: var(--hw-primary-soft, #E0E5ED);
+    --pill-text: var(--hw-primary, #203954);
+    --pill-border: transparent;
+
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    border-radius: 999px;
+    border: 1px solid var(--pill-border);
+    background: var(--pill-bg);
+    color: var(--pill-text);
+    font-size: 0.8125rem;
+    font-weight: 500;
+    /* Not a button, just an indicator - pointer-events handled by parent card */
+    pointer-events: none;
+    transition: background 120ms ease, transform 120ms ease;
+}
+
+.hw-story-pill__icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.hw-story-pill__label {
+    white-space: nowrap;
+}
+
+/* Mobile: Show icon only */
+@media (max-width: 768px) {
+    .hw-story-pill {
+        padding: 0;
+        width: 44px;
+        height: 44px;
+        justify-content: center;
+        border: none;
+        background: var(--pill-bg);
+    }
+
+    .hw-story-pill__label {
+        display: none;
+    }
+
+    .hw-story-pill__icon {
+        margin: 0;
+    }
+
+    .hw-story-pill__icon svg {
+        width: 20px;
+        height: 20px;
+    }
+}

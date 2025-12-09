@@ -68,17 +68,17 @@ const Hero = () => (
         </div>
       </div>
 
-      {/* Product Gallery Composite */}
-      <div className="relative mt-12 max-w-7xl mx-auto">
+      {/* Product Gallery Composite - Compact Version */}
+      <div className="relative mt-12 max-w-4xl mx-auto">
         {/* Background decorative elements */}
-        <div className="absolute -inset-4 bg-gradient-to-b from-cream-200/0 to-cream-200/50 rounded-[3rem] -z-10"></div>
+        <div className="absolute -inset-4 bg-gradient-to-b from-cream-200/0 to-cream-200/50 rounded-[2rem] -z-10"></div>
 
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
+        <div className="grid grid-cols-3 md:grid-cols-12 gap-3 md:gap-4 items-center">
 
           {/* Left Card: Timeline (Vertical) */}
-          <div className="md:col-span-3 transform translate-y-0 md:translate-y-8 transition-transform hover:-translate-y-2 duration-500 relative group">
-            <div className="bg-white p-2 rounded-xl shadow-xl border border-cream-200 h-full">
-              <div className="relative overflow-hidden rounded-lg h-[320px] md:h-[420px] bg-cream-50">
+          <div className="col-span-1 md:col-span-3 transform translate-y-0 md:translate-y-4 transition-transform hover:-translate-y-1 duration-500 relative group">
+            <div className="bg-white p-1.5 rounded-lg shadow-lg border border-cream-200 h-full">
+              <div className="relative overflow-hidden rounded-md h-[160px] md:h-[210px] bg-cream-50">
                 {/* Object-top is crucial here for the long vertical timeline image */}
                 <img
                   src={IMAGES.timelineSmall}
@@ -87,34 +87,33 @@ const Hero = () => (
                 />
                 <div className="absolute inset-0 bg-gradient-to-b from-white/20 via-transparent to-white/40 pointer-events-none"></div>
               </div>
-              <div className="px-3 py-1 absolute bottom-4 left-4 right-4 bg-white/95 backdrop-blur shadow-md rounded-lg border border-cream-100">
-                <h3 className="font-serif text-navy-900 font-bold text-sm text-center leading-none">The Timeline</h3>
-                <p className="text-xs text-navy-800/60 hidden xl:block text-center leading-none">Every story in order</p>
+              <div className="px-2 py-0.5 absolute bottom-2 left-2 right-2 bg-white/95 backdrop-blur shadow-sm rounded-md border border-cream-100">
+                <h3 className="font-serif text-navy-900 font-bold text-xs text-center leading-none">Timeline</h3>
               </div>
             </div>
           </div>
 
           {/* Center Card: Book View (Landscape/Wide) */}
-          <div className="md:col-span-6 z-20 transform transition-transform hover:scale-[1.02] duration-500">
-            <div className="bg-white p-3 rounded-2xl shadow-2xl border border-cream-200">
-              <div className="relative overflow-hidden rounded-xl bg-cream-50 aspect-[4/3]">
+          <div className="col-span-1 md:col-span-6 z-20 transform transition-transform hover:scale-[1.02] duration-500">
+            <div className="bg-white p-1.5 md:p-2 rounded-xl shadow-xl border border-cream-200">
+              <div className="relative overflow-hidden rounded-lg bg-cream-50 aspect-[4/3]">
                 <img
                   src={IMAGES.book}
                   alt="Book View Interface"
                   className="w-full h-full object-contain"
                 />
               </div>
-              <div className="px-4 py-1.5 text-center border-t border-cream-100 mt-2">
-                <h3 className="font-serif text-xl text-navy-900 font-bold leading-tight">The Living Book</h3>
-                <p className="text-sm text-navy-800/60 text-center leading-tight">Grows automatically with every memory you share.</p>
+              <div className="px-2 py-1 text-center border-t border-cream-100 mt-1">
+                <h3 className="font-serif text-sm md:text-base text-navy-900 font-bold leading-tight">The Living Book</h3>
+                <p className="text-xs text-navy-800/60 text-center leading-tight hidden md:block">Grows with every memory.</p>
               </div>
             </div>
           </div>
 
           {/* Right Card: Memory Box (Grid) */}
-          <div className="md:col-span-3 transform translate-y-0 md:translate-y-8 transition-transform hover:-translate-y-2 duration-500 relative group">
-            <div className="bg-white p-2 rounded-xl shadow-xl border border-cream-200 h-full">
-              <div className="relative overflow-hidden rounded-lg h-[320px] md:h-[420px] bg-cream-50">
+          <div className="col-span-1 md:col-span-3 transform translate-y-0 md:translate-y-4 transition-transform hover:-translate-y-1 duration-500 relative group">
+            <div className="bg-white p-1.5 rounded-lg shadow-lg border border-cream-200 h-full">
+              <div className="relative overflow-hidden rounded-md h-[160px] md:h-[210px] bg-cream-50">
                 <img
                   src={IMAGES.memoryBox}
                   alt="Memory Box Interface"
@@ -123,9 +122,8 @@ const Hero = () => (
                 />
                 <div className="absolute inset-0 bg-gradient-to-b from-white/20 via-transparent to-white/40 pointer-events-none"></div>
               </div>
-              <div className="px-3 py-1 absolute bottom-4 left-4 right-4 bg-white/95 backdrop-blur shadow-md rounded-lg border border-cream-100">
-                <h3 className="font-serif text-navy-900 font-bold text-sm text-center leading-none">Memory Box</h3>
-                <p className="text-xs text-navy-800/60 hidden xl:block text-center leading-none">Keepsakes & loose photos</p>
+              <div className="px-2 py-0.5 absolute bottom-2 left-2 right-2 bg-white/95 backdrop-blur shadow-sm rounded-md border border-cream-100">
+                <h3 className="font-serif text-navy-900 font-bold text-xs text-center leading-none">Memory Box</h3>
               </div>
             </div>
           </div>
@@ -487,60 +485,165 @@ const ScrollingTimeline = ({ src, alt }: { src: string; alt: string }) => {
   );
 };
 
+// Features data defined outside component to prevent recreation
+const FEATURES_DATA = [
+  {
+    tabName: "Live Timeline",
+    title: "The Timeline",
+    desc: "Life isn't a list of dates, but seeing it laid out is magic. Our Timeline view automatically organizes stories by the date they happened, giving you a bird's-eye view of the family legacy.",
+    image: IMAGES.timelineFull,
+    imgAlt: "Timeline View Screenshot",
+    isScrolling: true,
+  },
+  {
+    tabName: "Living Book",
+    title: "The Living Book",
+    desc: "Experience stories in a beautiful, distraction-free reader. It feels like a professionally published memoir, but you can add a new chapter whenever inspiration strikes. No 'final draft' anxiety.",
+    image: IMAGES.book,
+    imgAlt: "Digital Book Screenshot",
+    isScrolling: false,
+  },
+  {
+    tabName: "Memory Box",
+    title: "The Memory Box",
+    desc: "Not every memory has a date. The Memory Box is the home for loose photos, recipes, audio clips, and mementos that add texture to the family history without needing a specific place on the timeline.",
+    image: IMAGES.memoryBox,
+    imgAlt: "Memory Box Grid Screenshot",
+    isScrolling: true,
+  },
+];
+
 const FeatureDeepDive = () => {
-  const features = [
-    {
-      title: "The Timeline",
-      desc: "Life isn't a list of dates, but seeing it laid out is magic. Our Timeline view automatically organizes stories by the date they happened, giving you a bird's-eye view of the family legacy.",
-      image: IMAGES.timelineFull,
-      imgAlt: "Timeline View Screenshot",
-      align: "left" as const,
-      isScrolling: true, // Special scrolling behavior for timeline
-    },
-    {
-      title: "The Living Book",
-      desc: "Experience stories in a beautiful, distraction-free reader. It feels like a professionally published memoir, but you can add a new chapter whenever inspiration strikes. No 'final draft' anxiety.",
-      image: IMAGES.book,
-      imgAlt: "Digital Book Screenshot",
-      align: "right" as const,
-      isScrolling: false,
-    },
-    {
-      title: "The Memory Box",
-      desc: "Not every memory has a date. The Memory Box is the home for loose photos, recipes, audio clips, and mementos that add texture to the family history without needing a specific place on the timeline.",
-      image: IMAGES.memoryBox,
-      imgAlt: "Memory Box Grid Screenshot",
-      align: "left" as const,
-      isScrolling: false,
-    },
-  ];
+  const [activeTab, setActiveTab] = useState(0);
+  const [isTransitioning, setIsTransitioning] = useState(false);
+  const autoRotateRef = useRef<NodeJS.Timeout | null>(null);
+  const AUTO_ROTATE_INTERVAL = 6000; // 6 seconds per tab
+  const TOTAL_TABS = 3;
+
+  // Auto-rotate tabs
+  useEffect(() => {
+    const rotateTab = () => {
+      setIsTransitioning(true);
+      setTimeout(() => {
+        setActiveTab((prev) => (prev + 1) % TOTAL_TABS);
+        setIsTransitioning(false);
+      }, 300);
+    };
+
+    autoRotateRef.current = setInterval(rotateTab, AUTO_ROTATE_INTERVAL);
+
+    return () => {
+      if (autoRotateRef.current) {
+        clearInterval(autoRotateRef.current);
+      }
+    };
+  }, []);
+
+  // Reset auto-rotate timer when user manually clicks a tab
+  const handleTabClick = (index: number) => {
+    if (index === activeTab || isTransitioning) return;
+
+    // Clear existing timer
+    if (autoRotateRef.current) {
+      clearInterval(autoRotateRef.current);
+    }
+
+    // Transition to new tab
+    setIsTransitioning(true);
+    setTimeout(() => {
+      setActiveTab(index);
+      setIsTransitioning(false);
+    }, 300);
+
+    // Restart auto-rotate after user interaction
+    autoRotateRef.current = setInterval(() => {
+      setIsTransitioning(true);
+      setTimeout(() => {
+        setActiveTab((prev) => (prev + 1) % TOTAL_TABS);
+        setIsTransitioning(false);
+      }, 300);
+    }, AUTO_ROTATE_INTERVAL);
+  };
+
+  const currentFeature = FEATURES_DATA[activeTab];
 
   return (
-    <section id="features" className="py-24 bg-cream-100 space-y-24">
-      {features.map((f, i) => (
-        <div key={i} className="max-w-7xl mx-auto px-4 md:px-8">
-          <div className={`flex flex-col ${f.align === "right" ? "md:flex-row-reverse" : "md:flex-row"} items-center gap-12 md:gap-20`}>
-            <div className="flex-1">
-              {f.isScrolling ? (
-                // Auto-scrolling timeline with fade effects
-                <ScrollingTimeline src={f.image} alt={f.imgAlt} />
+    <section id="features" className="py-24 bg-cream-100">
+      <div className="max-w-7xl mx-auto px-4 md:px-8">
+        {/* Tab Navigation */}
+        <div className="flex justify-center mb-12">
+          <div className="inline-flex bg-white rounded-full p-1.5 shadow-lg border border-cream-200">
+            {FEATURES_DATA.map((f, i) => (
+              <button
+                key={i}
+                onClick={() => handleTabClick(i)}
+                className={`px-6 py-3 rounded-full text-sm font-semibold transition-all duration-300 ${
+                  activeTab === i
+                    ? "bg-green-800 text-white shadow-md"
+                    : "text-navy-800 hover:text-green-800 hover:bg-cream-50"
+                }`}
+              >
+                {f.tabName}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Progress indicator */}
+        <div className="flex justify-center gap-2 mb-8">
+          {FEATURES_DATA.map((_, i) => (
+            <div
+              key={i}
+              className={`h-1 rounded-full transition-all duration-300 ${
+                activeTab === i ? "w-8 bg-green-800" : "w-2 bg-cream-300"
+              }`}
+            />
+          ))}
+        </div>
+
+        {/* Content Area */}
+        <div className="flex flex-col md:flex-row items-center gap-12 md:gap-20">
+          {/* Image with fade transition */}
+          <div className="flex-1 w-full">
+            <div
+              className={`transition-opacity duration-300 ${
+                isTransitioning ? "opacity-0" : "opacity-100"
+              }`}
+            >
+              {currentFeature.isScrolling ? (
+                <ScrollingTimeline
+                  key={activeTab}
+                  src={currentFeature.image}
+                  alt={currentFeature.imgAlt}
+                />
               ) : (
-                // Regular static image for book and memory box
-                <div className="relative rounded-xl overflow-hidden shadow-2xl border border-cream-200/50 transform hover:scale-[1.01] transition-transform duration-500">
-                  <img src={f.image} alt={f.imgAlt} className="w-full h-auto bg-white" />
+                <div className="relative rounded-xl overflow-hidden shadow-2xl border border-cream-200/50">
+                  <img
+                    src={currentFeature.image}
+                    alt={currentFeature.imgAlt}
+                    className="w-full h-auto bg-white"
+                  />
                 </div>
               )}
             </div>
-            <div className="flex-1 space-y-6">
-              <h3 className="text-3xl md:text-4xl font-serif font-medium text-navy-900">{f.title}</h3>
-              <div className="w-12 h-1 bg-gold-500"></div>
-              <p className="text-lg text-navy-800/80 leading-relaxed">
-                {f.desc}
-              </p>
-            </div>
+          </div>
+
+          {/* Text content with fade transition */}
+          <div
+            className={`flex-1 space-y-6 transition-opacity duration-300 ${
+              isTransitioning ? "opacity-0" : "opacity-100"
+            }`}
+          >
+            <h3 className="text-3xl md:text-4xl font-serif font-medium text-navy-900">
+              {currentFeature.title}
+            </h3>
+            <div className="w-12 h-1 bg-gold-500"></div>
+            <p className="text-lg text-navy-800/80 leading-relaxed">
+              {currentFeature.desc}
+            </p>
           </div>
         </div>
-      ))}
+      </div>
     </section>
   );
 };

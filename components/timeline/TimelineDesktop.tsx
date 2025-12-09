@@ -25,18 +25,12 @@ import { NextStoryCard } from "@/components/NextStoryCard";
 import { PaywallPromptCard } from "@/components/PaywallPromptCard";
 import { MemoryOverlay } from "@/components/MemoryOverlay";
 import {
-  Play,
   Plus,
-  Square,
-  Loader2,
-  AlertCircle,
-  Pause,
-  X,
-  Clock,
-  Volume2,
   ChevronLeft,
   ChevronRight,
   ImagePlus,
+  Headphones,
+  FileText,
 } from "lucide-react";
 import Image from "next/image";
 import { useToast } from "@/hooks/use-toast";
@@ -51,10 +45,9 @@ import { formatStoryDate, formatStoryDateForMetadata } from "@/lib/dateFormattin
 import { TimelineEnd } from "@/components/timeline/TimelineEnd";
 import { STARTER_TEMPLATES, type StarterMemoryTemplate } from "@/lib/starterTemplates";
 import { StarterMemoryCard } from "@/components/timeline/StarterMemoryCard";
-import PlayPauseButton from "@/components/ui/PlayPauseButton";
 import DecadeNav, { type DecadeEntry } from "@/components/ui/DecadeNav";
 import { StoryPhotoWithBlurExtend } from "@/components/StoryPhotoWithBlurExtend";
-import { PlayPillButton } from "@/components/timeline/PlayPillButton";
+import { StoryPillButton } from "@/components/timeline/StoryPillButton";
 import { TimelineHeroHeader } from "@/components/timeline/TimelineHeroHeader";
 import type { TimelineViewerContext } from "@/lib/timelineHeader";
 
@@ -208,19 +201,10 @@ function CenteredMemoryCard({ story, position, index, isDark = false, showDecade
   // Narrow story type for traits access
   const s = story as Story & { traits?: Array<{ name: string }> };
 
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [hasError, setHasError] = useState(false);
-  const [currentAudio, setCurrentAudio] = useState<HTMLAudioElement | null>(null);
-  const [progress, setProgress] = useState(0);
-  const [currentTime, setCurrentTime] = useState(0);
-  const [duration, setDuration] = useState(story.durationSeconds || 0);
   const [isVisible, setIsVisible] = useState(false);
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
   const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
   const cardRef = useRef<HTMLDivElement>(null);
-  const progressBarRef = useRef<HTMLDivElement>(null);
-  const audioRef = useRef<HTMLAudioElement | null>(null);
 
   // Sort photos with hero first, then rest in original order
   const sortedPhotos = useMemo(() => {
@@ -312,150 +296,6 @@ function CenteredMemoryCard({ story, position, index, isDark = false, showDecade
       }
     };
   }, [prefersReducedMotion]);
-
-  const formatDuration = (seconds?: number) => {
-    if (!seconds || isNaN(seconds)) return "0:00";
-    const mins = Math.floor(seconds / 60);
-    const secs = Math.floor(seconds % 60);
-    return `${mins}:${secs.toString().padStart(2, "0")}`;
-  };
-
-  const handlePlayAudio = (e: React.MouseEvent) => {
-    e.stopPropagation();
-
-    if (hasError) {
-      setHasError(false);
-      setIsLoading(true);
-    }
-
-    if (isPlaying && currentAudio) {
-      currentAudio.pause();
-      setIsPlaying(false);
-      setCurrentAudio(null);
-      audioRef.current = null;
-      setProgress(0);
-      setCurrentTime(0);
-      audioManager.stop(story.id);
-    } else if (story.audioUrl && story.audioUrl.trim() !== "") {
-      setIsLoading(true);
-      setHasError(false);
-
-      const audio = new Audio(story.audioUrl);
-      audio.crossOrigin = "anonymous";
-
-      audioManager.requestPlay(story.id);
-
-      setCurrentAudio(audio);
-      audioRef.current = audio;
-
-      audio.addEventListener("loadstart", () => {
-        setIsLoading(true);
-      });
-
-      audio.addEventListener("canplay", () => {
-        setIsLoading(false);
-        setDuration(audio.duration);
-      });
-
-      audio.addEventListener("timeupdate", () => {
-        const progressPercent = (audio.currentTime / audio.duration) * 100;
-        setProgress(progressPercent);
-        setCurrentTime(audio.currentTime);
-      });
-
-      audio.addEventListener("ended", () => {
-        setIsPlaying(false);
-        setCurrentAudio(null);
-        audioRef.current = null;
-        setProgress(0);
-        setCurrentTime(0);
-        audioManager.stop(story.id);
-      });
-
-      audio.addEventListener("error", (error) => {
-        console.error("Audio playback error:", error);
-        setIsPlaying(false);
-        setIsLoading(false);
-        setHasError(true);
-        setCurrentAudio(null);
-        audioRef.current = null;
-        setProgress(0);
-        setCurrentTime(0);
-        audioManager.stop(story.id);
-      });
-
-      setTimeout(() => {
-        if (audioRef.current === audio) {
-          audio
-            .play()
-            .then(() => {
-              audioManager.confirmPlaying(story.id, audio);
-              setIsPlaying(true);
-              setIsLoading(false);
-            })
-            .catch((error) => {
-              console.error("Error playing audio:", error);
-              setIsPlaying(false);
-              setIsLoading(false);
-              setHasError(true);
-              setCurrentAudio(null);
-              audioRef.current = null;
-              setProgress(0);
-              audioManager.stop(story.id);
-            });
-        }
-      }, 50);
-    }
-  };
-
-  const handleProgressBarClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (!currentAudio || !progressBarRef.current) return;
-
-    e.stopPropagation();
-    const rect = progressBarRef.current.getBoundingClientRect();
-    const clickX = e.clientX - rect.left;
-    const clickRatio = clickX / rect.width;
-    const newTime = clickRatio * currentAudio.duration;
-
-    currentAudio.currentTime = newTime;
-    setCurrentTime(newTime);
-    setProgress((newTime / currentAudio.duration) * 100);
-  };
-
-  useEffect(() => {
-    const handleAudioStateChange = (
-      playing: boolean,
-      audioElement?: HTMLAudioElement | null,
-    ) => {
-      if (!playing) {
-        if (audioRef.current) {
-          audioRef.current.pause();
-          audioRef.current.currentTime = 0;
-          audioRef.current = null;
-        }
-        setIsPlaying(false);
-        setProgress(0);
-        setCurrentTime(0);
-        setCurrentAudio(null);
-        setIsLoading(false);
-      }
-    };
-
-    audioManager.register(story.id, handleAudioStateChange);
-
-    return () => {
-      audioManager.unregister(story.id);
-      if (audioRef.current) {
-        audioRef.current.pause();
-        audioRef.current.currentTime = 0;
-        audioRef.current = null;
-      }
-    };
-  }, [story.id]);
-
-  useEffect(() => {
-    audioRef.current = currentAudio;
-  }, [currentAudio]);
 
   const handleCardClick = () => {
     if (onCustomAction) {
@@ -606,75 +446,17 @@ function CenteredMemoryCard({ story, position, index, isDark = false, showDecade
               </>
             )}
 
-            {/* Book-style audio button overlaid on photo (hidden in V2 and viewer mode) */}
-            {story.audioUrl && !useV2Features && !isViewerMode && (
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handlePlayAudio(e);
-                }}
-                aria-pressed={isPlaying}
-                aria-label={isPlaying ? 'Pause audio' : 'Play audio'}
-                className="absolute right-4 bottom-4 hover:scale-105 transition-transform z-10"
-              >
-                <svg className="w-11 h-11 -rotate-90" viewBox="0 0 44 44">
-                  {/* Background ring */}
-                  <circle
-                    cx="22"
-                    cy="22"
-                    r="18"
-                    fill="white"
-                    fillOpacity="0.9"
-                  />
-                  <circle
-                    cx="22"
-                    cy="22"
-                    r="18"
-                    fill="none"
-                    stroke="rgba(139,107,122,0.2)"
-                    strokeWidth="3"
-                  />
-                  {/* Progress ring - Always render, but only visible when playing */}
-                  <circle
-                    cx="22"
-                    cy="22"
-                    r="18"
-                    fill="none"
-                    stroke="#8b6b7a"
-                    strokeWidth="3"
-                    strokeDasharray={`${2 * Math.PI * 18}`}
-                    strokeDashoffset={`${2 * Math.PI * 18 * (1 - progress / 100)}`}
-                    strokeLinecap="round"
-                    style={{
-                      opacity: isPlaying ? 1 : 0,
-                      transition: 'stroke-dashoffset 0.3s ease, opacity 0.2s ease'
-                    }}
-                  />
-                </svg>
-                {/* Icon in center */}
-                <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                  {isLoading ? (
-                    <Loader2 className="w-5 h-5 animate-spin text-neutral-600" />
-                  ) : isPlaying ? (
-                    <Pause className="w-5 h-5 text-neutral-600 fill-neutral-600" />
-                  ) : (
-                    <Volume2 className="w-5 h-5 text-neutral-600" />
-                  )}
-                </div>
-              </button>
-            )}
-
-            {/* Viewer mode: static duration badge on photo (non-V2) */}
-            {story.audioUrl && !useV2Features && isViewerMode && story.durationSeconds && (
+            {/* Audio indicator badge on photo - shows headphone icon if story has audio */}
+            {story.audioUrl && !useV2Features && (
               <div
-                className="absolute right-4 bottom-4 px-3 py-1.5 rounded-full text-sm font-medium z-10"
+                className="absolute right-4 bottom-4 w-11 h-11 rounded-full flex items-center justify-center z-10"
                 style={{
-                  color: 'var(--hw-text-muted, #8A8378)',
                   backgroundColor: 'rgba(255, 255, 255, 0.9)',
                   backdropFilter: 'blur(4px)'
                 }}
+                aria-label="Story has audio"
               >
-                {Math.ceil(story.durationSeconds / 60)} min
+                <Headphones className="w-5 h-5 text-neutral-600" />
               </div>
             )}
           </div>
@@ -704,7 +486,7 @@ function CenteredMemoryCard({ story, position, index, isDark = false, showDecade
                 </div>
               </div>
 
-              {/* Right: V2 audio button with progress indicator - only show if audio exists */}
+              {/* Right: Story type indicator or custom action */}
               {customActionLabel ? (
                 <button
                   onClick={(e) => {
@@ -716,24 +498,9 @@ function CenteredMemoryCard({ story, position, index, isDark = false, showDecade
                   <span>{customActionLabel}</span>
                   <Plus className="w-4 h-4" />
                 </button>
-              ) : story.audioUrl && story.audioUrl.trim() !== "" ? (
-                isViewerMode ? (
-                  // Viewer mode: static duration badge (non-interactive)
-                  <span
-                    className="px-3 py-1.5 rounded-full text-sm font-medium"
-                    style={{ color: 'var(--hw-text-muted, #8A8378)', backgroundColor: 'var(--hw-section-bg, #EFE6DA)' }}
-                  >
-                    {Math.ceil((story.durationSeconds || 0) / 60)} min
-                  </span>
-                ) : (
-                  // Owner mode: interactive play button
-                  <PlayPillButton
-                    isPlaying={isPlaying}
-                    progress={progress}
-                    onClick={handlePlayAudio}
-                  />
-                )
-              ) : null}
+              ) : (
+                <StoryPillButton hasAudio={!!(story.audioUrl && story.audioUrl.trim() !== "")} />
+              )}
             </div>
           </div>
         </div>
@@ -741,7 +508,7 @@ function CenteredMemoryCard({ story, position, index, isDark = false, showDecade
     }
 
     // No photo - render compact pill-style card
-    const hasAudio = story.audioUrl && story.audioUrl.trim() !== "";
+    const hasAudio = !!(story.audioUrl && story.audioUrl.trim() !== "");
     const hasText = story.transcription;
 
     return (
@@ -767,11 +534,9 @@ function CenteredMemoryCard({ story, position, index, isDark = false, showDecade
             <div className="flex-shrink-0 flex flex-col items-center gap-1.5">
               <div className="w-12 h-12 rounded-full bg-stone-100 flex items-center justify-center">
                 {hasAudio ? (
-                  <Volume2 className="w-6 h-6 text-stone-600" />
+                  <Headphones className="w-6 h-6 text-stone-600" />
                 ) : (
-                  <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6 text-stone-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                  </svg>
+                  <FileText className="w-6 h-6 text-stone-600" />
                 )}
               </div>
               <span className="text-xs text-stone-500 font-medium">
@@ -807,7 +572,7 @@ function CenteredMemoryCard({ story, position, index, isDark = false, showDecade
               )}
             </div>
 
-            {/* Right: Action button */}
+            {/* Right: Story type indicator or custom action */}
             <div className="flex-shrink-0">
               {customActionLabel ? (
                 <button
@@ -820,47 +585,17 @@ function CenteredMemoryCard({ story, position, index, isDark = false, showDecade
                   <span>{customActionLabel}</span>
                   <Plus className="w-4 h-4" />
                 </button>
-              ) : hasAudio ? (
-                isViewerMode ? (
-                  // Viewer mode: static duration badge (non-interactive)
-                  <span
-                    className="px-3 py-1.5 rounded-full text-sm font-medium"
-                    style={{ color: 'var(--hw-text-muted, #8A8378)', backgroundColor: 'var(--hw-section-bg, #EFE6DA)' }}
-                  >
-                    {Math.ceil((story.durationSeconds || 0) / 60)} min
-                  </span>
-                ) : (
-                  // Owner mode: interactive play button
-                  <PlayPillButton
-                    isPlaying={isPlaying}
-                    progress={progress}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handlePlayAudio(e);
-                    }}
-                  />
-                )
               ) : (
-                <button
-                  className="px-4 py-2 rounded-full bg-stone-100 hover:bg-stone-200 text-stone-700 text-sm font-semibold flex items-center gap-1.5 transition-colors"
-                  aria-label="Read story"
-                >
-                  <span>Read</span>
-                  <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                  </svg>
-                </button>
+                <StoryPillButton hasAudio={hasAudio} />
               )}
             </div>
           </div>
 
           {/* Helper text */}
           <p className="text-xs text-stone-400 mt-3 text-center">
-            {isViewerMode
+            {hasAudio
               ? "Tap to open this story"
-              : hasAudio
-                ? "Tap to listen to this story"
-                : "Tap to read this story"}
+              : "Tap to read this story"}
           </p>
         </div>
       </div>
