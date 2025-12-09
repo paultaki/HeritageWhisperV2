@@ -33,6 +33,17 @@ export function AccountSwitcher() {
     (s) => s.storytellerId !== user?.id
   );
 
+  // Debug logging
+  console.log('[AccountSwitcher] Debug:', {
+    userId: user?.id,
+    availableStorytellersCount: availableStorytellers.length,
+    availableStorytellers: availableStorytellers.map(s => ({ id: s.storytellerId, name: s.storytellerName })),
+    familyStorytellersCount: familyStorytellers.length,
+    familyStorytellers: familyStorytellers.map(s => ({ id: s.storytellerId, name: s.storytellerName })),
+    isLoading,
+    activeContext: activeContext ? { id: activeContext.storytellerId, type: activeContext.type } : null,
+  });
+
   // Show loading only if context is loading OR if we don't have either user or activeContext
   if (isLoading || !activeContext) {
     return (
