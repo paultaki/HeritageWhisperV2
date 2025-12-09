@@ -68,13 +68,16 @@ function useAccountContextInternal() {
   // Helper function to invalidate all storyteller-related queries
   const invalidateAllStorytellerQueries = useCallback(async () => {
     console.log('[useAccountContext] Invalidating all storyteller-related queries');
+    // Invalidate specific query keys - don't clear entire cache as that causes issues
     await Promise.all(
       STORYTELLER_QUERY_KEYS.map(key =>
         queryClient.invalidateQueries({ queryKey: [key] })
       )
     );
-    // Also clear the entire cache to prevent any stale data
-    queryClient.clear();
+    // Also remove (not just invalidate) to ensure fresh data
+    STORYTELLER_QUERY_KEYS.forEach(key => {
+      queryClient.removeQueries({ queryKey: [key] });
+    });
   }, [queryClient]);
 
   // Helper function to check family session (for unauthenticated viewers)
@@ -249,25 +252,33 @@ function useAccountContextInternal() {
 
   // Fetch available storytellers the user can switch to
   const fetchAvailableStorytellers = useCallback(async () => {
-    if (!user) return;
+    if (!user) {
+      console.log('[AccountContext] fetchAvailableStorytellers: No user, skipping');
+      return;
+    }
+
+    console.log('[AccountContext] fetchAvailableStorytellers: Fetching for user', user.id);
 
     try {
       const response = await apiRequest('GET', '/api/accounts/available');
       const data = await response.json();
 
       if (response.ok) {
+        console.log('[AccountContext] fetchAvailableStorytellers: Got', data.storytellers?.length || 0, 'storytellers:', data.storytellers?.map((s: any) => s.storytellerName));
         setAvailableStorytellers(data.storytellers || []);
       } else {
         console.error('[AccountContext] Failed to fetch storytellers:', data.error);
         setError(data.error);
       }
     } catch (err: any) {
+      console.error('[AccountContext] fetchAvailableStorytellers error:', err.message);
       // Silently handle expected errors:
       // - "Authentication required" = race condition where user exists but session doesn't yet
       // - "Failed to fetch" / "500" = endpoint doesn't exist yet (V3 migration in progress)
       if (err.message?.includes('Authentication required') ||
           err.message?.includes('Failed to fetch') ||
           err.message?.includes('500')) {
+        console.log('[AccountContext] fetchAvailableStorytellers: Expected error, setting empty list');
         setAvailableStorytellers([]);
         return;
       }
@@ -342,6 +353,10 @@ function useAccountContextInternal() {
 
       // Invalidate ALL storyteller-related queries to prevent stale data
       await invalidateAllStorytellerQueries();
+
+      // Re-fetch available storytellers to ensure dropdown is populated
+      await fetchAvailableStorytellers();
+
       setIsStable(true);
       return;
     }
@@ -370,8 +385,12 @@ function useAccountContextInternal() {
 
     // Invalidate ALL storyteller-related queries to prevent stale data
     await invalidateAllStorytellerQueries();
+
+    // Re-fetch available storytellers to ensure dropdown is populated
+    await fetchAvailableStorytellers();
+
     setIsStable(true);
-  }, [user, availableStorytellers, invalidateAllStorytellerQueries]);
+  }, [user, availableStorytellers, invalidateAllStorytellerQueries, fetchAvailableStorytellers]);
 
   // Reset to own account
   const resetToOwnAccount = useCallback(() => {
