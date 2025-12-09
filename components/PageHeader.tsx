@@ -18,7 +18,7 @@ interface PageHeaderProps {
   title: string;
   /** Optional subtitle for additional context */
   subtitle?: string;
-  /** Whether to show account switcher (desktop only, when viewing another account) */
+  /** Whether to show account switcher (desktop only, enables switching between accounts) */
   showAccountSwitcher?: boolean;
   /** Custom content to render on the left side of the header (mobile only) */
   leftContent?: React.ReactNode;
@@ -33,7 +33,7 @@ interface PageHeaderProps {
  * - Logo branding
  * - Page icon and title
  * - Optional subtitle
- * - Account switcher (when viewing someone else's account)
+ * - Account switcher (for users with family access to other accounts)
  * - Flexible right content area
  * 
  * @example
@@ -95,7 +95,7 @@ export function DesktopPageHeader({
           {/* Right section - Actions and account switcher */}
           <nav className="flex items-center gap-3 flex-shrink-0" aria-label="Page actions">
             {rightContent}
-            {showAccountSwitcher && !isOwnAccount && (
+            {showAccountSwitcher && (
               <AccountSwitcher />
             )}
           </nav>
