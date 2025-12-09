@@ -22,6 +22,7 @@ type FamilyMemberCardProps = {
     email: string;
     relationship: string | null;
     last_accessed_at: string | null;
+    sessionExpiresAt?: string | null;
   };
   onSendLoginLink: () => void;
   onRemove: () => void;
@@ -38,6 +39,26 @@ export function FamilyMemberCard({
 }: FamilyMemberCardProps) {
   const displayName = member.name || member.email.split("@")[0];
   const initial = (member.name || member.email)[0].toUpperCase();
+
+  // Format expiration date
+  const formatExpirationDate = (dateStr: string) => {
+    const date = new Date(dateStr);
+    return date.toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+    });
+  };
+
+  // Check if session is expired or expiring soon (within 7 days)
+  const now = new Date();
+  const sessionExpiresDate = member.sessionExpiresAt ? new Date(member.sessionExpiresAt) : null;
+  const isSessionExpired = sessionExpiresDate ? sessionExpiresDate < now : false;
+  const sevenDaysFromNow = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
+  const isExpiringSoon = sessionExpiresDate
+    ? !isSessionExpired && sessionExpiresDate < sevenDaysFromNow
+    : false;
+  const needsRenewal = isSessionExpired || isExpiringSoon;
 
   return (
     <Card className="bg-white border border-[#D2C9BD] rounded-xl overflow-hidden hover:shadow-sm transition-shadow">
@@ -106,21 +127,46 @@ export function FamilyMemberCard({
               <p className="flex items-center gap-1.5 text-sm md:text-base text-[#8A8378]">
                 <Clock className="w-4 h-4" />
                 Last viewed {getRelativeTime(member.last_accessed_at)}
+                {member.sessionExpiresAt && !isSessionExpired && (
+                  <>
+                    <span className="mx-1">·</span>
+                    <span>Access expires {formatExpirationDate(member.sessionExpiresAt)}</span>
+                  </>
+                )}
+                {isSessionExpired && (
+                  <>
+                    <span className="mx-1">·</span>
+                    <span className="text-[#B91C1C]">Access expired</span>
+                  </>
+                )}
               </p>
             )}
           </div>
         </div>
 
-        {/* Send login link - always available for family members */}
+        {/* Send login link / Renew access - always available for family members */}
         <div className="mt-4 pt-4 border-t border-[#D2C9BD]">
           <button
             onClick={onSendLoginLink}
             disabled={isSendingLink}
-            className="inline-flex items-center gap-2 text-[#203954] hover:text-[#1B3047] text-base font-medium hover:underline focus:outline-none focus:underline disabled:opacity-50 disabled:no-underline transition-colors"
+            className={`inline-flex items-center gap-2 text-base font-medium focus:outline-none disabled:opacity-50 transition-colors ${
+              needsRenewal
+                ? "text-[#B45309] hover:text-[#92400E] hover:underline focus:underline"
+                : "text-[#203954] hover:text-[#1B3047] hover:underline focus:underline"
+            }`}
           >
             <LinkIcon className="w-4 h-4" />
-            {isSendingLink ? "Sending..." : "Send sign-in link"}
+            {isSendingLink
+              ? "Sending..."
+              : needsRenewal
+              ? "Renew access"
+              : "Send sign-in link"}
           </button>
+          {isExpiringSoon && !isSessionExpired && (
+            <p className="text-sm text-[#B45309] mt-1">
+              Access expires soon
+            </p>
+          )}
         </div>
       </div>
     </Card>

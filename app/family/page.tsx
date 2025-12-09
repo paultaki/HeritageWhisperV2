@@ -61,6 +61,7 @@ interface FamilyMember {
   created_at: string;
   inviteExpired?: boolean;
   inviteExpiresAt?: string | null;
+  sessionExpiresAt?: string | null;
   permissionLevel?: "viewer" | "contributor";
 }
 

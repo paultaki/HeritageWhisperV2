@@ -56,10 +56,11 @@ export async function GET(req: NextRequest) {
       );
     }
 
-    // For each pending member, check if they have an active invite
-    const membersWithInvites = await Promise.all(
+    // For each member, fetch relevant expiration info
+    const membersWithExpiration = await Promise.all(
       (members || []).map(async (member) => {
         if (member.status === 'pending') {
+          // For pending members, get invite expiration
           const { data: invite } = await supabaseAdmin
             .from('family_invites')
             .select('expires_at, used_at')
@@ -74,14 +75,28 @@ export async function GET(req: NextRequest) {
             inviteExpired: invite ? new Date(invite.expires_at) < new Date() : false,
             inviteExpiresAt: invite?.expires_at || null,
           };
+        } else if (member.status === 'active') {
+          // For active members, get session expiration
+          const { data: session } = await supabaseAdmin
+            .from('family_sessions')
+            .select('expires_at')
+            .eq('family_member_id', member.id)
+            .order('created_at', { ascending: false })
+            .limit(1)
+            .single();
+
+          return {
+            ...member,
+            sessionExpiresAt: session?.expires_at || null,
+          };
         }
         return member;
       })
     );
 
     return NextResponse.json({
-      members: membersWithInvites,
-      total: membersWithInvites.length,
+      members: membersWithExpiration,
+      total: membersWithExpiration.length,
     });
   } catch (error) {
     console.error('Error in GET family members:', error);
