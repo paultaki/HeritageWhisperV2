@@ -68,17 +68,17 @@ const Hero = () => (
         </div>
       </div>
 
-      {/* Product Gallery Composite - Compact Version */}
-      <div className="relative mt-12 max-w-4xl mx-auto">
+      {/* Product Gallery Composite */}
+      <div className="relative mt-12 max-w-7xl mx-auto">
         {/* Background decorative elements */}
-        <div className="absolute -inset-4 bg-gradient-to-b from-cream-200/0 to-cream-200/50 rounded-[2rem] -z-10"></div>
+        <div className="absolute -inset-4 bg-gradient-to-b from-cream-200/0 to-cream-200/50 rounded-[3rem] -z-10"></div>
 
-        <div className="grid grid-cols-3 md:grid-cols-12 gap-3 md:gap-4 items-center">
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
 
           {/* Left Card: Timeline (Vertical) */}
-          <div className="col-span-1 md:col-span-3 transform translate-y-0 md:translate-y-4 transition-transform hover:-translate-y-1 duration-500 relative group">
-            <div className="bg-white p-1.5 rounded-lg shadow-lg border border-cream-200 h-full">
-              <div className="relative overflow-hidden rounded-md h-[160px] md:h-[210px] bg-cream-50">
+          <div className="md:col-span-3 transform translate-y-0 md:translate-y-8 transition-transform hover:-translate-y-2 duration-500 relative group">
+            <div className="bg-white p-2 rounded-xl shadow-xl border border-cream-200 h-full">
+              <div className="relative overflow-hidden rounded-lg h-[320px] md:h-[420px] bg-cream-50">
                 {/* Object-top is crucial here for the long vertical timeline image */}
                 <img
                   src={IMAGES.timelineSmall}
@@ -87,33 +87,34 @@ const Hero = () => (
                 />
                 <div className="absolute inset-0 bg-gradient-to-b from-white/20 via-transparent to-white/40 pointer-events-none"></div>
               </div>
-              <div className="px-2 py-0.5 absolute bottom-2 left-2 right-2 bg-white/95 backdrop-blur shadow-sm rounded-md border border-cream-100">
-                <h3 className="font-serif text-navy-900 font-bold text-xs text-center leading-none">Timeline</h3>
+              <div className="px-3 py-1 absolute bottom-4 left-4 right-4 bg-white/95 backdrop-blur shadow-md rounded-lg border border-cream-100">
+                <h3 className="font-serif text-navy-900 font-bold text-sm text-center leading-none">The Timeline</h3>
+                <p className="text-xs text-navy-800/60 hidden xl:block text-center leading-none">Every story in order</p>
               </div>
             </div>
           </div>
 
           {/* Center Card: Book View (Landscape/Wide) */}
-          <div className="col-span-1 md:col-span-6 z-20 transform transition-transform hover:scale-[1.02] duration-500">
-            <div className="bg-white p-1.5 md:p-2 rounded-xl shadow-xl border border-cream-200">
-              <div className="relative overflow-hidden rounded-lg bg-cream-50 aspect-[4/3]">
+          <div className="md:col-span-6 z-20 transform transition-transform hover:scale-[1.02] duration-500">
+            <div className="bg-white p-3 rounded-2xl shadow-2xl border border-cream-200">
+              <div className="relative overflow-hidden rounded-xl bg-cream-50 aspect-[4/3]">
                 <img
                   src={IMAGES.book}
                   alt="Book View Interface"
                   className="w-full h-full object-contain"
                 />
               </div>
-              <div className="px-2 py-1 text-center border-t border-cream-100 mt-1">
-                <h3 className="font-serif text-sm md:text-base text-navy-900 font-bold leading-tight">The Living Book</h3>
-                <p className="text-xs text-navy-800/60 text-center leading-tight hidden md:block">Grows with every memory.</p>
+              <div className="px-4 py-1.5 text-center border-t border-cream-100 mt-2">
+                <h3 className="font-serif text-xl text-navy-900 font-bold leading-tight">The Living Book</h3>
+                <p className="text-sm text-navy-800/60 text-center leading-tight">Grows automatically with every memory you share.</p>
               </div>
             </div>
           </div>
 
           {/* Right Card: Memory Box (Grid) */}
-          <div className="col-span-1 md:col-span-3 transform translate-y-0 md:translate-y-4 transition-transform hover:-translate-y-1 duration-500 relative group">
-            <div className="bg-white p-1.5 rounded-lg shadow-lg border border-cream-200 h-full">
-              <div className="relative overflow-hidden rounded-md h-[160px] md:h-[210px] bg-cream-50">
+          <div className="md:col-span-3 transform translate-y-0 md:translate-y-8 transition-transform hover:-translate-y-2 duration-500 relative group">
+            <div className="bg-white p-2 rounded-xl shadow-xl border border-cream-200 h-full">
+              <div className="relative overflow-hidden rounded-lg h-[320px] md:h-[420px] bg-cream-50">
                 <img
                   src={IMAGES.memoryBox}
                   alt="Memory Box Interface"
@@ -122,8 +123,9 @@ const Hero = () => (
                 />
                 <div className="absolute inset-0 bg-gradient-to-b from-white/20 via-transparent to-white/40 pointer-events-none"></div>
               </div>
-              <div className="px-2 py-0.5 absolute bottom-2 left-2 right-2 bg-white/95 backdrop-blur shadow-sm rounded-md border border-cream-100">
-                <h3 className="font-serif text-navy-900 font-bold text-xs text-center leading-none">Memory Box</h3>
+              <div className="px-3 py-1 absolute bottom-4 left-4 right-4 bg-white/95 backdrop-blur shadow-md rounded-lg border border-cream-100">
+                <h3 className="font-serif text-navy-900 font-bold text-sm text-center leading-none">Memory Box</h3>
+                <p className="text-xs text-navy-800/60 hidden xl:block text-center leading-none">Keepsakes & loose photos</p>
               </div>
             </div>
           </div>
@@ -463,14 +465,14 @@ const ScrollingTimeline = ({ src, alt }: { src: string; alt: string }) => {
   }, []);
 
   return (
-    <div className="relative rounded-xl overflow-hidden shadow-2xl border border-cream-200/50">
+    <div className="relative rounded-xl overflow-hidden shadow-xl border border-cream-200/50">
       {/* Top fade gradient */}
-      <div className="absolute top-0 left-0 right-0 h-20 bg-gradient-to-b from-white via-white/80 to-transparent z-10 pointer-events-none"></div>
+      <div className="absolute top-0 left-0 right-0 h-12 bg-gradient-to-b from-white via-white/80 to-transparent z-10 pointer-events-none"></div>
 
-      {/* Scrolling container */}
+      {/* Scrolling container - reduced height */}
       <div
         ref={containerRef}
-        className="h-[600px] overflow-y-auto bg-white"
+        className="h-[320px] overflow-y-auto bg-white"
         style={{
           scrollbarWidth: "thin",
           scrollbarColor: "#EBE2D5 transparent",
@@ -480,7 +482,7 @@ const ScrollingTimeline = ({ src, alt }: { src: string; alt: string }) => {
       </div>
 
       {/* Bottom fade gradient */}
-      <div className="absolute bottom-0 left-0 right-0 h-20 bg-gradient-to-t from-white via-white/80 to-transparent z-10 pointer-events-none"></div>
+      <div className="absolute bottom-0 left-0 right-0 h-12 bg-gradient-to-t from-white via-white/80 to-transparent z-10 pointer-events-none"></div>
     </div>
   );
 };
@@ -569,7 +571,7 @@ const FeatureDeepDive = () => {
 
   return (
     <section id="features" className="py-24 bg-cream-100">
-      <div className="max-w-7xl mx-auto px-4 md:px-8">
+      <div className="max-w-5xl mx-auto px-4 md:px-8">
         {/* Tab Navigation */}
         <div className="flex justify-center mb-12">
           <div className="inline-flex bg-white rounded-full p-1.5 shadow-lg border border-cream-200">
@@ -601,10 +603,10 @@ const FeatureDeepDive = () => {
           ))}
         </div>
 
-        {/* Content Area */}
-        <div className="flex flex-col md:flex-row items-center gap-12 md:gap-20">
+        {/* Content Area - Compact */}
+        <div className="flex flex-col md:flex-row items-center gap-8 md:gap-12">
           {/* Image with fade transition */}
-          <div className="flex-1 w-full">
+          <div className="flex-1 w-full max-w-md">
             <div
               className={`transition-opacity duration-300 ${
                 isTransitioning ? "opacity-0" : "opacity-100"
@@ -617,11 +619,11 @@ const FeatureDeepDive = () => {
                   alt={currentFeature.imgAlt}
                 />
               ) : (
-                <div className="relative rounded-xl overflow-hidden shadow-2xl border border-cream-200/50">
+                <div className="relative rounded-xl overflow-hidden shadow-xl border border-cream-200/50">
                   <img
                     src={currentFeature.image}
                     alt={currentFeature.imgAlt}
-                    className="w-full h-auto bg-white"
+                    className="w-full h-auto max-h-[320px] object-contain bg-white"
                   />
                 </div>
               )}
@@ -630,15 +632,15 @@ const FeatureDeepDive = () => {
 
           {/* Text content with fade transition */}
           <div
-            className={`flex-1 space-y-6 transition-opacity duration-300 ${
+            className={`flex-1 space-y-4 transition-opacity duration-300 ${
               isTransitioning ? "opacity-0" : "opacity-100"
             }`}
           >
-            <h3 className="text-3xl md:text-4xl font-serif font-medium text-navy-900">
+            <h3 className="text-2xl md:text-3xl font-serif font-medium text-navy-900">
               {currentFeature.title}
             </h3>
-            <div className="w-12 h-1 bg-gold-500"></div>
-            <p className="text-lg text-navy-800/80 leading-relaxed">
+            <div className="w-10 h-1 bg-gold-500"></div>
+            <p className="text-base text-navy-800/80 leading-relaxed">
               {currentFeature.desc}
             </p>
           </div>
