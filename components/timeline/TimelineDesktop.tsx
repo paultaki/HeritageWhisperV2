@@ -626,7 +626,7 @@ function CenteredMemoryCard({ story, position, index, isDark = false, showDecade
         className="z-10 flex-shrink-0 timeline-dot transition-all duration-500"
         style={{
           transform: position === "left" ? "translateX(-54px)" : "translateX(54px)",
-          marginBottom: '-40px',  // Pulls next badge closer to eliminate gap
+          marginBottom: '-183px',  // Pulls next badge closer - holds sticky longer (2:1 ratio)
         }}
       >
         <div
@@ -643,7 +643,7 @@ function CenteredMemoryCard({ story, position, index, isDark = false, showDecade
             borderRadius: '6px',
             backdropFilter: 'blur(10px)',
             position: 'relative',
-            top: '-19px',  // Align with connector lines
+            top: '-89px',  // Align with connector lines (adjusted for marginBottom change)
           }}
         >
           <span style={{ position: 'relative', top: '-2px' }}>
@@ -879,7 +879,7 @@ export function TimelineDesktop({ useV2Features = false }: { useV2Features?: boo
     if (!storiesData) return;
 
     const handleBubbleScroll = () => {
-      const stickyTop = 80; // Header height 62px + 18px clearance
+      const stickyTop = 150; // Adjusted for badge offset (-89px top)
       const collisionThreshold = 10 as number; // Very small threshold - stay visible longer
 
       // Query all timeline-dot elements
@@ -916,9 +916,9 @@ export function TimelineDesktop({ useV2Features = false }: { useV2Features?: boo
             // Stay FULLY visible until next bubble touches sticky position
             bubble.style.opacity = '1';
             bubble.style.transform = `${translateX} scale(1)`;
-          } else if (proximityToNext > -38) {
-            // Fade out over the last 38px of overlap (holds until badges nearly touch)
-            const overlapProgress = Math.abs(proximityToNext) / 38;
+          } else if (proximityToNext > -113) {
+            // Fade out over the last 113px of overlap (holds ~75px longer before releasing)
+            const overlapProgress = Math.abs(proximityToNext) / 113;
             bubble.style.opacity = `${Math.max(0, 1 - overlapProgress)}`;
             bubble.style.transform = `${translateX} scale(${Math.max(0.9, 1 - (overlapProgress * 0.1))})`;
           } else {
@@ -1294,7 +1294,7 @@ export function TimelineDesktop({ useV2Features = false }: { useV2Features?: boo
           /* Sticky date bubbles */
           .timeline-dot {
             position: sticky;
-            top: 80px;
+            top: 150px;
             z-index: 30;
             /* No transitions - scroll handler provides smooth updates */
           }

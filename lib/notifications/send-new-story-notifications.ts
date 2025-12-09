@@ -145,7 +145,7 @@ export async function sendNewStoryNotifications({
     // Only notify users who haven't unsubscribed
     const { data: familyMembers, error: familyError } = await supabaseAdmin
       .from('family_members')
-      .select('id, name, email, auth_user_id, email_notifications')
+      .select('id, name, email, email_notifications')
       .eq('user_id', storytellerUserId)
       .eq('status', 'active')
       .eq('email_notifications', true);
