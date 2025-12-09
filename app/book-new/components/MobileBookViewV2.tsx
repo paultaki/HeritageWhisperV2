@@ -584,6 +584,7 @@ export default function MobileBookViewV2({
       />
 
       {/* Table of contents - pass only story pages */}
+      {/* Note: viewMode/onViewModeChange props removed to hide Time/Chapter toggle on mobile */}
       <BookTableOfContents
         stories={bookStories}
         chapters={chaptersData?.chapters || []}
@@ -597,8 +598,6 @@ export default function MobileBookViewV2({
             scrollToIndex(tocIndex);
           }
         }}
-        viewMode={viewMode}
-        onViewModeChange={setViewMode}
       />
 
       {/* Safe area bottom spacer */}

@@ -8,6 +8,7 @@ import GlassMenuDropdown from "./GlassMenuDropdown";
 import { SubmitQuestionDialog } from "@/components/family/SubmitQuestionDialog";
 import { useNavInk } from "@/hooks/use-nav-ink";
 import { useAccountContext } from "@/hooks/use-account-context";
+import { useNavVisibility } from "@/contexts/NavVisibilityContext";
 
 export default function GlassNavWrapper() {
   const pathname = usePathname();
@@ -16,6 +17,7 @@ export default function GlassNavWrapper() {
   const [isQuestionDialogOpen, setIsQuestionDialogOpen] = useState(false);
   const { activeContext, isLoading: isContextLoading } = useAccountContext();
   const isOwnAccount = activeContext?.type === 'own';
+  const { isNavHidden } = useNavVisibility();
 
   // Track if we're on mobile (below lg breakpoint)
   // Desktop book view has dark background → needs light ink
@@ -57,8 +59,8 @@ export default function GlassNavWrapper() {
   const isRecordingPage = pathname.startsWith('/recording');
   const isReviewPage = pathname.startsWith('/review/book-style');
 
-  // Don't show glass nav on these pages
-  if (isLandingPage || isInterviewChat || isAuthPage || isRecordingPage || isReviewPage) {
+  // Don't show glass nav on these pages or when explicitly hidden (e.g., during modals)
+  if (isLandingPage || isInterviewChat || isAuthPage || isRecordingPage || isReviewPage || isNavHidden) {
     return null;
   }
 

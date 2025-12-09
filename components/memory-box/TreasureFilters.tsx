@@ -1,5 +1,12 @@
 "use client";
 import React from "react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 export type TreasureFilterType = "all" | "photos" | "documents" | "heirlooms" | "keepsakes" | "recipes" | "memorabilia";
 
@@ -18,81 +25,68 @@ type Props = {
 };
 
 /**
- * Minimal Filter Chips for Treasures
+ * Dropdown Filter for Treasures (Senior-Friendly)
  *
- * Filters treasures by category without emojis:
- * - All, Photos, Documents, Heirlooms, Keepsakes, Recipes, Memorabilia
- * - Active: filled secondary green background (--hw-secondary)
- * - Inactive: outline with transparent background
- * - Shows counts in parentheses
+ * Filters treasures by category using a dropdown:
+ * - All options visible when opened
+ * - Large tap targets (48px+ height)
+ * - Clear selection indicator
+ * - No hidden scrolling
  */
 export function TreasureFilters({
   activeFilter,
   onFilterChange,
   counts,
 }: Props) {
-  const filters = [
-    {
-      key: "all" as TreasureFilterType,
-      label: "All",
-      count: counts.all,
-    },
-    {
-      key: "photos" as TreasureFilterType,
-      label: "Photos",
-      count: counts.photos,
-    },
-    {
-      key: "documents" as TreasureFilterType,
-      label: "Documents",
-      count: counts.documents,
-    },
-    {
-      key: "heirlooms" as TreasureFilterType,
-      label: "Heirlooms",
-      count: counts.heirlooms,
-    },
-    {
-      key: "keepsakes" as TreasureFilterType,
-      label: "Keepsakes",
-      count: counts.keepsakes,
-    },
-    {
-      key: "recipes" as TreasureFilterType,
-      label: "Recipes",
-      count: counts.recipes,
-    },
-    {
-      key: "memorabilia" as TreasureFilterType,
-      label: "Memorabilia",
-      count: counts.memorabilia,
-    },
+  const filters: { key: TreasureFilterType; label: string; count: number }[] = [
+    { key: "all", label: "All Treasures", count: counts.all },
+    { key: "photos", label: "Photos", count: counts.photos },
+    { key: "documents", label: "Documents", count: counts.documents },
+    { key: "heirlooms", label: "Heirlooms", count: counts.heirlooms },
+    { key: "keepsakes", label: "Keepsakes", count: counts.keepsakes },
+    { key: "recipes", label: "Recipes", count: counts.recipes },
+    { key: "memorabilia", label: "Memorabilia", count: counts.memorabilia },
   ];
+
+  const activeLabel = filters.find((f) => f.key === activeFilter)?.label || "All Treasures";
+  const activeCount = filters.find((f) => f.key === activeFilter)?.count || 0;
 
   return (
     <div className="mb-6">
-      {/* Filter Chips - Horizontally scrollable on mobile */}
-      <div className="flex gap-2 overflow-x-auto pb-2 snap-x">
-        {filters.map((filter) => (
-          <button
-            key={filter.key}
-            onClick={() => onFilterChange(filter.key)}
-            className={`
-              flex-shrink-0 px-4 py-2 rounded-full text-sm font-medium
-              transition-all duration-200 whitespace-nowrap
-              ${activeFilter === filter.key
-                ? "text-white"
-                : "border border-gray-300 bg-transparent text-gray-700 hover:border-[#3E6A5A]/30"
-              }
-            `}
-            style={activeFilter === filter.key ? { backgroundColor: "var(--hw-secondary, #3E6A5A)" } : undefined}
-            aria-label={`Filter by ${filter.label}: ${filter.count} treasures`}
-            aria-pressed={activeFilter === filter.key}
-          >
-            {filter.label} ({filter.count})
-          </button>
-        ))}
-      </div>
+      <Select value={activeFilter} onValueChange={(value) => onFilterChange(value as TreasureFilterType)}>
+        <SelectTrigger
+          className="w-full h-12 px-4 text-base font-medium border-2 border-gray-300 rounded-xl
+                     bg-white hover:border-[#3E6A5A]/50 focus:border-[#3E6A5A] focus:ring-2 focus:ring-[#3E6A5A]/20
+                     transition-all duration-200"
+          aria-label="Filter treasures by category"
+        >
+          <SelectValue>
+            <span className="flex items-center gap-2">
+              <span>{activeLabel}</span>
+              <span className="text-gray-500">({activeCount})</span>
+            </span>
+          </SelectValue>
+        </SelectTrigger>
+        <SelectContent
+          className="bg-white border-2 border-gray-200 rounded-xl shadow-lg overflow-hidden"
+          position="popper"
+          sideOffset={4}
+        >
+          {filters.map((filter) => (
+            <SelectItem
+              key={filter.key}
+              value={filter.key}
+              className="h-12 px-4 text-base cursor-pointer hover:bg-gray-50 focus:bg-gray-100
+                         data-[state=checked]:bg-[#3E6A5A]/10 data-[state=checked]:text-[#3E6A5A]"
+            >
+              <span className="flex items-center justify-between w-full gap-4">
+                <span>{filter.label}</span>
+                <span className="text-gray-500 text-sm">({filter.count})</span>
+              </span>
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
     </div>
   );
 }

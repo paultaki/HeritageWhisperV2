@@ -5,6 +5,7 @@ import { useState } from "react";
 import { AuthProvider } from "@/lib/auth";
 import { getQueryFn } from "@/lib/queryClient";
 import { RecordingProvider } from "@/contexts/RecordingContext";
+import { NavVisibilityProvider } from "@/contexts/NavVisibilityContext";
 import { Toaster } from "@/components/ui/toaster";
 import { AccountContextProvider } from "@/hooks/use-account-context";
 
@@ -26,10 +27,12 @@ export function Providers({ children }: { children: React.ReactNode }) {
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
         <AccountContextProvider>
-          <RecordingProvider>
-            {children}
-            <Toaster />
-          </RecordingProvider>
+          <NavVisibilityProvider>
+            <RecordingProvider>
+              {children}
+              <Toaster />
+            </RecordingProvider>
+          </NavVisibilityProvider>
         </AccountContextProvider>
       </AuthProvider>
     </QueryClientProvider>

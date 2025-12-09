@@ -27,6 +27,7 @@ import { AddTreasureModal } from "@/components/memory-box/AddTreasureModal";
 import { EditTreasureModal } from "@/components/memory-box/EditTreasureModal";
 import { TreasureViewModal } from "@/components/memory-box/TreasureViewModal";
 import { EditMemoryModal } from "@/components/memory-box/EditMemoryModal";
+import { useNavVisibility } from "@/contexts/NavVisibilityContext";
 
 interface Story {
   id: string;
@@ -148,6 +149,7 @@ export default function MemoryBoxV2Page() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const isDesktop = useMediaQuery("(min-width: 1024px)");
+  const { hideNav, showNav } = useNavVisibility();
 
   // Get active storyteller context for family sharing (must be before defaultTab)
   const { activeContext } = useAccountContext();
@@ -188,6 +190,15 @@ export default function MemoryBoxV2Page() {
       (window as any).AudioManager = AudioManager;
     }
   }, []);
+
+  // Hide floating nav when recording or adding treasures
+  useEffect(() => {
+    if (modeSelection.quickRecorderOpen || addTreasureModalOpen) {
+      hideNav();
+    } else {
+      showNav();
+    }
+  }, [modeSelection.quickRecorderOpen, addTreasureModalOpen, hideNav, showNav]);
 
   const {
     data: stories = [],

@@ -45,7 +45,7 @@ export async function middleware(request: NextRequest) {
   // TODO: Revisit nonce-based CSP when Next.js improves support
   const cspHeader = `
     default-src 'self';
-    script-src 'self' 'unsafe-inline' 'unsafe-eval';
+    script-src 'self' 'unsafe-inline' 'unsafe-eval' https://va.vercel-scripts.com;
     style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
     img-src 'self' data: blob: https://*.supabase.co;
     font-src 'self' https://fonts.gstatic.com;
