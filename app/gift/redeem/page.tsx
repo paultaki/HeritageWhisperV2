@@ -6,6 +6,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { Gift, Check, ArrowRight, AlertCircle, User } from 'lucide-react'
 import { useAuth } from '@/lib/auth'
+import { useQueryClient } from '@tanstack/react-query'
 
 interface GiftDetails {
   purchaserName: string | null
@@ -48,6 +49,7 @@ function GiftRedeemContent() {
   const searchParams = useSearchParams()
   const codeFromUrl = searchParams.get('code')
   const { user, isLoading: authLoading } = useAuth()
+  const queryClient = useQueryClient()
 
   const [step, setStep] = useState<'enter' | 'validate' | 'redeem' | 'success'>('enter')
   const [code, setCode] = useState(codeFromUrl || '')
@@ -133,6 +135,9 @@ function GiftRedeemContent() {
         setIsRedeeming(false)
         return
       }
+
+      // Invalidate user data cache so isPaid status is refreshed
+      await queryClient.invalidateQueries({ queryKey: ['/api/auth/me'] })
 
       setSuccessMessage(data.message)
       setStep('success')

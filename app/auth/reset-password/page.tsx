@@ -30,8 +30,40 @@ export default function ResetPassword() {
   const { toast } = useToast();
 
   useEffect(() => {
-    // Check if we have a valid recovery session
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    const initSession = async () => {
+      // Check if we have tokens in the URL hash (from /auth/confirm redirect)
+      const hash = window.location.hash.substring(1);
+      if (hash) {
+        const params = new URLSearchParams(hash);
+        const accessToken = params.get("access_token");
+        const refreshToken = params.get("refresh_token");
+
+        if (accessToken && refreshToken) {
+          // Set the session from the URL hash
+          const { error } = await supabase.auth.setSession({
+            access_token: accessToken,
+            refresh_token: refreshToken,
+          });
+
+          if (error) {
+            console.error("Error setting session:", error);
+            toast({
+              title: "Invalid or expired link",
+              description: "Please request a new password reset link",
+              variant: "destructive",
+            });
+            router.push("/auth/forgot-password");
+            return;
+          }
+
+          // Clear the hash from the URL for cleaner appearance
+          window.history.replaceState(null, "", window.location.pathname);
+          return;
+        }
+      }
+
+      // Fallback: Check if we already have a valid session
+      const { data: { session } } = await supabase.auth.getSession();
       if (!session) {
         toast({
           title: "Invalid or expired link",
@@ -40,7 +72,9 @@ export default function ResetPassword() {
         });
         router.push("/auth/forgot-password");
       }
-    });
+    };
+
+    initSession();
   }, [router, toast]);
 
   const handleResetPassword = async (e: React.FormEvent) => {

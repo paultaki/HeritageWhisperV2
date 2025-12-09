@@ -21,7 +21,7 @@ const features: Feature[] = [
     description: 'Watch 80 years of wisdom unfold before your eyes. Stories organized by decade, patterns revealed across a lifetime. Tap any moment to hear it in their voice.',
     imageAlt: 'Timeline view screenshot showing decade markers, story cards, clean organization',
     image: '/timeline-2.webp',
-    isScrolling: true,
+    isScrolling: false,
   },
   {
     id: 'book',
@@ -39,7 +39,7 @@ const features: Feature[] = [
     description: 'Photos, documents, and keepsakes—each with the story behind it. Upload the artifact, record the memory. Context for every treasure.',
     imageAlt: 'Memory box view showing photos with associated stories',
     image: '/memory-box-2.webp',
-    isScrolling: true,
+    isScrolling: false,
   },
 ]
 
@@ -198,8 +198,8 @@ export default function ProductShowcase() {
                 onClick={() => handleTabClick(i)}
                 className={`px-5 py-2.5 rounded-full text-sm font-semibold transition-all duration-300 ${
                   activeTab === i
-                    ? 'bg-[var(--hw-accent-green)] text-white shadow-md'
-                    : 'text-[var(--hw-primary)] hover:text-[var(--hw-accent-green)] hover:bg-[var(--hw-page-bg)]'
+                    ? 'bg-[#2D4739] text-white shadow-md'
+                    : 'text-[var(--hw-primary)] hover:text-[#2D4739] hover:bg-[var(--hw-page-bg)]'
                 }`}
               >
                 {f.tabName}
@@ -214,7 +214,7 @@ export default function ProductShowcase() {
             <div
               key={i}
               className={`h-1 rounded-full transition-all duration-300 ${
-                activeTab === i ? 'w-8 bg-[var(--hw-accent-green)]' : 'w-2 bg-[var(--hw-border)]'
+                activeTab === i ? 'w-8 bg-[#2D4739]' : 'w-2 bg-[var(--hw-border)]'
               }`}
             />
           ))}
@@ -236,13 +236,13 @@ export default function ProductShowcase() {
                   alt={currentFeature.imageAlt}
                 />
               ) : (
-                <div className="relative rounded-xl overflow-hidden shadow-xl border border-[var(--hw-border)]">
+                <div className="relative rounded-xl overflow-hidden shadow-xl border border-[var(--hw-border)] inline-block">
                   <Image
                     src={currentFeature.image}
                     alt={currentFeature.imageAlt}
-                    width={500}
-                    height={375}
-                    className="w-full h-auto max-h-[320px] object-contain bg-white"
+                    width={400}
+                    height={300}
+                    className="w-auto h-auto max-h-[280px] object-contain"
                   />
                 </div>
               )}
