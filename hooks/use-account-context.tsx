@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, createContext, useContext, type ReactNode } from 'react';
+import { useState, useEffect, useCallback, createContext, useContext, useRef, type ReactNode } from 'react';
 import { useAuth } from '@/lib/auth';
 import { apiRequest } from '@/lib/queryClient';
 import { useQueryClient } from '@tanstack/react-query';
@@ -21,11 +21,26 @@ export interface AvailableStoryteller {
 
 const STORAGE_KEY = 'hw_active_storyteller_context';
 
+// All query keys that need to be invalidated on account switch
+const STORYTELLER_QUERY_KEYS = [
+  'stories',
+  '/api/stories',
+  'prompts',
+  '/api/prompts',
+  'chapters',
+  '/api/chapters',
+  'treasures',
+  '/api/treasures',
+  'activity',
+  '/api/activity',
+];
+
 // Create Context for sharing state across all components
 interface AccountContextValue {
   activeContext: AccountContext | null;
   availableStorytellers: AvailableStoryteller[];
   isLoading: boolean;
+  isStable: boolean; // True when context is fully resolved and won't change unexpectedly
   error: string | null;
   switchToStoryteller: (storytellerId: string) => Promise<void>;
   resetToOwnAccount: () => void;
@@ -43,115 +58,194 @@ function useAccountContextInternal() {
   const [activeContext, setActiveContext] = useState<AccountContext | null>(null);
   const [availableStorytellers, setAvailableStorytellers] = useState<AvailableStoryteller[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isStable, setIsStable] = useState(false); // New: prevents flipping
   const [error, setError] = useState<string | null>(null);
-  const [authCheckComplete, setAuthCheckComplete] = useState(false);
 
-  // Fallback: If auth is taking too long, check for family session anyway
-  useEffect(() => {
-    const timeout = setTimeout(() => {
-      if (!user && !activeContext) {
-        setAuthCheckComplete(true);
+  // Track initialization to prevent race conditions
+  const initializationRef = useRef<'idle' | 'initializing' | 'complete'>('idle');
+  const lastUserIdRef = useRef<string | null>(null);
+
+  // Helper function to invalidate all storyteller-related queries
+  const invalidateAllStorytellerQueries = useCallback(async () => {
+    console.log('[useAccountContext] Invalidating all storyteller-related queries');
+    await Promise.all(
+      STORYTELLER_QUERY_KEYS.map(key =>
+        queryClient.invalidateQueries({ queryKey: [key] })
+      )
+    );
+    // Also clear the entire cache to prevent any stale data
+    queryClient.clear();
+  }, [queryClient]);
+
+  // Helper function to check family session (for unauthenticated viewers)
+  const checkFamilySession = useCallback(async (): Promise<AccountContext | null> => {
+    try {
+      const response = await fetch('/api/family/session', {
+        method: 'GET',
+        credentials: 'include',
+      });
+
+      const data = await response.json();
+
+      if (!data.authenticated || !data.session) {
+        if (data.expired) {
+          setError('Your viewing session has expired. Please request a new link.');
+        }
+        return null;
       }
-    }, 1000); // Wait 1 second max for auth
 
-    return () => clearTimeout(timeout);
-  }, [user, activeContext]);
-
-  // Load active context from localStorage or check for initial family member context
-  useEffect(() => {
-    // Don't run if auth is still loading - wait for it to finish OR timeout
-    if (isAuthLoading && !authCheckComplete) {
-      return;
+      return {
+        storytellerId: data.session.storytellerId,
+        storytellerName: data.session.storytellerName,
+        type: 'viewing' as const,
+        permissionLevel: (data.session.permissionLevel || 'viewer') as 'viewer' | 'contributor' | 'owner',
+        relationship: data.session.relationship || null,
+      };
+    } catch (e) {
+      console.error('[useAccountContext] Failed to check family session:', e);
+      return null;
     }
+  }, []);
 
-    if (!user) {
-      // Check for family_session via API (HttpOnly cookie - not accessible to JS)
-      // The session info is fetched from the server, not localStorage
-      checkFamilySession();
-      return;
-    }
+  // Helper function to clear family session cookie (when owner logs in)
+  const clearFamilySessionIfOwner = useCallback(async (userId: string): Promise<void> => {
+    try {
+      // Check if there's a family session
+      const response = await fetch('/api/family/session', {
+        method: 'GET',
+        credentials: 'include',
+      });
 
-    async function checkFamilySession() {
-      try {
-        const response = await fetch('/api/family/session', {
-          method: 'GET',
-          credentials: 'include', // Send HttpOnly cookie
+      const data = await response.json();
+
+      // If there's a family session for this user's own account, clear it
+      // This prevents auth priority confusion
+      if (data.authenticated && data.session?.storytellerId === userId) {
+        console.log('[useAccountContext] Clearing stale family session for owner');
+        await fetch('/api/family/session', {
+          method: 'DELETE',
+          credentials: 'include',
         });
+      }
+    } catch (e) {
+      console.error('[useAccountContext] Failed to check/clear family session:', e);
+    }
+  }, []);
 
-        const data = await response.json();
+  // MAIN INITIALIZATION EFFECT - Consolidated logic to prevent race conditions
+  useEffect(() => {
+    // Don't start until auth check is complete
+    if (isAuthLoading) {
+      return;
+    }
 
-        if (!data.authenticated || !data.session) {
-          if (data.expired) {
-            setError('Your viewing session has expired. Please request a new link.');
+    // Detect user change and reset state
+    const currentUserId = user?.id || null;
+    if (lastUserIdRef.current !== currentUserId) {
+      console.log('[useAccountContext] User changed:', lastUserIdRef.current, '->', currentUserId);
+      lastUserIdRef.current = currentUserId;
+      initializationRef.current = 'idle';
+      setIsStable(false);
+    }
+
+    // Skip if already initializing or complete for this user
+    if (initializationRef.current !== 'idle') {
+      return;
+    }
+
+    initializationRef.current = 'initializing';
+    setIsLoading(true);
+    setIsStable(false);
+
+    async function initialize() {
+      try {
+        // CASE 1: Authenticated user (subscriber)
+        if (user) {
+          // Clear any stale family session cookie that points to the user's own account
+          // This prevents auth priority confusion in the stories API
+          await clearFamilySessionIfOwner(user.id);
+
+          // Check localStorage for stored context
+          const storedValue = localStorage.getItem(STORAGE_KEY);
+
+          // Handle simple storyteller ID (from account creation flow)
+          if (storedValue && !storedValue.startsWith('{')) {
+            // Keep loading - will be resolved when availableStorytellers loads
+            console.log('[useAccountContext] Found simple storyteller ID, waiting for available list');
+            setIsLoading(true);
+            initializationRef.current = 'complete';
+            return;
           }
-          setActiveContext(null);
+
+          // Handle full context object
+          if (storedValue && storedValue.startsWith('{')) {
+            try {
+              const storedContext = JSON.parse(storedValue) as AccountContext;
+
+              // CRITICAL: If user is viewing their own account as "viewer", reset to owner
+              // This fixes the flipping bug when owner logs in with stale family session
+              if (storedContext.type === 'viewing' && storedContext.storytellerId === user.id) {
+                console.log('[useAccountContext] Owner has stale viewer context, resetting to own');
+                localStorage.removeItem(STORAGE_KEY);
+                await invalidateAllStorytellerQueries();
+                // Fall through to default own account
+              } else if (storedContext.storytellerId === user.id || storedContext.type === 'viewing') {
+                // Valid stored context - use it
+                console.log('[useAccountContext] Using stored context:', storedContext.type, storedContext.storytellerId);
+                setActiveContext(storedContext);
+                setIsLoading(false);
+                setIsStable(true);
+                initializationRef.current = 'complete';
+                return;
+              }
+            } catch (e) {
+              console.error('[useAccountContext] Failed to parse stored context:', e);
+              localStorage.removeItem(STORAGE_KEY);
+            }
+          }
+
+          // Default: Set up own account
+          const ownContext: AccountContext = {
+            storytellerId: user.id,
+            storytellerName: user.name || 'Your Stories',
+            type: 'own',
+            permissionLevel: 'owner',
+            relationship: null,
+          };
+          console.log('[useAccountContext] Setting up own account context');
+          setActiveContext(ownContext);
           setIsLoading(false);
+          setIsStable(true);
+          initializationRef.current = 'complete';
           return;
         }
 
-        // Set viewer context from session data
-        const viewerContext = {
-          storytellerId: data.session.storytellerId,
-          storytellerName: data.session.storytellerName,
-          type: 'viewing' as const,
-          permissionLevel: (data.session.permissionLevel || 'viewer') as 'viewer' | 'contributor' | 'owner',
-          relationship: data.session.relationship || null,
-        };
+        // CASE 2: Unauthenticated - check for family session cookie
+        console.log('[useAccountContext] No user, checking family session');
+        const familyContext = await checkFamilySession();
 
-        setActiveContext(viewerContext);
+        if (familyContext) {
+          console.log('[useAccountContext] Found valid family session');
+          setActiveContext(familyContext);
+        } else {
+          console.log('[useAccountContext] No valid session found');
+          setActiveContext(null);
+        }
+
         setIsLoading(false);
+        setIsStable(true);
+        initializationRef.current = 'complete';
       } catch (e) {
-        console.error('[useAccountContext] Failed to check family session:', e);
+        console.error('[useAccountContext] Initialization error:', e);
         setActiveContext(null);
         setIsLoading(false);
+        setIsStable(true);
+        initializationRef.current = 'complete';
       }
     }
 
-    // Check if there's a stored storytellerId (set during account creation for family members)
-    const storedStorytellerIdOnly = localStorage.getItem(STORAGE_KEY);
-
-    // First, check for simple storyteller ID (from account creation flow)
-    if (storedStorytellerIdOnly && !storedStorytellerIdOnly.startsWith('{')) {
-      // This is just a storyteller ID, not a full context object
-      // We'll fetch the full context later when availableStorytellers loads
-      setIsLoading(true); // Keep loading until we fetch full context
-      return;
-    }
-
-    // Check for stored full context object
-    if (storedStorytellerIdOnly && storedStorytellerIdOnly.startsWith('{')) {
-      try {
-        const storedContext = JSON.parse(storedStorytellerIdOnly) as AccountContext;
-
-        // IMPORTANT: If the logged-in user IS the storyteller in the stored context,
-        // they should be treated as owner, not viewer (fixes stale family session bug)
-        if (storedContext.type === 'viewing' && storedContext.storytellerId === user.id) {
-          console.log('[useAccountContext] Owner logged in with stale viewer context, resetting to own account');
-          localStorage.removeItem(STORAGE_KEY);
-          // Fall through to default own account setup below
-        }
-        // Accept stored context if it's own account OR viewing someone else's account
-        else if (storedContext.storytellerId === user.id || storedContext.type === 'viewing') {
-          setActiveContext(storedContext);
-          setIsLoading(false);
-          return;
-        }
-      } catch (e) {
-        console.error('Failed to parse stored context:', e);
-        localStorage.removeItem(STORAGE_KEY);
-      }
-    }
-
-    // Default: Own account (for existing users without stored context)
-    setActiveContext({
-      storytellerId: user.id,
-      storytellerName: user.name || 'Your Stories',
-      type: 'own',
-      permissionLevel: 'owner',
-      relationship: null,
-    });
-    setIsLoading(false);
-  }, [user, isAuthLoading, authCheckComplete]); // Run when user changes OR when auth loading completes OR timeout
+    initialize();
+  }, [user, isAuthLoading, checkFamilySession, clearFamilySessionIfOwner, invalidateAllStorytellerQueries]);
 
   // Fetch available storytellers the user can switch to
   const fetchAvailableStorytellers = useCallback(async () => {
@@ -231,6 +325,9 @@ function useAccountContextInternal() {
   const switchToStoryteller = useCallback(async (storytellerId: string) => {
     if (!user) return;
 
+    // Mark context as unstable during switch
+    setIsStable(false);
+
     // If switching to own account
     if (storytellerId === user.id) {
       const ownContext: AccountContext = {
@@ -243,11 +340,9 @@ function useAccountContextInternal() {
       setActiveContext(ownContext);
       localStorage.setItem(STORAGE_KEY, JSON.stringify(ownContext));
 
-      // Invalidate all story-related queries to trigger refetch
-      await Promise.all([
-        queryClient.invalidateQueries({ queryKey: ['stories'] }),
-        queryClient.invalidateQueries({ queryKey: ['/api/stories'] }),
-      ]);
+      // Invalidate ALL storyteller-related queries to prevent stale data
+      await invalidateAllStorytellerQueries();
+      setIsStable(true);
       return;
     }
 
@@ -257,6 +352,7 @@ function useAccountContextInternal() {
     if (!storyteller) {
       console.error('[AccountContext] Storyteller not found in available list');
       setError('Cannot switch to this account');
+      setIsStable(true);
       return;
     }
 
@@ -268,15 +364,14 @@ function useAccountContextInternal() {
       relationship: storyteller.relationship,
     };
 
+    console.log('[useAccountContext] Switching to storyteller:', newContext.storytellerName);
     setActiveContext(newContext);
     localStorage.setItem(STORAGE_KEY, JSON.stringify(newContext));
 
-    // Invalidate all story-related queries to trigger refetch
-    await Promise.all([
-      queryClient.invalidateQueries({ queryKey: ['stories'] }),
-      queryClient.invalidateQueries({ queryKey: ['/api/stories'] }),
-    ]);
-  }, [user, availableStorytellers, queryClient]);
+    // Invalidate ALL storyteller-related queries to prevent stale data
+    await invalidateAllStorytellerQueries();
+    setIsStable(true);
+  }, [user, availableStorytellers, invalidateAllStorytellerQueries]);
 
   // Reset to own account
   const resetToOwnAccount = useCallback(() => {
@@ -295,6 +390,7 @@ function useAccountContextInternal() {
     availableStorytellers,
     // For family viewers (activeContext without user), ignore isAuthLoading since we're not waiting for auth
     isLoading: activeContext && !user ? isLoading : (isLoading || isAuthLoading),
+    isStable, // True when context is fully resolved and won't change unexpectedly
     error,
     switchToStoryteller,
     resetToOwnAccount,

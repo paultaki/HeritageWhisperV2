@@ -91,7 +91,7 @@ interface Chapter {
  */
 function BookV4PageContent() {
   const { user } = useAuth();
-  const { activeContext, isLoading: isContextLoading } = useAccountContext();
+  const { activeContext, isLoading: isContextLoading, isStable: isContextStable } = useAccountContext();
   const isOwnAccount = activeContext?.type === 'own';
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -176,7 +176,8 @@ function BookV4PageContent() {
 
   // Data fetching
   const storytellerId = activeContext?.storytellerId || user?.id;
-  const queryEnabled = !isContextLoading && ((!!user && !!user.id) || !!activeContext);
+  // CRITICAL: Only enable queries when context is STABLE to prevent data flipping
+  const queryEnabled = !isContextLoading && isContextStable && ((!!user && !!user.id) || !!activeContext);
 
   const { data, isLoading, isFetching } = useQuery<{ stories: Story[] }>({
     queryKey: ["/api/stories", storytellerId],

@@ -55,12 +55,14 @@ export function useTimelineData({
   // Family Sharing Support - Get active storyteller context
   // ==================================================================================
 
-  const { activeContext, isLoading: isContextLoading } = useAccountContext();
+  const { activeContext, isLoading: isContextLoading, isStable: isContextStable } = useAccountContext();
 
   // Always default to user.id if no active context (prevents query from being disabled)
   const storytellerId = activeContext?.storytellerId || user?.id;
 
-  const queryEnabled = !isContextLoading && ((!!user && !!user.id) || !!activeContext);
+  // CRITICAL: Only enable queries when context is STABLE to prevent data flipping
+  // This ensures we don't fetch data until we know for sure which storyteller to fetch for
+  const queryEnabled = !isContextLoading && isContextStable && ((!!user && !!user.id) || !!activeContext);
 
   // ==================================================================================
   // Data Fetching (TanStack Query)

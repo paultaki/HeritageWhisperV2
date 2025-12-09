@@ -72,7 +72,7 @@ interface Chapter {
 
 function BookV3PageContent() {
   const { user } = useAuth();
-  const { activeContext, isLoading: isContextLoading } = useAccountContext();
+  const { activeContext, isLoading: isContextLoading, isStable: isContextStable } = useAccountContext();
   const isOwnAccount = activeContext?.type === 'own';
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -160,7 +160,8 @@ function BookV3PageContent() {
   // Fetch stories - with storyteller_id support for family sharing
   // Always default to user.id if no active context (prevents query from being disabled)
   const storytellerId = activeContext?.storytellerId || user?.id;
-  const queryEnabled = !isContextLoading && ((!!user && !!user.id) || !!activeContext);
+  // CRITICAL: Only enable queries when context is STABLE to prevent data flipping
+  const queryEnabled = !isContextLoading && isContextStable && ((!!user && !!user.id) || !!activeContext);
 
   // Debug logging
   console.log('[Book V3] Query setup:', {

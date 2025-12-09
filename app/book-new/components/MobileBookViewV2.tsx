@@ -21,12 +21,13 @@ export default function MobileBookViewV2({
 }: MobileBookViewV2Props) {
   const router = useRouter();
   const { user } = useAuth();
-  const { activeContext, isLoading: isContextLoading, isOwnAccount } = useAccountContext();
+  const { activeContext, isLoading: isContextLoading, isStable: isContextStable, isOwnAccount } = useAccountContext();
   const pagerRef = useRef<HTMLDivElement>(null);
 
   // Use same fallback logic as parent BookV4PageContent
   const storytellerId = activeContext?.storytellerId || user?.id;
-  const queryEnabled = !isContextLoading && ((!!user && !!user.id) || !!activeContext);
+  // CRITICAL: Only enable queries when context is STABLE to prevent data flipping
+  const queryEnabled = !isContextLoading && isContextStable && ((!!user && !!user.id) || !!activeContext);
 
   console.log('[MobileBookViewV2] Render - storytellerId:', storytellerId, 'queryEnabled:', queryEnabled, 'initialStoryId:', initialStoryId);
 
