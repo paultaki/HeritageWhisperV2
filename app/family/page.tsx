@@ -60,6 +60,7 @@ interface FamilyMember {
   access_count: number;
   created_at: string;
   inviteExpired?: boolean;
+  inviteExpiresAt?: string | null;
   permissionLevel?: "viewer" | "contributor";
 }
 

@@ -21,7 +21,7 @@ export default function MobileBookViewV2({
 }: MobileBookViewV2Props) {
   const router = useRouter();
   const { user } = useAuth();
-  const { activeContext, isLoading: isContextLoading } = useAccountContext();
+  const { activeContext, isLoading: isContextLoading, isOwnAccount } = useAccountContext();
   const pagerRef = useRef<HTMLDivElement>(null);
 
   // Use same fallback logic as parent BookV4PageContent
@@ -539,7 +539,7 @@ export default function MobileBookViewV2({
         onTocClick={() => setIsTocOpen(true)}
         viewMode={chaptersData?.chapters && chaptersData.chapters.length > 0 ? viewMode : undefined}
         onViewModeChange={chaptersData?.chapters && chaptersData.chapters.length > 0 ? setViewMode : undefined}
-        showEditButton={bookPages[currentIndex]?.type === "story"}
+        showEditButton={isOwnAccount && bookPages[currentIndex]?.type === "story"}
       />
 
       {/* Horizontal pager */}

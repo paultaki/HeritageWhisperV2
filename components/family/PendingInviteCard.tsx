@@ -22,6 +22,7 @@ type PendingInviteCardProps = {
     relationship: string | null;
     invited_at: string;
     inviteExpired?: boolean;
+    inviteExpiresAt?: string | null;
   };
   onResend: () => void;
   onRevoke: () => void;
@@ -38,6 +39,16 @@ export function PendingInviteCard({
 }: PendingInviteCardProps) {
   const displayName = member.name || member.email.split("@")[0];
   const initial = (member.name || member.email)[0].toUpperCase();
+
+  // Format expiration date
+  const formatExpirationDate = (dateStr: string) => {
+    const date = new Date(dateStr);
+    return date.toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+    });
+  };
 
   return (
     <Card className="bg-[#EFE6DA]/50 border border-[#D2C9BD] rounded-xl overflow-hidden">
@@ -114,6 +125,12 @@ export function PendingInviteCard({
 
             <p className="text-sm md:text-base text-[#8A8378]">
               Invited {getRelativeTime(member.invited_at)}
+              {member.inviteExpiresAt && !member.inviteExpired && (
+                <span className="mx-1">·</span>
+              )}
+              {member.inviteExpiresAt && !member.inviteExpired && (
+                <span>Link expires {formatExpirationDate(member.inviteExpiresAt)}</span>
+              )}
             </p>
           </div>
         </div>

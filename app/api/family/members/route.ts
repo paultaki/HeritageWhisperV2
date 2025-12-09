@@ -72,6 +72,7 @@ export async function GET(req: NextRequest) {
           return {
             ...member,
             inviteExpired: invite ? new Date(invite.expires_at) < new Date() : false,
+            inviteExpiresAt: invite?.expires_at || null,
           };
         }
         return member;
