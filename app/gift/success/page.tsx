@@ -30,7 +30,7 @@ function SuccessPageSkeleton() {
           <div className="h-10 w-[200px] bg-gray-200 rounded animate-pulse" />
         </div>
       </header>
-      <main className="max-w-2xl mx-auto px-6 py-12">
+      <main className="max-w-2xl mx-auto px-4 sm:px-6 py-12">
         <div className="text-center py-12">
           <div className="w-12 h-12 border-4 border-[var(--hw-primary)]/30 border-t-[var(--hw-primary)] rounded-full animate-spin mx-auto mb-6" />
           <div className="h-8 w-64 bg-gray-200 rounded mx-auto mb-2 animate-pulse" />
@@ -113,7 +113,7 @@ function GiftSuccessContent() {
     <div className="min-h-screen bg-[var(--hw-page-bg)] print:bg-white">
       {/* Simple Header - hidden when printing */}
       <header className="bg-[var(--hw-surface)] border-b border-[var(--hw-border-subtle)] print:hidden">
-        <div className="max-w-[1140px] mx-auto px-6 py-4">
+        <div className="max-w-[1140px] mx-auto px-4 sm:px-6 py-4">
           <Link href="/" className="inline-block">
             <Image
               src="/final logo/logo-new.svg"
@@ -127,14 +127,14 @@ function GiftSuccessContent() {
         </div>
       </header>
 
-      <main className="max-w-2xl mx-auto px-6 py-12 md:py-16 print:py-8 print:px-4">
+      <main className="max-w-2xl mx-auto px-4 sm:px-6 py-8 sm:py-12 md:py-16 print:py-4 print:px-4">
         {isLoading ? (
           <div className="text-center py-12">
             <div className="w-12 h-12 border-4 border-[var(--hw-primary)]/30 border-t-[var(--hw-primary)] rounded-full animate-spin mx-auto mb-6" />
             <h2 className="text-xl font-semibold text-[var(--hw-text-primary)] mb-2">
               Generating your gift code...
             </h2>
-            <p className="text-[var(--hw-text-muted)]">
+            <p className="text-[var(--hw-text-muted)] text-center">
               This will only take a moment
             </p>
           </div>
@@ -146,7 +146,7 @@ function GiftSuccessContent() {
             <h2 className="text-xl font-semibold text-[var(--hw-text-primary)] mb-2">
               Almost there!
             </h2>
-            <p className="text-[var(--hw-text-secondary)] mb-6">{error}</p>
+            <p className="text-[var(--hw-text-secondary)] mb-6 text-center">{error}</p>
             <button
               onClick={() => window.location.reload()}
               className="px-6 py-3 bg-[var(--hw-primary)] text-white font-medium rounded-xl hover:bg-[var(--hw-primary-hover)] transition-colors"
@@ -157,14 +157,14 @@ function GiftSuccessContent() {
         ) : giftCode ? (
           <>
             {/* Success Header - hidden when printing */}
-            <div className="text-center mb-10 print:hidden">
-              <div className="inline-flex items-center justify-center w-20 h-20 bg-green-100 rounded-full mb-6">
-                <Check className="w-10 h-10 text-green-600" />
+            <div className="text-center mb-8 sm:mb-10 print:hidden">
+              <div className="inline-flex items-center justify-center w-16 h-16 sm:w-20 sm:h-20 bg-green-100 rounded-full mb-4 sm:mb-6">
+                <Check className="w-8 h-8 sm:w-10 sm:h-10 text-green-600" />
               </div>
-              <h1 className="text-3xl md:text-4xl font-semibold text-[var(--hw-text-primary)] mb-3">
+              <h1 className="text-2xl sm:text-3xl md:text-4xl font-semibold text-[var(--hw-text-primary)] mb-2 sm:mb-3 text-center">
                 Your Gift is Ready!
               </h1>
-              <p className="text-lg text-[var(--hw-text-secondary)]">
+              <p className="text-base sm:text-lg text-[var(--hw-text-secondary)] text-center">
                 Share this code with your loved one
               </p>
             </div>
@@ -173,7 +173,7 @@ function GiftSuccessContent() {
             <GiftCard code={giftCode.code} expiresAt={giftCode.expiresAt} />
 
             {/* Action Buttons - hidden when printing */}
-            <div className="mt-8 print:hidden">
+            <div className="mt-6 sm:mt-8 print:hidden">
               <div className="flex flex-col sm:flex-row gap-3">
                 <button
                   onClick={handleCopy}
@@ -202,7 +202,7 @@ function GiftSuccessContent() {
             </div>
 
             {/* Receipt Note - hidden when printing */}
-            <p className="mt-8 text-center text-sm text-[var(--hw-text-muted)] print:hidden">
+            <p className="mt-6 sm:mt-8 text-center text-sm text-[var(--hw-text-muted)] print:hidden">
               <Mail className="w-4 h-4 inline-block mr-1" />
               A receipt has been sent to your email
             </p>
