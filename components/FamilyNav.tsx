@@ -40,10 +40,11 @@ export default function FamilyNav({
     },
     {
       key: "ask",
-      label: "Ask\nQuestion",
+      label: "Ask Question",
       href: "#",
       Icon: MessageSquarePlus,
       isHighlighted: true,
+      isTwoLine: true,
       onClick: () => setAskDialogOpen(true),
     },
     {
@@ -103,10 +104,9 @@ export default function FamilyNav({
         />
 
         {/* items */}
-        {navItems.map(({ key, label, href, Icon, isHighlighted, onClick }) => {
+        {navItems.map(({ key, label, href, Icon, isHighlighted, isTwoLine, onClick }) => {
           const active = key === activeKey;
           const hasOnClick = !!onClick;
-          const isMultiLine = label.includes("\n");
 
           const sharedClassName = cn(
             "group flex flex-col items-center justify-start px-1.5 py-1.5 rounded-[10px] transition-all duration-200 flex-1 gap-0.5",
@@ -130,10 +130,10 @@ export default function FamilyNav({
                   )}
                 />
               )}
-              {isMultiLine ? (
+              {isTwoLine ? (
                 <span
                   className={cn(
-                    "relative text-[10px] leading-3 font-bold text-center transition-colors duration-200 whitespace-pre-line",
+                    "relative text-[10px] leading-3 font-bold text-center transition-colors duration-200",
                     isHighlighted
                       ? "text-blue-600"
                       : active
@@ -141,12 +141,7 @@ export default function FamilyNav({
                       : "text-black/85"
                   )}
                 >
-                  {label.split("\n").map((line, i) => (
-                    <React.Fragment key={i}>
-                      {line}
-                      {i === 0 && <br />}
-                    </React.Fragment>
-                  ))}
+                  Ask<br />Question
                   {active && (
                     <i className="absolute left-1/2 -translate-x-1/2 -bottom-[2px] block w-5 h-[2px] rounded-full bg-black/70" />
                   )}
