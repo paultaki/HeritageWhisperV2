@@ -21,6 +21,36 @@
   }
 }
 
+/* Print utilities for gift cards and other printable content */
+@media print {
+  /* Reset backgrounds to white for clean printing */
+  body {
+    background-color: #ffffff !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  /* Ensure images print properly */
+  img {
+    max-width: 100% !important;
+    page-break-inside: avoid;
+  }
+
+  /* Hide navigation and interactive elements when printing */
+  nav,
+  footer,
+  .bottom-tabs,
+  [data-print-hidden="true"] {
+    display: none !important;
+  }
+
+  /* Ensure gift cards fit on a single page */
+  .gift-card-print {
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+}
+
 /* Respect user's motion preferences - disable all animations if they prefer reduced motion */
 @media (prefers-reduced-motion: reduce) {
   *,
