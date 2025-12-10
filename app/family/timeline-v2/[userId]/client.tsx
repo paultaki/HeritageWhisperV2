@@ -3,7 +3,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
 import { FamilyGuard } from '@/components/FamilyGuard';
-import { SubmitQuestionDialog } from '@/components/SubmitQuestionDialog';
+import FamilyNav from '@/components/FamilyNav';
 import { useFamilyAuth } from '@/hooks/use-family-auth';
 import { Card } from '@/components/ui/card';
 import { Loader2, Home, BookOpen, HelpCircle, Pause, Volume2, Clock } from 'lucide-react';
@@ -751,12 +751,11 @@ export default function FamilyTimelineV2Client({ userId }: FamilyTimelineV2Clien
 
   return (
     <FamilyGuard userId={userId}>
-      <div className="hw-page" style={{ background: 'var(--color-page)' }}>
-        {/* Guest Navigation Bar */}
+      <div className="hw-page pb-24" style={{ background: 'var(--color-page)' }}>
+        {/* Top Header Bar */}
         <div className="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-gray-200">
           <div className="max-w-7xl mx-auto px-4 py-3">
-            <div className="flex items-center justify-between">
-              {/* Left: Logo and name */}
+            <div className="flex items-center justify-center">
               <div className="flex items-center gap-3">
                 <Image
                   src={logoUrl}
@@ -769,37 +768,22 @@ export default function FamilyTimelineV2Client({ userId }: FamilyTimelineV2Clien
                   <h1 className="text-sm font-semibold text-gray-900">
                     {storytellerFirstName}'s Stories
                   </h1>
-                  <p className="text-xs text-gray-500">View-only access</p>
+                  <p className="text-xs text-gray-500">
+                    {session?.permissionLevel === 'contributor' ? 'Contributor access' : 'View-only access'}
+                  </p>
                 </div>
-              </div>
-
-              {/* Right: Navigation */}
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() => router.push(`/family/timeline-v2/${userId}`)}
-                  className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
-                >
-                  <Clock className="w-4 h-4" />
-                  <span className="hidden sm:inline">Timeline</span>
-                </button>
-                {/* Book view - Coming soon */}
-                {/* <button
-                  onClick={() => router.push(`/family/book/${userId}`)}
-                  className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
-                >
-                  <BookOpen className="w-4 h-4" />
-                  <span className="hidden sm:inline">Book</span>
-                </button> */}
-                {session?.permissionLevel === 'contributor' && (
-                  <SubmitQuestionDialog
-                    storytellerId={userId}
-                    storytellerName={session.storytellerName}
-                  />
-                )}
               </div>
             </div>
           </div>
         </div>
+
+        {/* Bottom Navigation Bar */}
+        <FamilyNav
+          activeKey="timeline"
+          userId={userId}
+          storytellerName={session?.storytellerName || storytellerFirstName}
+          permissionLevel={session?.permissionLevel}
+        />
 
         {/* Timeline Content */}
         <div className="max-w-7xl mx-auto px-4 py-8">

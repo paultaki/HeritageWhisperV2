@@ -609,17 +609,17 @@ function CenteredMemoryCard({ story, position, index, isDark = false, showDecade
   return (
     <div
       ref={cardRef}
-      className={`timeline-step flex flex-col md:flex-row items-center gap-6 md:gap-0 transition-all duration-500 ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
+      className={`timeline-step flex flex-col lg:flex-row items-center gap-6 lg:gap-0 transition-all duration-500 ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
         }`}
       style={{
         transitionTimingFunction: "cubic-bezier(0.16, 1, 0.3, 1)",
         pointerEvents: 'none',
       }}
     >
-      {/* Left side content (for left-positioned cards) - Desktop/Tablet only */}
-      <div className={`flex-1 flex ${position === "left" ? "justify-end" : ""} hidden md:flex`} style={{ pointerEvents: 'none', paddingRight: position === "left" ? "clamp(60px, 8vw, 109px)" : "0" }}>
+      {/* Left side content (for left-positioned cards) - Desktop only */}
+      <div className={`flex-1 flex ${position === "left" ? "justify-end" : ""} hidden lg:flex`} style={{ pointerEvents: 'none', paddingRight: position === "left" ? "109px" : "0" }}>
         {position === "left" && (
-          <div className="w-full timeline-card-container" style={{ pointerEvents: 'auto', maxWidth: 'clamp(280px, 38vw, 448px)' }}>
+          <div className="w-full max-w-md timeline-card-container" style={{ pointerEvents: 'auto' }}>
             {renderCardContent()}
           </div>
         )}
@@ -627,8 +627,9 @@ function CenteredMemoryCard({ story, position, index, isDark = false, showDecade
 
       {/* V3: Year marker - more visible now as primary date indicator */}
       <div
-        className={`z-10 flex-shrink-0 timeline-dot transition-all duration-500 ${position === "left" ? "timeline-dot-left" : "timeline-dot-right"}`}
+        className="z-10 flex-shrink-0 timeline-dot transition-all duration-500"
         style={{
+          transform: position === "left" ? "translateX(-54px)" : "translateX(54px)",
           marginBottom: '-183px',  // Pulls next badge closer - holds sticky longer (2:1 ratio)
         }}
       >
@@ -655,17 +656,17 @@ function CenteredMemoryCard({ story, position, index, isDark = false, showDecade
         </div>
       </div>
 
-      {/* Right side content (for right-positioned cards) - Desktop/Tablet only */}
-      <div className={`flex-1 flex ${position === "right" ? "justify-start" : ""} hidden md:flex`} style={{ pointerEvents: 'none', paddingLeft: position === "right" ? "clamp(60px, 8vw, 109px)" : "0" }}>
+      {/* Right side content (for right-positioned cards) - Desktop only */}
+      <div className={`flex-1 flex ${position === "right" ? "justify-start" : ""} hidden lg:flex`} style={{ pointerEvents: 'none', paddingLeft: position === "right" ? "109px" : "0" }}>
         {position === "right" && (
-          <div className="w-full timeline-card-container" style={{ pointerEvents: 'auto', maxWidth: 'clamp(280px, 38vw, 448px)' }}>
+          <div className="w-full max-w-md timeline-card-container" style={{ pointerEvents: 'auto' }}>
             {renderCardContent()}
           </div>
         )}
       </div>
 
-      {/* Mobile Card (shown on small screens only) */}
-      <div className="md:hidden w-full" style={{ pointerEvents: 'auto' }}>
+      {/* Mobile Card (shown on all small screens) */}
+      <div className="lg:hidden w-full" style={{ pointerEvents: 'auto' }}>
         {renderCardContent()}
       </div>
     </div>
@@ -902,6 +903,11 @@ export function TimelineDesktopV2({ useV2Features = false }: { useV2Features?: b
           nextBubbleDistance = nextRect.top;
         }
 
+        // Get the base translateX from inline styles (left cards: -12px, right cards: +12px)
+        const baseTransform = bubble.style.transform || '';
+        const translateXMatch = baseTransform.match(/translateX\(([^)]+)\)/);
+        const translateX = translateXMatch ? translateXMatch[0] : '';
+
         // This bubble is at or above sticky position
         if (distanceFromTop <= stickyTop) {
           bubble.classList.add('is-sticky');
@@ -913,22 +919,22 @@ export function TimelineDesktopV2({ useV2Features = false }: { useV2Features?: b
           if (proximityToNext > 0) {
             // Stay FULLY visible until next bubble touches sticky position
             bubble.style.opacity = '1';
-            bubble.style.setProperty('--dot-scale', '1');
+            bubble.style.transform = `${translateX} scale(1)`;
           } else if (proximityToNext > -113) {
             // Fade out over the last 113px of overlap (holds ~75px longer before releasing)
             const overlapProgress = Math.abs(proximityToNext) / 113;
             bubble.style.opacity = `${Math.max(0, 1 - overlapProgress)}`;
-            bubble.style.setProperty('--dot-scale', `${Math.max(0.9, 1 - (overlapProgress * 0.1))}`);
+            bubble.style.transform = `${translateX} scale(${Math.max(0.9, 1 - (overlapProgress * 0.1))})`;
           } else {
             // Fully faded when deep overlap
             bubble.style.opacity = '0';
-            bubble.style.setProperty('--dot-scale', '0.9');
+            bubble.style.transform = `${translateX} scale(0.9)`;
           }
         } else {
           // Bubble is below sticky position - normal state
           bubble.classList.remove('is-sticky');
           bubble.style.opacity = '1';
-          bubble.style.setProperty('--dot-scale', '1');
+          bubble.style.transform = `${translateX} scale(1)`;
         }
       });
     };
@@ -1294,18 +1300,7 @@ export function TimelineDesktopV2({ useV2Features = false }: { useV2Features?: b
             position: sticky;
             top: 151px;
             z-index: 30;
-            --dot-scale: 1;
             /* No transitions - scroll handler provides smooth updates */
-          }
-
-          /* Left-positioned date badges */
-          .timeline-dot-left {
-            transform: translateX(clamp(-54px, -4vw, -30px)) scale(var(--dot-scale, 1));
-          }
-
-          /* Right-positioned date badges */
-          .timeline-dot-right {
-            transform: translateX(clamp(30px, 4vw, 54px)) scale(var(--dot-scale, 1));
           }
         
           .timeline-card-container {
@@ -1317,7 +1312,7 @@ export function TimelineDesktopV2({ useV2Features = false }: { useV2Features?: b
             position: absolute;
             top: 50%;
             transform: translateY(-50%);
-            width: clamp(40px, 6vw, 78px);
+            width: 78px;
             height: 3.5px;
             background: linear-gradient(
               to right,
@@ -1334,7 +1329,7 @@ export function TimelineDesktopV2({ useV2Features = false }: { useV2Features?: b
 
           /* Left-positioned cards - connector goes to the right (light at card, dark at spine) */
           .timeline-step .justify-end .timeline-card-container::after {
-            right: clamp(-78px, -6vw, -40px);
+            right: -78px;
             background: linear-gradient(
               to right,
               rgba(32, 57, 84, 0.4) 0%,
@@ -1345,7 +1340,7 @@ export function TimelineDesktopV2({ useV2Features = false }: { useV2Features?: b
 
           /* Right-positioned cards - connector goes to the left (dark at spine, light at card) */
           .timeline-step .justify-start .timeline-card-container::after {
-            left: clamp(-78px, -6vw, -40px);
+            left: -78px;
             background: linear-gradient(
               to right,
               rgba(32, 57, 84, 0.8) 0%,
@@ -1388,10 +1383,8 @@ export function TimelineDesktopV2({ useV2Features = false }: { useV2Features?: b
           .decade-banner {
             transform: translateX(0) !important;
           }
-          .timeline-dot,
-          .timeline-dot-left,
-          .timeline-dot-right {
-            transform: scale(1) translateX(0) !important;
+          .timeline-dot {
+            transform: scale(1) !important;
             opacity: 1 !important;
           }
         }

@@ -1,8 +1,9 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { MessageSquarePlus, X, Loader2 } from 'lucide-react';
 import { useFamilyAuth } from '@/hooks/use-family-auth';
+import { useNavVisibility } from '@/contexts/NavVisibilityContext';
 import confetti from 'canvas-confetti';
 
 type SubmitQuestionDialogProps = {
@@ -19,12 +20,22 @@ export function SubmitQuestionDialog({
   storytellerName,
 }: SubmitQuestionDialogProps) {
   const { session } = useFamilyAuth();
+  const { hideNav, showNav } = useNavVisibility();
   const [promptText, setPromptText] = useState('');
   const [context, setContext] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
   const [showSuccess, setShowSuccess] = useState(false);
   const submitButtonRef = useRef<HTMLButtonElement>(null);
+
+  // Hide nav when dialog is open
+  useEffect(() => {
+    if (isOpen) {
+      hideNav();
+    } else {
+      showNav();
+    }
+  }, [isOpen, hideNav, showNav]);
 
   // Confetti celebration function (same as family invite)
   const celebrateSubmission = () => {
@@ -137,22 +148,36 @@ export function SubmitQuestionDialog({
     <>
       {/* Success Toast */}
       {showSuccess && (
-        <div className="fixed top-4 right-4 z-[60] bg-green-50 border border-green-200 rounded-lg p-4 shadow-lg max-w-md">
+        <div
+          className="fixed top-4 right-4 z-[60] rounded-xl p-4 shadow-lg max-w-md border"
+          style={{
+            backgroundColor: 'var(--hw-secondary-soft, #DDE7E1)',
+            borderColor: 'var(--hw-secondary, #3E6A5A)',
+          }}
+        >
           <div className="flex items-start gap-3">
-            <div className="flex-shrink-0 w-5 h-5 rounded-full bg-green-100 flex items-center justify-center">
-              <div className="w-2 h-2 rounded-full bg-green-600" />
+            <div
+              className="flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center"
+              style={{ backgroundColor: 'var(--hw-secondary, #3E6A5A)' }}
+            >
+              <svg className="w-3.5 h-3.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+              </svg>
             </div>
             <div className="flex-1">
-              <p className="font-medium text-green-900">Question sent!</p>
-              <p className="text-sm text-green-700 mt-1">
+              <p className="font-semibold" style={{ color: 'var(--hw-text-primary, #1F1F1F)' }}>
+                Question sent!
+              </p>
+              <p className="text-base mt-1" style={{ color: 'var(--hw-text-secondary, #4A4A4A)' }}>
                 {storytellerName} will see it in their prompt library.
               </p>
             </div>
             <button
               onClick={() => setShowSuccess(false)}
-              className="flex-shrink-0 text-green-600 hover:text-green-800"
+              className="flex-shrink-0 p-1 rounded-lg transition-colors"
+              style={{ color: 'var(--hw-secondary, #3E6A5A)' }}
             >
-              <X className="w-4 h-4" />
+              <X className="w-5 h-5" />
             </button>
           </div>
         </div>
@@ -160,60 +185,118 @@ export function SubmitQuestionDialog({
 
       {/* Modal Overlay */}
       <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-        <div className="bg-white rounded-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto shadow-2xl">
+        <div
+          className="rounded-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto shadow-2xl"
+          style={{ backgroundColor: 'var(--hw-surface, #FFFFFF)' }}
+        >
           {/* Header */}
-          <div className="sticky top-0 bg-gradient-to-br from-amber-500 via-orange-500 to-rose-500 text-white p-6 rounded-t-2xl">
+          <div
+            className="sticky top-0 p-6 rounded-t-2xl"
+            style={{ backgroundColor: 'var(--hw-primary, #203954)' }}
+          >
             <div className="flex items-start justify-between">
               <div>
-                <h2 className="text-2xl font-bold">Suggest a Question</h2>
-                <p className="text-amber-50 mt-1">for {storytellerName}</p>
+                <h2 className="text-2xl font-semibold text-white">Suggest a Question</h2>
+                <p className="mt-1 text-base" style={{ color: 'var(--hw-primary-soft, #E0E5ED)' }}>
+                  for {storytellerName}
+                </p>
               </div>
+              <button
+                onClick={handleClose}
+                disabled={isSubmitting}
+                className="p-2 rounded-lg transition-colors hover:bg-white/10"
+                aria-label="Close dialog"
+              >
+                <X className="w-6 h-6 text-white" />
+              </button>
             </div>
           </div>
 
           {/* Form */}
-          <form onSubmit={handleSubmit} className="p-6 space-y-4">
+          <form onSubmit={handleSubmit} className="p-6 space-y-5">
             {/* Question Field */}
-            <div>
-              <label htmlFor="promptText" className="block text-sm font-medium text-gray-700 mb-2">
-                Your Question <span className="text-rose-500">*</span>
+            <div className="space-y-2">
+              <label
+                htmlFor="promptText"
+                className="block text-base font-medium"
+                style={{ color: 'var(--hw-text-primary, #1F1F1F)' }}
+              >
+                Your Question <span style={{ color: 'var(--hw-error, #B91C1C)' }}>*</span>
               </label>
               <textarea
                 id="promptText"
                 value={promptText}
                 onChange={(e) => setPromptText(e.target.value)}
                 placeholder={`What question would you like ${storytellerName} to answer?`}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg resize-none focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all"
-                rows={4}
+                className="w-full px-4 py-4 rounded-xl resize-none transition-all text-base"
+                style={{
+                  minHeight: '120px',
+                  backgroundColor: 'var(--hw-surface, #FFFFFF)',
+                  border: '1px solid var(--hw-border-subtle, #D2C9BD)',
+                  color: 'var(--hw-text-primary, #1F1F1F)',
+                }}
+                onFocus={(e) => {
+                  e.target.style.borderColor = 'var(--hw-primary, #203954)';
+                  e.target.style.boxShadow = '0 0 0 2px var(--hw-primary, #203954)';
+                }}
+                onBlur={(e) => {
+                  e.target.style.borderColor = 'var(--hw-border-subtle, #D2C9BD)';
+                  e.target.style.boxShadow = 'none';
+                }}
                 maxLength={500}
                 required
                 disabled={isSubmitting}
               />
-              <div className="flex justify-between items-center mt-1">
-                <p className="text-xs text-gray-500">Minimum 10 characters</p>
-                <p className={`text-xs ${charCount > 450 ? 'text-rose-600 font-medium' : 'text-gray-500'}`}>
+              <div className="flex justify-between items-center">
+                <p className="text-base" style={{ color: 'var(--hw-text-muted, #8A8378)' }}>
+                  Minimum 10 characters
+                </p>
+                <p
+                  className="text-base font-medium"
+                  style={{ color: charCount > 450 ? 'var(--hw-error, #B91C1C)' : 'var(--hw-text-muted, #8A8378)' }}
+                >
                   {charCount}/500
                 </p>
               </div>
             </div>
 
             {/* Context Field (Optional) */}
-            <div>
-              <label htmlFor="context" className="block text-sm font-medium text-gray-700 mb-2">
-                Context <span className="text-gray-400">(optional)</span>
+            <div className="space-y-2">
+              <label
+                htmlFor="context"
+                className="block text-base font-medium"
+                style={{ color: 'var(--hw-text-primary, #1F1F1F)' }}
+              >
+                Context <span style={{ color: 'var(--hw-text-muted, #8A8378)' }}>(optional)</span>
               </label>
               <textarea
                 id="context"
                 value={context}
                 onChange={(e) => setContext(e.target.value)}
                 placeholder="Why is this question meaningful to you? Any additional details..."
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg resize-none focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all"
-                rows={3}
+                className="w-full px-4 py-4 rounded-xl resize-none transition-all text-base"
+                style={{
+                  minHeight: '100px',
+                  backgroundColor: 'var(--hw-surface, #FFFFFF)',
+                  border: '1px solid var(--hw-border-subtle, #D2C9BD)',
+                  color: 'var(--hw-text-primary, #1F1F1F)',
+                }}
+                onFocus={(e) => {
+                  e.target.style.borderColor = 'var(--hw-primary, #203954)';
+                  e.target.style.boxShadow = '0 0 0 2px var(--hw-primary, #203954)';
+                }}
+                onBlur={(e) => {
+                  e.target.style.borderColor = 'var(--hw-border-subtle, #D2C9BD)';
+                  e.target.style.boxShadow = 'none';
+                }}
                 maxLength={500}
                 disabled={isSubmitting}
               />
-              <div className="flex justify-end mt-1">
-                <p className={`text-xs ${contextCharCount > 450 ? 'text-rose-600 font-medium' : 'text-gray-500'}`}>
+              <div className="flex justify-end">
+                <p
+                  className="text-base font-medium"
+                  style={{ color: contextCharCount > 450 ? 'var(--hw-error, #B91C1C)' : 'var(--hw-text-muted, #8A8378)' }}
+                >
                   {contextCharCount}/500
                 </p>
               </div>
@@ -221,26 +304,62 @@ export function SubmitQuestionDialog({
 
             {/* Error Message */}
             {error && (
-              <div className="bg-rose-50 border border-rose-200 rounded-lg p-3">
-                <p className="text-sm text-rose-700">{error}</p>
+              <div
+                className="rounded-xl p-4 border"
+                style={{
+                  backgroundColor: '#FEF2F2',
+                  borderColor: 'var(--hw-error, #B91C1C)',
+                }}
+              >
+                <p className="text-base" style={{ color: 'var(--hw-error, #B91C1C)' }}>{error}</p>
               </div>
             )}
 
-            {/* Submit Button */}
-            <div className="flex gap-3 pt-2">
+            {/* Buttons */}
+            <div className="flex gap-4 pt-2">
+              {/* Cancel Button - Secondary style */}
               <button
                 type="button"
                 onClick={handleClose}
-                className="flex-1 px-4 py-3 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors font-medium"
                 disabled={isSubmitting}
+                className="flex-1 px-6 py-4 rounded-xl font-medium transition-all active:scale-[0.98]"
+                style={{
+                  minHeight: '56px',
+                  backgroundColor: 'var(--hw-surface, #FFFFFF)',
+                  border: '1px solid var(--hw-border-subtle, #D2C9BD)',
+                  color: 'var(--hw-text-primary, #1F1F1F)',
+                  fontSize: '18px',
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = 'var(--hw-section-bg, #EFE6DA)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = 'var(--hw-surface, #FFFFFF)';
+                }}
               >
                 Cancel
               </button>
+
+              {/* Submit Button - Primary style */}
               <button
                 ref={submitButtonRef}
                 type="submit"
                 disabled={isSubmitting || promptText.trim().length < 10}
-                className="flex-1 px-4 py-3 bg-gradient-to-br from-amber-500 via-orange-500 to-rose-500 text-white rounded-lg hover:shadow-lg transition-all font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                className="flex-1 px-6 py-4 rounded-xl font-medium transition-all active:scale-[0.98] flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm hover:shadow-md"
+                style={{
+                  minHeight: '56px',
+                  backgroundColor: 'var(--hw-primary, #203954)',
+                  color: 'white',
+                  fontSize: '18px',
+                }}
+                onMouseEnter={(e) => {
+                  if (!e.currentTarget.disabled) {
+                    e.currentTarget.style.backgroundColor = 'var(--hw-primary-hover, #1B3047)';
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = 'var(--hw-primary, #203954)';
+                }}
               >
                 {isSubmitting ? (
                   <>
@@ -257,8 +376,11 @@ export function SubmitQuestionDialog({
             </div>
 
             {/* Helper Text */}
-            <p className="text-xs text-gray-500 text-center pt-2">
-              Your question will appear in {storytellerName}'s prompt library
+            <p
+              className="text-base text-center pt-2"
+              style={{ color: 'var(--hw-text-muted, #8A8378)' }}
+            >
+              Your question will appear in {storytellerName}&apos;s prompt library
             </p>
           </form>
         </div>
