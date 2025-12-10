@@ -154,7 +154,7 @@ export default function FamilyNav({
               ) : (
                 <span
                   className={cn(
-                    "relative text-sm leading-tight font-medium transition-colors duration-200",
+                    "relative text-[10px] leading-3 font-medium text-center transition-colors duration-200",
                     isHighlighted
                       ? "text-blue-600"
                       : active
