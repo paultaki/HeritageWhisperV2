@@ -109,69 +109,44 @@ export function AccountSwitcher() {
 
       <DropdownMenuContent align="end" className="w-[300px]">
         <DropdownMenuLabel className="text-xs text-gray-600 font-semibold uppercase tracking-wider">
-          Switch Account
+          Switch To
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
 
-        {/* Own Account */}
-        <DropdownMenuItem
-          onClick={() => handleSwitch(user.id)}
-          className={cn(
-            'flex items-center gap-3 px-3 py-3 cursor-pointer',
-            isOwnAccount && 'bg-accent'
-          )}
-        >
-          <div className="flex items-center justify-center w-10 h-10 rounded-full bg-gradient-to-br from-amber-400 to-amber-600">
-            <User className="h-5 w-5 text-white" />
-          </div>
-          <div className="flex-1 min-w-0">
-            <p className="text-base font-semibold truncate text-gray-900">{user.name || 'Your Stories'}</p>
-            <p className="text-sm text-gray-600">Your Stories</p>
-          </div>
-          {isOwnAccount && <Check className="h-5 w-5 text-amber-600" />}
-        </DropdownMenuItem>
-
-        {familyStorytellers.length > 0 && (
-          <React.Fragment key="family-section">
-            <DropdownMenuSeparator />
-            <DropdownMenuLabel className="text-xs text-gray-600 font-semibold uppercase tracking-wider">
-              Family Stories
-            </DropdownMenuLabel>
-
-            {familyStorytellers.map((storyteller) => {
-              const isActive = activeContext.storytellerId === storyteller.storytellerId;
-
-              return (
-                <DropdownMenuItem
-                  key={storyteller.storytellerId}
-                  onClick={() => handleSwitch(storyteller.storytellerId)}
-                  className={cn(
-                    'flex items-center gap-3 px-3 py-3 cursor-pointer',
-                    isActive && 'bg-accent'
-                  )}
-                >
-                  <div className="flex items-center justify-center w-10 h-10 rounded-full bg-gradient-to-br from-blue-400 to-blue-600">
-                    <Users className="h-5 w-5 text-white" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-base font-semibold truncate text-gray-900">{storyteller.storytellerName}</p>
-                    <div className="flex items-center gap-2 text-sm text-gray-600">
-                      {storyteller.relationship && (
-                        <span className="truncate">{storyteller.relationship}</span>
-                      )}
-                      {storyteller.permissionLevel === 'contributor' && (
-                        <span className="px-1.5 py-0.5 rounded-full bg-blue-100 text-blue-700 text-xs font-medium">
-                          Contributor
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                  {isActive && <Check className="h-5 w-5 text-blue-600" />}
-                </DropdownMenuItem>
-              );
-            })}
-          </React.Fragment>
+        {/* Own Account - only show if NOT currently on own account */}
+        {!isOwnAccount && (
+          <DropdownMenuItem
+            onClick={() => handleSwitch(user.id)}
+            className="flex items-center gap-3 px-3 py-3 cursor-pointer"
+          >
+            <div className="flex items-center justify-center w-10 h-10 rounded-full bg-gradient-to-br from-amber-400 to-amber-600">
+              <User className="h-5 w-5 text-white" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-base font-semibold truncate text-gray-900">{user.name || 'Your Stories'}</p>
+              <p className="text-sm text-gray-600">Your Stories</p>
+            </div>
+          </DropdownMenuItem>
         )}
+
+        {/* Family accounts - only show ones that are NOT currently active */}
+        {familyStorytellers
+          .filter((storyteller) => activeContext.storytellerId !== storyteller.storytellerId)
+          .map((storyteller) => (
+            <DropdownMenuItem
+              key={storyteller.storytellerId}
+              onClick={() => handleSwitch(storyteller.storytellerId)}
+              className="flex items-center gap-3 px-3 py-3 cursor-pointer"
+            >
+              <div className="flex items-center justify-center w-10 h-10 rounded-full bg-gradient-to-br from-blue-400 to-blue-600">
+                <Users className="h-5 w-5 text-white" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-base font-semibold truncate text-gray-900">{storyteller.storytellerName}</p>
+                <p className="text-sm text-gray-600">Guest access</p>
+              </div>
+            </DropdownMenuItem>
+          ))}
       </DropdownMenuContent>
     </DropdownMenu>
   );

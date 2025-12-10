@@ -205,7 +205,7 @@ export default function GlassMenuDropdown({ isOpen, onClose }: GlassMenuDropdown
                     {isOwnAccount ? (user.name || "Your Stories") : activeContext?.storytellerName}
                   </p>
                   <p className="text-xs text-gray-500 truncate">
-                    {isOwnAccount ? "Your Stories" : `Viewing as ${activeContext?.relationship || 'Family'}`}
+                    {isOwnAccount ? "Your Stories" : "Viewing as guest"}
                   </p>
                 </div>
                 {hasFamilyAccess && (
@@ -226,45 +226,40 @@ export default function GlassMenuDropdown({ isOpen, onClose }: GlassMenuDropdown
                     className="overflow-hidden border-t border-gray-100"
                   >
                     <div className="py-1 bg-white/50">
-                      {/* Own account option */}
-                      <button
-                        onClick={() => handleAccountSwitch(user.id)}
-                        className={`w-full flex items-center gap-3 px-4 py-2.5 text-left transition-colors ${
-                          isOwnAccount ? 'bg-amber-50' : 'hover:bg-gray-50'
-                        }`}
-                      >
-                        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center flex-shrink-0">
-                          <User className="w-4 h-4 text-white" />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium text-gray-900 truncate">{user.name || "Your Stories"}</p>
-                          <p className="text-xs text-gray-500">Your Stories</p>
-                        </div>
-                        {isOwnAccount && <Check className="w-4 h-4 text-amber-600 flex-shrink-0" />}
-                      </button>
+                      {/* Own account option - only show if NOT currently on own account */}
+                      {!isOwnAccount && (
+                        <button
+                          onClick={() => handleAccountSwitch(user.id)}
+                          className="w-full flex items-center gap-3 px-4 py-2.5 text-left transition-colors hover:bg-gray-50"
+                        >
+                          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center flex-shrink-0">
+                            <User className="w-4 h-4 text-white" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-medium text-gray-900 truncate">{user.name || "Your Stories"}</p>
+                            <p className="text-xs text-gray-500">Your Stories</p>
+                          </div>
+                        </button>
+                      )}
 
-                      {/* Family accounts */}
-                      {familyStorytellers.map((storyteller) => {
-                        const isActive = activeContext?.storytellerId === storyteller.storytellerId;
-                        return (
+                      {/* Family accounts - only show ones that are NOT currently active */}
+                      {familyStorytellers
+                        .filter((storyteller) => activeContext?.storytellerId !== storyteller.storytellerId)
+                        .map((storyteller) => (
                           <button
                             key={storyteller.storytellerId}
                             onClick={() => handleAccountSwitch(storyteller.storytellerId)}
-                            className={`w-full flex items-center gap-3 px-4 py-2.5 text-left transition-colors ${
-                              isActive ? 'bg-blue-50' : 'hover:bg-gray-50'
-                            }`}
+                            className="w-full flex items-center gap-3 px-4 py-2.5 text-left transition-colors hover:bg-gray-50"
                           >
                             <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center flex-shrink-0">
                               <Users className="w-4 h-4 text-white" />
                             </div>
                             <div className="flex-1 min-w-0">
                               <p className="text-sm font-medium text-gray-900 truncate">{storyteller.storytellerName}</p>
-                              <p className="text-xs text-gray-500 truncate">{storyteller.relationship || 'Family'}</p>
+                              <p className="text-xs text-gray-500">Guest access</p>
                             </div>
-                            {isActive && <Check className="w-4 h-4 text-blue-600 flex-shrink-0" />}
                           </button>
-                        );
-                      })}
+                        ))}
                     </div>
                   </motion.div>
                 )}
