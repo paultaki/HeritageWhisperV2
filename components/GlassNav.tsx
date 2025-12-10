@@ -140,7 +140,7 @@ export default function GlassNav({
             )}
             <span
               className={cn(
-                "relative text-[11px] leading-tight font-medium transition-colors duration-200",
+                "relative text-sm leading-tight font-medium transition-colors duration-200",
                 // Label colors - conditional on ink and active state
                 dataInk === "light"
                   ? "text-white drop-shadow-[0_1px_1px_rgba(0,0,0,0.30)]"
@@ -151,7 +151,7 @@ export default function GlassNav({
             >
               {label.startsWith('+') ? (
                 <>
-                  <span className="text-[13px] font-bold">{label.charAt(0)}</span>
+                  <span className="text-base font-bold">{label.charAt(0)}</span>
                   {label.slice(1)}
                 </>
               ) : (

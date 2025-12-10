@@ -198,6 +198,16 @@ body {
   min-width: 0;
   /* Allow card to shrink below content size */
   box-sizing: border-box;
+  /* Hover lift effect */
+  transition: transform 200ms ease, box-shadow 200ms ease;
+}
+
+/* Desktop hover lift effect - use !important to override .hw-card-visible transform */
+@media (hover: hover) {
+  .hw-card:hover {
+    transform: translateY(-4px) !important;
+    box-shadow: 0 12px 28px -8px rgba(0, 0, 0, 0.18), 0 8px 16px -4px rgba(0, 0, 0, 0.1) !important;
+  }
 }
 
 /* Lighter shadows on mobile and remove border */

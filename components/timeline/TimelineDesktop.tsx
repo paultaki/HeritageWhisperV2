@@ -338,10 +338,12 @@ function CenteredMemoryCard({ story, position, index, isDark = false, showDecade
             borderColor: 'var(--color-timeline-card-border)',
           }}
           onMouseEnter={(e) => {
-            e.currentTarget.style.boxShadow = '0 8px 20px -3px rgba(0, 0, 0, 0.15), 0 4px 9px -1px rgba(0, 0, 0, 0.1)';
+            e.currentTarget.style.boxShadow = '0 12px 28px -8px rgba(0, 0, 0, 0.18), 0 8px 16px -4px rgba(0, 0, 0, 0.1)';
+            e.currentTarget.style.transform = 'translateY(-4px)';
           }}
           onMouseLeave={(e) => {
             e.currentTarget.style.boxShadow = '0 4px 12px -2px rgba(0, 0, 0, 0.08), 0 2px 6px -1px rgba(0, 0, 0, 0.06)';
+            e.currentTarget.style.transform = 'translateY(0)';
           }}
         >
           {/* Ghost Placeholder - 4:3 aspect ratio with gray background and icon */}
@@ -398,10 +400,12 @@ function CenteredMemoryCard({ story, position, index, isDark = false, showDecade
             border: '1.5px solid var(--color-timeline-card-border)',
           }}
           onMouseEnter={(e) => {
-            e.currentTarget.style.boxShadow = '0 8px 20px -3px rgba(0, 0, 0, 0.2), 0 4px 9px -1px rgba(0, 0, 0, 0.15)';
+            e.currentTarget.style.boxShadow = '0 12px 28px -8px rgba(0, 0, 0, 0.18), 0 8px 16px -4px rgba(0, 0, 0, 0.1)';
+            e.currentTarget.style.transform = 'translateY(-4px)';
           }}
           onMouseLeave={(e) => {
-            e.currentTarget.style.boxShadow = '0 12px 32px -4px rgba(0, 0, 0, 0.35), 0 6px 14px -2px rgba(0, 0, 0, 0.25)';
+            e.currentTarget.style.boxShadow = '0 6px 16px -2px rgba(0, 0, 0, 0.18), 0 3px 7px -1px rgba(0, 0, 0, 0.12)';
+            e.currentTarget.style.transform = 'translateY(0)';
           }}
         >
           {/* Photo Section - 4:3 aspect ratio to match mobile, rounded top corners only */}
@@ -417,12 +421,23 @@ function CenteredMemoryCard({ story, position, index, isDark = false, showDecade
               className="w-full h-full"
             />
 
-            {/* Photo count badge - z-20 to stay above photo */}
-            {photoCount > 1 && (
-              <div className="absolute top-3 left-3 z-20 bg-black/60 text-white px-2 py-1 rounded text-xs font-medium">
-                {photoCount} photos
-              </div>
-            )}
+            {/* Metadata badge (top-left) - shows audio indicator and photo count */}
+            {(() => {
+              const hasAudio = !!(story.audioUrl && story.audioUrl.trim() !== "");
+              const hasMultiplePhotos = photoCount > 1;
+
+              const parts: string[] = [];
+              if (hasAudio) parts.push("🎧 Audio");
+              if (hasMultiplePhotos && !useV2Features) parts.push(`${photoCount} photos`);
+
+              if (parts.length === 0) return null;
+
+              return (
+                <div className="absolute top-3 left-3 z-30 bg-black/75 text-white px-2.5 py-1.5 rounded-full text-xs font-semibold shadow-lg">
+                  {parts.join(" • ")}
+                </div>
+              );
+            })()}
 
             {/* Photo navigation arrows - only show when multiple photos */}
             {photoCount > 1 && (
@@ -446,19 +461,6 @@ function CenteredMemoryCard({ story, position, index, isDark = false, showDecade
               </>
             )}
 
-            {/* Audio indicator badge on photo - shows headphone icon if story has audio */}
-            {story.audioUrl && !useV2Features && (
-              <div
-                className="absolute right-4 bottom-4 w-11 h-11 rounded-full flex items-center justify-center z-10"
-                style={{
-                  backgroundColor: 'rgba(255, 255, 255, 0.9)',
-                  backdropFilter: 'blur(4px)'
-                }}
-                aria-label="Story has audio"
-              >
-                <Headphones className="w-5 h-5 text-neutral-600" />
-              </div>
-            )}
           </div>
 
           {/* White Card Section Below Photo - Compact horizontal layout */}
@@ -521,10 +523,12 @@ function CenteredMemoryCard({ story, position, index, isDark = false, showDecade
           border: '1.5px solid var(--color-timeline-card-border)',
         }}
         onMouseEnter={(e) => {
-          e.currentTarget.style.boxShadow = '0 8px 20px -3px rgba(0, 0, 0, 0.2), 0 4px 9px -1px rgba(0, 0, 0, 0.15)';
+          e.currentTarget.style.boxShadow = '0 12px 28px -8px rgba(0, 0, 0, 0.18), 0 8px 16px -4px rgba(0, 0, 0, 0.1)';
+          e.currentTarget.style.transform = 'translateY(-4px)';
         }}
         onMouseLeave={(e) => {
           e.currentTarget.style.boxShadow = '0 6px 16px -2px rgba(0, 0, 0, 0.18), 0 3px 7px -1px rgba(0, 0, 0, 0.12)';
+          e.currentTarget.style.transform = 'translateY(0)';
         }}
       >
         {/* Compact pill layout - no photo placeholder */}
@@ -879,7 +883,7 @@ export function TimelineDesktop({ useV2Features = false }: { useV2Features?: boo
     if (!storiesData) return;
 
     const handleBubbleScroll = () => {
-      const stickyTop = 150; // Adjusted for badge offset (-89px top)
+      const stickyTop = 151; // Adjusted for badge offset (-89px top) + 1px header clearance
       const collisionThreshold = 10 as number; // Very small threshold - stay visible longer
 
       // Query all timeline-dot elements
@@ -1294,7 +1298,7 @@ export function TimelineDesktop({ useV2Features = false }: { useV2Features?: boo
           /* Sticky date bubbles */
           .timeline-dot {
             position: sticky;
-            top: 150px;
+            top: 151px;
             z-index: 30;
             /* No transitions - scroll handler provides smooth updates */
           }

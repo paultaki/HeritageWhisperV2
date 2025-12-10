@@ -288,7 +288,7 @@ export default function BookProgressBar({
           <div className="flex items-center gap-1 bg-white/95 rounded-lg border border-gray-300 overflow-hidden">
             <button
               onClick={onZoomOut}
-              className="w-9 h-8 flex items-center justify-center hover:bg-gray-100 transition-colors text-gray-700 font-bold text-lg"
+              className="min-w-[48px] min-h-[48px] flex items-center justify-center hover:bg-gray-100 transition-colors text-gray-700 font-bold text-lg"
               aria-label="Zoom out"
             >
               −
@@ -298,7 +298,7 @@ export default function BookProgressBar({
             </div>
             <button
               onClick={onZoomIn}
-              className="w-9 h-8 flex items-center justify-center hover:bg-gray-100 transition-colors text-gray-700 font-bold text-lg"
+              className="min-w-[48px] min-h-[48px] flex items-center justify-center hover:bg-gray-100 transition-colors text-gray-700 font-bold text-lg"
               aria-label="Zoom in"
             >
               +

@@ -406,7 +406,7 @@ export const MemoryCard = React.memo(
         {/* Image container with audio overlay */}
         <div
           className="w-full block"
-          style={{ position: "relative", overflow: "hidden", margin: 0, padding: 0 }}
+          style={{ position: "relative", margin: 0, padding: 0 }}
           onTouchStart={useV2Features && photoCount > 1 ? handleTouchStart : undefined}
           onTouchMove={useV2Features && photoCount > 1 ? handleTouchMove : undefined}
           onTouchEnd={useV2Features && photoCount > 1 ? handleTouchEnd : undefined}
@@ -493,26 +493,25 @@ export const MemoryCard = React.memo(
             </>
           )}
 
-          {/* Original photo count badge (non-V2) - z-20 to stay above photo */}
-          {!useV2Features && photoCount > 1 && (
-            <div className="absolute bottom-3 left-3 z-20 bg-black/60 text-white px-2 py-1 rounded text-xs font-medium">
-              {photoCount} photos
-            </div>
-          )}
+          {/* Metadata badge (top-left) - shows audio indicator and photo count */}
+          {(() => {
+            const hasAudio = !!(story.audioUrl && story.audioUrl.trim() !== "");
+            const hasMultiplePhotos = photoCount > 1;
 
-          {/* Audio indicator badge on photo - shows headphone icon if story has audio */}
-          {story.audioUrl && !useV2Features && (
-            <div
-              className="absolute right-4 bottom-4 w-11 h-11 rounded-full flex items-center justify-center"
-              style={{
-                backgroundColor: 'rgba(255, 255, 255, 0.9)',
-                backdropFilter: 'blur(4px)'
-              }}
-              aria-label="Story has audio"
-            >
-              <Headphones className="w-5 h-5 text-neutral-600" />
-            </div>
-          )}
+            // Build badge content
+            const parts: string[] = [];
+            if (hasAudio) parts.push("🎧 Audio");
+            if (hasMultiplePhotos && !useV2Features) parts.push(`${photoCount} photos`);
+
+            if (parts.length === 0) return null;
+
+            return (
+              <div className="absolute top-3 left-3 z-30 bg-black/75 text-white px-2.5 py-1.5 rounded-full text-xs font-semibold shadow-lg">
+                {parts.join(" • ")}
+              </div>
+            );
+          })()}
+
         </div>
 
         <div className="hw-card-body relative">
