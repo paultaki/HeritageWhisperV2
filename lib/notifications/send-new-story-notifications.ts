@@ -145,7 +145,7 @@ export async function sendNewStoryNotifications({
     // Only notify users who haven't unsubscribed
     const { data: familyMembers, error: familyError } = await supabaseAdmin
       .from('family_members')
-      .select('id, name, email, email_notifications')
+      .select('id, name, email, email_notifications, last_story_notification_sent_at')
       .eq('user_id', storytellerUserId)
       .eq('status', 'active')
       .eq('email_notifications', true);
@@ -154,6 +154,26 @@ export async function sendNewStoryNotifications({
       console.log('[StoryNotification] No active family members to notify');
       return;
     }
+
+    // 3-HOUR THROTTLE: Filter out family members who were notified within the last 3 hours
+    // They'll receive a batched notification later (via daily digest or after the throttle window)
+    const THREE_HOURS_MS = 3 * 60 * 60 * 1000;
+    const throttleThreshold = new Date(Date.now() - THREE_HOURS_MS);
+
+    const eligibleMembers = familyMembers.filter((member) => {
+      if (!member.last_story_notification_sent_at) {
+        return true; // Never notified before, send immediately
+      }
+      const lastSent = new Date(member.last_story_notification_sent_at);
+      return lastSent < throttleThreshold; // Only include if last notification was 3+ hours ago
+    });
+
+    if (eligibleMembers.length === 0) {
+      console.log('[StoryNotification] All family members were notified within the last 3 hours - skipping (they will receive batched notification later)');
+      return;
+    }
+
+    console.log(`[StoryNotification] ${eligibleMembers.length} of ${familyMembers.length} family members eligible for immediate notification (${familyMembers.length - eligibleMembers.length} throttled)`);
 
     // Generate signed URL for hero photo (if exists)
     const heroPhotoUrl = await generateSignedPhotoUrl(heroPhotoPath);
@@ -166,11 +186,11 @@ export async function sendNewStoryNotifications({
 
     const resend = new Resend(process.env.RESEND_API_KEY);
 
-    // Send email to each family member
+    // Send email to each eligible family member (throttle-filtered)
     let successCount = 0;
     let failureCount = 0;
 
-    for (const member of familyMembers) {
+    for (const member of eligibleMembers) {
       try {
         const familyMemberName = member.name || member.email.split('@')[0];
 

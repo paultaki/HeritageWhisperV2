@@ -61,7 +61,9 @@ export async function GET(request: NextRequest) {
   // - Family members who need notifications
   // - Their storyteller info
   // - Story counts since last notification
-  const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+  // Note: Using 3-hour window to match the immediate notification throttle
+  // This ensures the daily digest picks up family members who were throttled during story saves
+  const threeHoursAgo = new Date(Date.now() - 3 * 60 * 60 * 1000).toISOString();
   const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
 
   logger.info('[DailyNotifications] Fetching family members with storyteller data...');
@@ -85,7 +87,7 @@ export async function GET(request: NextRequest) {
     `)
     .eq('status', 'active')
     .eq('email_notifications', true)
-    .or(`last_story_notification_sent_at.is.null,last_story_notification_sent_at.lt.${twentyFourHoursAgo}`);
+    .or(`last_story_notification_sent_at.is.null,last_story_notification_sent_at.lt.${threeHoursAgo}`);
 
   if (membersError) {
     logger.error('[DailyNotifications] Error fetching family members:', membersError);
