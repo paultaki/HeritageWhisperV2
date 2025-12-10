@@ -192,12 +192,22 @@ function useAccountContextInternal() {
                 localStorage.removeItem(STORAGE_KEY);
                 await invalidateAllStorytellerQueries();
                 // Fall through to default own account
-              } else if (storedContext.storytellerId === user.id || storedContext.type === 'viewing') {
-                // Valid stored context - use it
-                console.log('[useAccountContext] Using stored context:', storedContext.type, storedContext.storytellerId);
+              } else if (storedContext.storytellerId === user.id) {
+                // Own account context - use it
+                console.log('[useAccountContext] Using stored own account context');
                 setActiveContext(storedContext);
                 setIsLoading(false);
                 setIsStable(true);
+                initializationRef.current = 'complete';
+                return;
+              } else if (storedContext.type === 'viewing') {
+                // Viewing another account - need to VERIFY access before using
+                // Don't trust stale localStorage from a different user session!
+                // We'll validate this context once availableStorytellers loads
+                console.log('[useAccountContext] Found viewing context, will validate after fetching available storytellers');
+                // Set a temporary context but mark as NOT stable until validated
+                setActiveContext(storedContext);
+                setIsLoading(true); // Keep loading until validated
                 initializationRef.current = 'complete';
                 return;
               }
@@ -293,16 +303,16 @@ function useAccountContextInternal() {
     }
   }, [user, isAuthLoading, fetchAvailableStorytellers]);
 
-  // Convert simple storyteller ID to full context once available storytellers are loaded
+  // Validate and resolve context once available storytellers are loaded
   useEffect(() => {
     if (!user || availableStorytellers.length === 0) return;
 
-    const storedStorytellerIdOnly = localStorage.getItem(STORAGE_KEY);
+    const storedValue = localStorage.getItem(STORAGE_KEY);
 
-    // Check if we have a simple ID (from account creation) and no active context yet
-    if (storedStorytellerIdOnly && !storedStorytellerIdOnly.startsWith('{') && !activeContext) {
+    // CASE 1: Simple storyteller ID (from account creation flow)
+    if (storedValue && !storedValue.startsWith('{') && !activeContext) {
       // Find the storyteller in available list
-      const storyteller = availableStorytellers.find(s => s.storytellerId === storedStorytellerIdOnly);
+      const storyteller = availableStorytellers.find(s => s.storytellerId === storedValue);
 
       if (storyteller) {
         const newContext: AccountContext = {
@@ -316,8 +326,10 @@ function useAccountContextInternal() {
         setActiveContext(newContext);
         localStorage.setItem(STORAGE_KEY, JSON.stringify(newContext));
         setIsLoading(false);
+        setIsStable(true);
       } else {
         // Storyteller not found in available list, default to own account
+        console.log('[useAccountContext] Storyteller ID not in available list, resetting to own account');
         const ownContext: AccountContext = {
           storytellerId: user.id,
           storytellerName: user.name || 'Your Stories',
@@ -328,9 +340,44 @@ function useAccountContextInternal() {
         setActiveContext(ownContext);
         localStorage.setItem(STORAGE_KEY, JSON.stringify(ownContext));
         setIsLoading(false);
+        setIsStable(true);
+      }
+      return;
+    }
+
+    // CASE 2: Validate "viewing" context from localStorage
+    // This catches stale contexts from different user sessions
+    if (activeContext?.type === 'viewing' && isLoading) {
+      const hasAccess = availableStorytellers.some(
+        s => s.storytellerId === activeContext.storytellerId
+      );
+
+      if (hasAccess) {
+        // Context is valid - user has access to this storyteller
+        console.log('[useAccountContext] Validated viewing context:', activeContext.storytellerName);
+        setIsLoading(false);
+        setIsStable(true);
+      } else {
+        // INVALID: User doesn't have access to this storyteller!
+        // This happens when switching users - localStorage has stale data from previous user
+        console.log('[useAccountContext] INVALID viewing context! User lacks access to:', activeContext.storytellerId);
+        console.log('[useAccountContext] Available storytellers:', availableStorytellers.map(s => s.storytellerId));
+
+        // Reset to own account
+        const ownContext: AccountContext = {
+          storytellerId: user.id,
+          storytellerName: user.name || 'Your Stories',
+          type: 'own',
+          permissionLevel: 'owner',
+          relationship: null,
+        };
+        setActiveContext(ownContext);
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(ownContext));
+        setIsLoading(false);
+        setIsStable(true);
       }
     }
-  }, [user, availableStorytellers, activeContext]);
+  }, [user, availableStorytellers, activeContext, isLoading]);
 
   // Switch to a different storyteller
   const switchToStoryteller = useCallback(async (storytellerId: string) => {
