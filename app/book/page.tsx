@@ -713,7 +713,7 @@ function BookV4PageContent() {
 
           <div className="flex items-center justify-center" style={{ height: "100dvh" }}>
             <ClosedBookCoverV4
-              userName={user?.name || "Your"}
+              userName={activeContext?.storytellerName || user?.name || "Your"}
               storyCount={sortedStories.length}
               onOpen={() => setIsBookOpen(true)}
             />
