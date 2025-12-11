@@ -28,13 +28,17 @@ import { supabase } from '@/lib/supabase';
  * Token expires in ~60 seconds, so fetch immediately before WebRTC connection
  */
 async function fetchEphemeralToken(): Promise<string> {
+  console.log('[RealtimeInterview] 🔑 Fetching ephemeral token...');
+
   const { data: { session } } = await supabase.auth.getSession();
   const token = session?.access_token;
 
   if (!token) {
+    console.error('[RealtimeInterview] ❌ No auth token available');
     throw new Error('Not authenticated - please sign in to use Pearl');
   }
 
+  console.log('[RealtimeInterview] 📤 Calling /api/realtime-session...');
   const response = await fetch('/api/realtime-session', {
     method: 'POST',
     headers: {
@@ -45,12 +49,18 @@ async function fetchEphemeralToken(): Promise<string> {
 
   if (!response.ok) {
     const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
+    console.error('[RealtimeInterview] ❌ Token fetch failed:', response.status, errorData);
     throw new Error(errorData.error || `Failed to get session token (${response.status})`);
   }
 
   const data = await response.json();
+  console.log('[RealtimeInterview] ✅ Got response from /api/realtime-session:', {
+    hasClientSecret: !!data.client_secret,
+    expiresAt: data.expires_at,
+  });
 
   if (!data.client_secret) {
+    console.error('[RealtimeInterview] ❌ No client_secret in response');
     throw new Error('No client secret received from server');
   }
 
@@ -179,6 +189,7 @@ export function useRealtimeInterview() {
     onUserSpeechStart?: () => void,  // Callback when user starts speaking
     userName?: string // Optional user name for personalization
   ) => {
+    console.log('[RealtimeInterview] 🚀 startSession called');
     try {
       setStatus('connecting');
       setError(null);
@@ -192,7 +203,9 @@ export function useRealtimeInterview() {
 
       // Fetch ephemeral token from server-side proxy
       // Token expires in ~60 seconds, so fetch immediately before connection
+      console.log('[RealtimeInterview] 📡 Fetching ephemeral token...');
       const ephemeralToken = await fetchEphemeralToken();
+      console.log('[RealtimeInterview] ✅ Got ephemeral token, starting WebRTC...');
 
       const handles = await startRealtime({
         // Live transcript updates (gray provisional text)

@@ -47,9 +47,12 @@ export async function startRealtime(
   apiKey: string,
   config?: RealtimeConfig
 ): Promise<RealtimeHandles> {
+  console.log('[Realtime] 🚀 startRealtime called, apiKey length:', apiKey?.length || 0);
+
   // 2. Create WebRTC peer connection
   // Docs: https://developer.mozilla.org/en-US/docs/Web/API/RTCPeerConnection
   const pc = new RTCPeerConnection();
+  console.log('[Realtime] ✅ RTCPeerConnection created');
 
   // 3. Assistant audio output (receive track)
   pc.ontrack = (event) => {
@@ -185,15 +188,18 @@ export async function startRealtime(
   });
 
   mic.getTracks().forEach((track) => pc.addTrack(track, mic));
+  console.log('[Realtime] 🎤 Mic track added to peer connection');
 
   // 6. Create SDP offer
   const offer = await pc.createOffer();
   await pc.setLocalDescription(offer);
+  console.log('[Realtime] 📤 SDP offer created, exchanging with OpenAI...');
 
   // 7. Connect to OpenAI Realtime via WebRTC (Ephemeral Token approach)
   // Docs: https://platform.openai.com/docs/guides/realtime-webrtc
   // Using ephemeral token from /v1/realtime/client_secrets endpoint
   // POST to /v1/realtime/calls with ephemeral token for WebRTC SDP exchange
+  console.log('[Realtime] 📡 Calling https://api.openai.com/v1/realtime/calls...');
   const sdpResponse = await fetch('https://api.openai.com/v1/realtime/calls', {
     method: 'POST',
     headers: {
@@ -203,9 +209,11 @@ export async function startRealtime(
     body: offer.sdp,
   });
 
+  console.log('[Realtime] 📥 SDP response status:', sdpResponse.status, sdpResponse.statusText);
+
   if (!sdpResponse.ok) {
     const errorText = await sdpResponse.text();
-    console.error('[Realtime] SDP exchange failed:', {
+    console.error('[Realtime] ❌ SDP exchange failed:', {
       status: sdpResponse.status,
       statusText: sdpResponse.statusText,
       error: errorText,
@@ -215,10 +223,12 @@ export async function startRealtime(
   }
 
   const answerSdp = await sdpResponse.text();
+  console.log('[Realtime] ✅ Got SDP answer, setting remote description...');
   await pc.setRemoteDescription({
     type: 'answer',
     sdp: answerSdp,
   } as RTCSessionDescriptionInit);
+  console.log('[Realtime] ✅ WebRTC connection established!');
 
   // Helper function to safely send data through the channel
   const safeSend = (data: any, retryCount = 0): boolean => {
