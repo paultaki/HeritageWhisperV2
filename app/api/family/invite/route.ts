@@ -83,15 +83,15 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Check family member limit (max 10)
+    // Check family member limit (max 15)
     const { count } = await supabaseAdmin
       .from('family_members')
       .select('*', { count: 'exact', head: true })
       .eq('user_id', userId);
 
-    if ((count || 0) >= 10) {
+    if ((count || 0) >= 15) {
       return NextResponse.json(
-        { error: 'Maximum 10 family members allowed' },
+        { error: 'Maximum 15 family members allowed' },
         { status: 400 }
       );
     }

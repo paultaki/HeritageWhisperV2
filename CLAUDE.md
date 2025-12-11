@@ -40,7 +40,7 @@ lsof -ti:3000 | xargs kill -9     # Kill port 3000
 - **AI:** AssemblyAI (transcription) + OpenAI (GPT-4o, Realtime API)
 - **State:** TanStack Query v5
 - **Styling:** Tailwind CSS + shadcn/ui
-- **Deployment:** Vercel (dev.heritagewhisper.com)
+- **Deployment:** Vercel (heritagewhisper.com)
 
 ## Non-Negotiables
 
