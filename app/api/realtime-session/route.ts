@@ -67,29 +67,15 @@ export async function POST(req: NextRequest) {
     }
 
     // 4. Create ephemeral client secret with session configuration
-    // Docs: https://platform.openai.com/docs/api-reference/realtime-sessions/create-realtime-client-secret
-    // The session config is embedded in the client_secret - client can override via session.update
+    // Docs: https://platform.openai.com/docs/guides/realtime-webrtc
+    // Format from OpenAI official docs for ephemeral token endpoint
     const sessionConfig = {
       session: {
         type: 'realtime',
-        model: 'gpt-realtime',  // GA model name (not preview)
-        modalities: ['text', 'audio'],
-        instructions: 'You are a helpful assistant.',  // Default, overridden by client
+        model: 'gpt-4o-realtime-preview',
         audio: {
-          input: {
-            transcription: {
-              model: 'gpt-4o-mini-transcribe',  // For user speech transcription
-            },
-            turn_detection: {
-              type: 'server_vad',
-              threshold: 0.7,
-              prefix_padding_ms: 300,
-              silence_duration_ms: 2000,  // Senior-friendly: 2 seconds silence tolerance
-              create_response: true,  // CRITICAL: Auto-generate response when user stops speaking
-            },
-          },
           output: {
-            voice: 'shimmer',  // Pearl's voice
+            voice: 'shimmer',
           },
         },
       },
@@ -113,7 +99,7 @@ export async function POST(req: NextRequest) {
         statusText: response.statusText,
         error: errorText,
         url: 'https://api.openai.com/v1/realtime/client_secrets',
-        model: 'gpt-realtime-mini',
+        model: 'gpt-4o-realtime-preview',
       });
 
       // Return more detailed error for debugging
@@ -145,7 +131,7 @@ export async function POST(req: NextRequest) {
     logger.info('[RealtimeSession] Session created successfully', {
       userId,
       expiresAt,
-      model: 'gpt-realtime-mini',
+      model: 'gpt-4o-realtime-preview',
       // DO NOT log clientSecret!
     });
 

@@ -31,9 +31,9 @@ export function ChatMessage({ message }: ChatMessageProps) {
           {/* Sender label */}
           <div className="mb-1 px-3 text-xs font-medium flex items-center gap-2">
             <div className="w-6 h-6 rounded-full bg-amber-100 flex items-center justify-center text-amber-700 text-xs font-bold">
-              G
+              P
             </div>
-            <span className="text-amber-900/60 font-serif italic">Grandchild</span>
+            <span className="text-amber-900/60 font-serif italic">Pearl</span>
           </div>
           {/* Bubble */}
           <div

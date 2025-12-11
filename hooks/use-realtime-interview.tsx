@@ -432,7 +432,14 @@ export function useRealtimeInterview() {
         // Connection established
         onConnected: () => {
           setStatus('connected');
-          setConversationPhase('listening'); // Start in listening mode
+          setConversationPhase('speaking'); // Pearl will speak first
+
+          // Trigger Pearl to speak her greeting after a short delay
+          // This gives the WebRTC connection time to fully stabilize
+          setTimeout(() => {
+            console.log('[RealtimeInterview] 🎤 Triggering Pearl to speak first...');
+            handles.triggerPearlResponse();
+          }, 500);
         },
 
         // Error handling
@@ -526,13 +533,18 @@ export function useRealtimeInterview() {
   }, []);
 
   // Toggle voice output
-  const toggleVoice = useCallback(() => {
+  // If `enabled` is provided, set to that value; otherwise toggle
+  const toggleVoice = useCallback((enabled?: boolean) => {
     setVoiceEnabled(prev => {
-      const newValue = !prev;
+      const newValue = enabled !== undefined ? enabled : !prev;
 
       // Mute/unmute the audio element
       if (audioElementRef.current) {
         audioElementRef.current.muted = !newValue;
+        // Also pause/play if needed
+        if (!newValue && !audioElementRef.current.paused) {
+          audioElementRef.current.pause();
+        }
       }
 
       return newValue;

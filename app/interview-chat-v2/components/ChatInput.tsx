@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { Mic, Square, Send, Keyboard, Volume2, VolumeX } from "lucide-react";
+import { Mic, Square, Send, Keyboard, Volume2, VolumeX, Pause, Play } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useRealtimeInterview } from "@/hooks/use-realtime-interview";
 
@@ -12,6 +12,7 @@ interface ChatInputProps {
   disabled?: boolean;
   useRealtime?: boolean; // Flag to enable Realtime API mode
   userName?: string; // User name for personalization
+  realtimeConnected?: boolean; // Whether realtime session is active (for pause button)
 }
 
 export function ChatInput({
@@ -20,10 +21,12 @@ export function ChatInput({
   onTranscriptUpdate,
   disabled,
   useRealtime = false,
-  userName
+  userName,
+  realtimeConnected = false
 }: ChatInputProps) {
   const [mode, setMode] = useState<'audio' | 'text'>('audio');
   const [isRecording, setIsRecording] = useState(false);
+  const [isPaused, setIsPaused] = useState(false); // For realtime mode pause state
   const [textInput, setTextInput] = useState('');
   const [recordingDuration, setRecordingDuration] = useState(0);
   const [isMobile, setIsMobile] = useState(false);
@@ -44,6 +47,7 @@ export function ChatInput({
     startSession,
     stopSession,
     toggleVoice,
+    toggleMic,
     getMixedAudioBlob,
   } = useRealtimeInterview();
 
@@ -199,6 +203,22 @@ export function ChatInput({
     }
   };
 
+  // Toggle pause/resume for realtime mode
+  // When paused: mute mic AND mute Pearl's audio output
+  const togglePause = () => {
+    const newPausedState = !isPaused;
+    setIsPaused(newPausedState);
+
+    // Toggle microphone (disable when paused)
+    toggleMic(!newPausedState);
+
+    // Toggle Pearl's voice output (mute when paused)
+    // Note: toggleVoice(true) = voice enabled, toggleVoice(false) = voice muted
+    toggleVoice(!newPausedState);
+
+    console.log('[ChatInput] Pause toggled:', newPausedState ? 'PAUSED' : 'RESUMED');
+  };
+
   // Send text response
   const sendText = () => {
     if (!textInput.trim()) return;
@@ -231,7 +251,41 @@ export function ChatInput({
       {/* Audio Mode (Default) */}
       {mode === 'audio' && (
         <div className="flex flex-col items-center">
-          {isRecording ? (
+          {/* Realtime Mode: Show Pause/Resume button when connected */}
+          {useRealtime && realtimeConnected ? (
+            <div className="flex items-center justify-center gap-4">
+              {/* Switch to Text */}
+              <button
+                onClick={() => setMode('text')}
+                className="w-10 h-10 rounded-full bg-[var(--hw-surface)] border border-[var(--hw-border-subtle)] text-[var(--hw-text-secondary)] flex items-center justify-center hover:bg-[var(--hw-section-bg)] transition-colors"
+                title="Type instead"
+                aria-label="Switch to typing"
+              >
+                <Keyboard className="w-5 h-5" />
+              </button>
+
+              {/* Pause/Resume Button - 60px */}
+              <button
+                onClick={togglePause}
+                className={`w-[60px] h-[60px] rounded-full flex items-center justify-center shadow-lg transition-transform active:scale-95 ${
+                  isPaused
+                    ? 'bg-[var(--hw-primary)] hover:bg-[var(--hw-primary-hover)]'
+                    : 'bg-[var(--hw-warning-accent)] hover:bg-amber-600'
+                }`}
+                aria-label={isPaused ? "Resume conversation" : "Pause conversation"}
+              >
+                {isPaused ? (
+                  <Play className="w-7 h-7 text-white ml-1" />
+                ) : (
+                  <Pause className="w-7 h-7 text-white" />
+                )}
+              </button>
+
+              {/* Spacer for balance */}
+              <div className="w-10" />
+            </div>
+          ) : isRecording ? (
+            /* Traditional Recording Mode: Show Stop button */
             <div className="flex items-center justify-center gap-4">
               {/* Recording Indicator & Timer */}
               <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-red-50 border border-red-200">
@@ -251,6 +305,7 @@ export function ChatInput({
               </button>
             </div>
           ) : (
+            /* Traditional Mode: Show Record button (when not realtime or not connected) */
             <div className="flex items-center justify-center gap-4">
               {/* Switch to Text - Keyboard icon is clearer */}
               <button
@@ -278,7 +333,11 @@ export function ChatInput({
           )}
 
           {/* Helper Text - compact */}
-          {!isRecording && (
+          {useRealtime && realtimeConnected ? (
+            <p className="text-xs text-[var(--hw-text-muted)] mt-1">
+              {isPaused ? 'Tap to resume' : 'Tap to pause conversation'}
+            </p>
+          ) : !isRecording && (
             <p className="text-xs text-[var(--hw-text-muted)] mt-1">
               Tap to answer
             </p>

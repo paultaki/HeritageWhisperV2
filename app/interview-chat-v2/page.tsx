@@ -557,7 +557,14 @@ export default function InterviewChatPage() {
 
     // Start recording session
     if (isRealtimeEnabled) {
-      startSession((text) => handleTranscriptUpdate(text, true));
+      startSession(
+        (text) => handleTranscriptUpdate(text, true),
+        undefined, // onError
+        undefined, // config
+        handlePearlResponse, // onAssistantResponse
+        undefined, // onUserSpeechStart
+        user?.name // userName
+      );
     } else {
       startTraditionalRecording('conversation');
     }
@@ -600,7 +607,11 @@ export default function InterviewChatPage() {
           console.error('Realtime session retry error:', error);
           setConnectionError(error.message);
           setShowErrorFallback(true);
-        }
+        },
+        undefined, // config
+        handlePearlResponse, // onAssistantResponse
+        undefined, // onUserSpeechStart
+        user?.name // userName
       );
     } catch (error) {
       console.error('Failed to retry realtime session:', error);
@@ -657,6 +668,9 @@ export default function InterviewChatPage() {
 
   // Handle theme selection - start the warm-up phase
   const handleThemeSelect = async (theme: InterviewTheme) => {
+    console.log('[InterviewChat] 🎯 handleThemeSelect called with theme:', theme.id);
+    console.log('[InterviewChat] isRealtimeEnabled:', isRealtimeEnabled);
+
     setSelectedTheme(theme);
     setInterviewPhase('warmup');
     setWarmUpIndex(0);
@@ -668,23 +682,30 @@ export default function InterviewChatPage() {
 
     // Start recording state for the interview
     if (isRealtimeEnabled) {
+      console.log('[InterviewChat] 🚀 Starting Realtime session...');
       try {
         await startSession(
           (text) => handleTranscriptUpdate(text, true),
           (error) => {
             // Error callback from hook
-            console.error('Realtime session error:', error);
+            console.error('[InterviewChat] ❌ Realtime session error:', error);
             setConnectionError(error.message);
             setShowErrorFallback(true);
-          }
+          },
+          undefined, // config
+          handlePearlResponse, // onAssistantResponse
+          undefined, // onUserSpeechStart
+          user?.name // userName
         );
+        console.log('[InterviewChat] ✅ Realtime session started successfully');
       } catch (error) {
-        console.error('Failed to start realtime session:', error);
+        console.error('[InterviewChat] ❌ Failed to start realtime session:', error);
         setConnectionError(error instanceof Error ? error.message : 'Failed to connect');
         setShowErrorFallback(true);
         return; // Don't proceed if connection fails
       }
     } else {
+      console.log('[InterviewChat] 📼 Using traditional recording (Realtime disabled)');
       startTraditionalRecording('conversation');
     }
 
@@ -766,10 +787,13 @@ export default function InterviewChatPage() {
 
   // Handle transcript updates from Realtime API
   const handleTranscriptUpdate = (text: string, isFinal: boolean) => {
+    console.log('[InterviewChat] 📝 handleTranscriptUpdate called:', { text: text?.substring(0, 50), isFinal });
+
     if (isRealtimeEnabled) {
       handleRealtimeTranscriptUpdate(text, isFinal);
-      if (isFinal) {
+      if (isFinal && text && text.trim()) {
         // Final transcript received - add as user message
+        console.log('[InterviewChat] Adding user message bubble');
         const userMessage: Message = {
           id: `msg-${Date.now()}`,
           type: 'audio-response',
@@ -954,6 +978,34 @@ export default function InterviewChatPage() {
   const removeTypingIndicator = () => {
     setMessages(prev => prev.filter(msg => msg.type !== 'typing'));
   };
+
+  // Handle Pearl's realtime responses (from OpenAI Realtime API)
+  const handlePearlResponse = useCallback((text: string) => {
+    console.log('[InterviewChat] 🎙️ handlePearlResponse called:', text?.substring(0, 50) + '...');
+
+    if (text === '__COMPOSING__') {
+      // Pearl started speaking - show typing indicator
+      console.log('[InterviewChat] Pearl started composing...');
+      addTypingIndicator();
+      return;
+    }
+
+    // Pearl finished - remove typing indicator and add her message
+    console.log('[InterviewChat] Pearl finished speaking, adding message bubble');
+    removeTypingIndicator();
+
+    if (text && text.trim()) {
+      const pearlMessage: Message = {
+        id: `msg-pearl-${Date.now()}`,
+        type: 'question', // Pearl's responses are displayed as questions
+        content: text.trim(),
+        timestamp: new Date(),
+        sender: 'hw',
+      };
+
+      setMessages(prev => [...prev, pearlMessage]);
+    }
+  }, []);
 
   // Transcribe audio blob (traditional mode only)
   const transcribeChunk = async (audioBlob: Blob): Promise<string> => {
@@ -1415,6 +1467,7 @@ export default function InterviewChatPage() {
           disabled={isProcessing}
           useRealtime={isRealtimeEnabled}
           userName={user?.name}
+          realtimeConnected={isRealtimeEnabled && status === 'connected'}
         />
       </div>
     </div>

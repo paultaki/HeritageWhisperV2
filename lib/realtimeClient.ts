@@ -257,22 +257,33 @@ export async function startRealtime(
     }
   };
 
-  // 8. Send session.update to override/add instructions
+  // 8. Send session.update to configure VAD, transcription, and instructions
   // Docs: https://platform.openai.com/docs/api-reference/realtime-client-events/session/update
-  // NOTE: Core session config (model, voice, VAD) is set in client_secrets on server
-  // We only need to update instructions here
   dataChannel.onopen = () => {
     console.log('[Realtime] ✅ Data channel opened, sending session.update...');
 
-    // Build session update with instructions
-    // The GA API format uses nested audio.input and audio.output objects
+    // Full session configuration including VAD and transcription
+    // Note: GA API uses output_modalities, not modalities
     const sessionConfig: any = {
       type: 'session.update',
       session: {
-        // Instructions can be overridden by client
         instructions: config?.instructions || 'You are a helpful assistant.',
-        // Max output tokens for response length
-        max_output_tokens: 1200,
+        output_modalities: ['text', 'audio'],
+        // Enable input transcription
+        input_audio_transcription: {
+          model: 'whisper-1',
+        },
+        // Server VAD for turn detection - SENIOR FRIENDLY settings
+        // Seniors need time to think and gather thoughts during interviews
+        // 5 seconds silence = plenty of time to gather thoughts
+        turn_detection: {
+          type: 'server_vad',
+          threshold: 0.8,            // Higher threshold to avoid false triggers from background noise
+          prefix_padding_ms: 500,    // More padding before speech starts
+          silence_duration_ms: 5000, // 5 SECONDS - seniors need time to think!
+          create_response: true,     // CRITICAL: Auto-generate response
+        },
+        max_response_output_tokens: 1200,
       },
     };
 
