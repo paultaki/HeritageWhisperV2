@@ -66,20 +66,44 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // 4. Create ephemeral client secret
-    // Docs: https://platform.openai.com/docs/guides/realtime-webrtc
-    // Endpoint: POST /v1/realtime/client_secrets (NOT /sessions - that's Azure)
-    // Note: Model is specified in the WebRTC connection URL, NOT in client_secrets request
+    // 4. Create ephemeral client secret with session configuration
+    // Docs: https://platform.openai.com/docs/api-reference/realtime-sessions/create-realtime-client-secret
+    // The session config is embedded in the client_secret - client can override via session.update
+    const sessionConfig = {
+      session: {
+        type: 'realtime',
+        model: 'gpt-realtime',  // GA model name (not preview)
+        modalities: ['text', 'audio'],
+        instructions: 'You are a helpful assistant.',  // Default, overridden by client
+        audio: {
+          input: {
+            transcription: {
+              model: 'gpt-4o-mini-transcribe',  // For user speech transcription
+            },
+            turn_detection: {
+              type: 'server_vad',
+              threshold: 0.7,
+              prefix_padding_ms: 300,
+              silence_duration_ms: 2000,  // Senior-friendly: 2 seconds silence tolerance
+              create_response: true,  // CRITICAL: Auto-generate response when user stops speaking
+            },
+          },
+          output: {
+            voice: 'shimmer',  // Pearl's voice
+          },
+        },
+      },
+    };
+
+    console.log('[RealtimeSession] Creating client_secret with config:', JSON.stringify(sessionConfig, null, 2));
+
     const response = await fetch('https://api.openai.com/v1/realtime/client_secrets', {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({
-        // Model NOT included here - specified in WebRTC connection URL instead
-        // Modalities and voice also NOT included - configured via session.update after connection
-      }),
+      body: JSON.stringify(sessionConfig),
     });
 
     if (!response.ok) {

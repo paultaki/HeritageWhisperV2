@@ -247,53 +247,26 @@ export async function startRealtime(
     }
   };
 
-  // 8. Send session.update (REQUIRED for transcription)
-  // Docs: https://platform.openai.com/docs/guides/realtime-webrtc#session-configuration
-  // Why VAD params: 300ms silence/prefix = snappy turns without cutting off speech
+  // 8. Send session.update to override/add instructions
+  // Docs: https://platform.openai.com/docs/api-reference/realtime-client-events/session/update
+  // NOTE: Core session config (model, voice, VAD) is set in client_secrets on server
+  // We only need to update instructions here
   dataChannel.onopen = () => {
+    console.log('[Realtime] ✅ Data channel opened, sending session.update...');
+
+    // Build session update with instructions
+    // The GA API format uses nested audio.input and audio.output objects
     const sessionConfig: any = {
       type: 'session.update',
       session: {
-        // CRITICAL: Enable both text and audio modalities for Pearl to speak
-        modalities: ['text', 'audio'],
-        // Set Pearl's voice
-        voice: 'shimmer',
-        // Enable input transcription (whisper-1 required to receive transcript events)
-        input_audio_transcription: {
-          model: 'whisper-1',
-        },
-        // Server VAD for detecting when user finishes speaking
-        // Docs: https://platform.openai.com/docs/guides/realtime-webrtc#vad
-        // SENIOR-FRIENDLY: Extended silence tolerance gives thinking time
-        // Research: Seniors need 2-4 seconds to formulate responses (vs 0.5-1s for younger adults)
-        turn_detection: {
-          type: 'server_vad',
-          threshold: 0.7,  // Higher threshold = less sensitive to ambient noise
-          prefix_padding_ms: 300,  // Include 300ms before speech starts
-          silence_duration_ms: 2000, // 2 seconds of silence - seniors need thinking time!
-          create_response: true,  // CRITICAL: Auto-generate response when user stops speaking
-        },
-        // Allow longer responses for natural conversation flow (1200 tokens ≈ 15-18 sentences)
-        max_response_output_tokens: 1200,
+        // Instructions can be overridden by client
+        instructions: config?.instructions || 'You are a helpful assistant.',
+        // Max output tokens for response length
+        max_output_tokens: 1200,
       },
     };
 
-    // Add optional configuration if provided
-    if (config) {
-      if (config.instructions) {
-        sessionConfig.session.instructions = config.instructions;
-      }
-      if (config.modalities) {
-        sessionConfig.session.modalities = config.modalities;
-      }
-      if (config.voice) {
-        sessionConfig.session.voice = config.voice;
-      }
-      if (config.temperature !== undefined) {
-        sessionConfig.session.temperature = config.temperature;
-      }
-    }
-
+    console.log('[Realtime] 📤 Sending session.update:', JSON.stringify(sessionConfig, null, 2));
     safeSend(sessionConfig);
     callbacks.onConnected?.();
   };
