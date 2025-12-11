@@ -172,7 +172,16 @@ export async function GET(request: NextRequest) {
   // Track member IDs that need timestamp updates (batch at end)
   const membersToUpdate: string[] = [];
 
-  for (const member of eligibleMembers) {
+  // Rate limit: Resend allows 2 requests/second, so we add 550ms delay between sends
+  for (let i = 0; i < eligibleMembers.length; i++) {
+    const member = eligibleMembers[i];
+
+    // Add delay between emails to respect Resend's 2 req/sec rate limit
+    // Skip delay for first email
+    if (i > 0) {
+      await new Promise(resolve => setTimeout(resolve, 550));
+    }
+
     try {
       const storyteller = member.users as unknown as Storyteller | null;
       if (!storyteller) {

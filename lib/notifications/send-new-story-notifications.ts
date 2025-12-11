@@ -187,10 +187,19 @@ export async function sendNewStoryNotifications({
     const resend = new Resend(process.env.RESEND_API_KEY);
 
     // Send email to each eligible family member (throttle-filtered)
+    // Rate limit: Resend allows 2 requests/second, so we add 550ms delay between sends
     let successCount = 0;
     let failureCount = 0;
 
-    for (const member of eligibleMembers) {
+    for (let i = 0; i < eligibleMembers.length; i++) {
+      const member = eligibleMembers[i];
+
+      // Add delay between emails to respect Resend's 2 req/sec rate limit
+      // Skip delay for first email
+      if (i > 0) {
+        await new Promise(resolve => setTimeout(resolve, 550));
+      }
+
       try {
         const familyMemberName = member.name || member.email.split('@')[0];
 
