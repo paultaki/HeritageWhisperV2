@@ -214,9 +214,9 @@ export function ChatInput({
 
   return (
     <div
-      className="sticky left-0 right-0 border-t border-amber-100 bg-[#fffdf5] px-4 sm:px-6 py-4 sm:py-6 z-40 shadow-[0_-4px_20px_rgba(0,0,0,0.03)]"
+      className="border-t border-[var(--hw-border-subtle)] bg-[var(--hw-page-bg)] px-4 py-3 z-40"
       style={{
-        bottom: isMobile ? 'max(80px, env(safe-area-inset-bottom, 0px))' : '0px',
+        paddingBottom: 'max(12px, env(safe-area-inset-bottom, 0px))',
       }}
     >
       {/* Provisional Transcript Display (Realtime mode only) */}
@@ -229,49 +229,45 @@ export function ChatInput({
 
       {/* Audio Mode (Default) */}
       {mode === 'audio' && (
-        <div className="flex flex-col items-center gap-4">
+        <div className="flex flex-col items-center gap-2">
           {isRecording ? (
-            <div className="w-full flex items-center gap-4">
+            <div className="w-full flex items-center gap-3">
               {/* Recording Indicator & Timer */}
-              <div className="flex-1 flex items-center justify-center gap-3 px-6 py-4 rounded-2xl bg-red-50 border border-red-100 shadow-inner">
-                <div className="w-3 h-3 bg-red-500 rounded-full animate-pulse" />
-                <span className="text-lg font-medium text-red-800 tabular-nums tracking-widest">
+              <div className="flex-1 flex items-center justify-center gap-2 px-4 py-2 rounded-xl bg-red-50 border border-red-200">
+                <div className="w-2 h-2 bg-[var(--hw-error)] rounded-full animate-pulse" />
+                <span className="text-base font-medium text-[var(--hw-error)] tabular-nums">
                   {formatTime(recordingDuration)}
                 </span>
               </div>
 
-              {/* Stop Button */}
+              {/* Stop Button - 60px per design guidelines */}
               <button
                 onClick={stopRecording}
-                className="w-16 h-16 rounded-full bg-red-500 hover:bg-red-600 flex items-center justify-center shadow-lg shadow-red-500/30 transition-transform active:scale-95"
+                className="w-[60px] h-[60px] rounded-full bg-[var(--hw-error)] hover:bg-red-700 flex items-center justify-center shadow-md transition-transform active:scale-95"
                 aria-label="Stop recording"
               >
-                <Square className="w-7 h-7 text-white fill-white" />
+                <Square className="w-6 h-6 text-white fill-white" />
               </button>
             </div>
           ) : (
-            <div className="w-full flex items-center justify-between gap-4">
-              {/* Switch to Text (Small) */}
+            <div className="w-full flex items-center justify-center gap-3">
+              {/* Switch to Text */}
               <button
                 onClick={() => setMode('text')}
-                className="w-12 h-12 rounded-full bg-white border border-amber-200 text-amber-700 flex items-center justify-center hover:bg-amber-50 transition-colors"
+                className="w-12 h-12 rounded-full bg-[var(--hw-surface)] border border-[var(--hw-border-subtle)] text-[var(--hw-text-secondary)] flex items-center justify-center hover:bg-[var(--hw-section-bg)] transition-colors"
                 title="Type instead"
               >
                 <Type className="w-5 h-5" />
               </button>
 
-              {/* BIG RECORD BUTTON */}
+              {/* RECORD BUTTON - 60px per design guidelines */}
               <button
                 onClick={startRecording}
                 disabled={disabled}
-                className="group relative flex items-center justify-center"
+                className="w-[60px] h-[60px] rounded-full bg-[var(--hw-primary)] hover:bg-[var(--hw-primary-hover)] flex items-center justify-center shadow-md transition-transform active:scale-95 disabled:opacity-50"
                 aria-label="Start recording"
               >
-                {/* Pulsing rings */}
-                <div className="absolute inset-0 bg-amber-400 rounded-full opacity-20 group-hover:animate-ping" />
-                <div className="relative w-20 h-20 rounded-full bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center shadow-xl shadow-amber-500/30 transition-transform group-hover:scale-105 active:scale-95">
-                  <Mic className="w-8 h-8 text-white" />
-                </div>
+                <Mic className="w-6 h-6 text-white" />
               </button>
 
               {/* Spacer for balance */}
@@ -281,7 +277,7 @@ export function ChatInput({
 
           {/* Helper Text */}
           {!isRecording && (
-            <p className="text-base text-amber-900/60 font-medium">
+            <p className="text-sm text-[var(--hw-text-muted)]">
               Tap to answer
             </p>
           )}
@@ -290,43 +286,41 @@ export function ChatInput({
 
       {/* Text Mode */}
       {mode === 'text' && (
-        <div className="flex flex-col gap-3">
-          <div className="flex items-end gap-3">
-            {/* Switch back to Audio */}
-            <button
-              onClick={() => setMode('audio')}
-              className="mb-1 w-10 h-10 rounded-full bg-white border border-amber-200 text-amber-700 flex items-center justify-center hover:bg-amber-50 transition-colors flex-shrink-0"
-              title="Switch to voice"
-            >
-              <Mic className="w-5 h-5" />
-            </button>
+        <div className="flex items-end gap-2">
+          {/* Switch back to Audio */}
+          <button
+            onClick={() => setMode('audio')}
+            className="mb-1 w-12 h-12 rounded-full bg-[var(--hw-surface)] border border-[var(--hw-border-subtle)] text-[var(--hw-text-secondary)] flex items-center justify-center hover:bg-[var(--hw-section-bg)] transition-colors flex-shrink-0"
+            title="Switch to voice"
+          >
+            <Mic className="w-5 h-5" />
+          </button>
 
-            {/* Text Input */}
-            <textarea
-              value={textInput}
-              onChange={(e) => setTextInput(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' && !e.shiftKey) {
-                  e.preventDefault();
-                  sendText();
-                }
-              }}
-              disabled={disabled}
-              placeholder="Type your story here..."
-              className="flex-1 resize-none px-5 py-4 rounded-2xl border border-amber-200 bg-white focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20 focus:outline-none text-lg placeholder:text-amber-900/30 disabled:opacity-50"
-              style={{ minHeight: '60px', maxHeight: '150px' }}
-              rows={1}
-            />
+          {/* Text Input */}
+          <textarea
+            value={textInput}
+            onChange={(e) => setTextInput(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendText();
+              }
+            }}
+            disabled={disabled}
+            placeholder="Type your response..."
+            className="flex-1 resize-none px-4 py-3 rounded-xl border border-[var(--hw-border-subtle)] bg-[var(--hw-surface)] focus:border-[var(--hw-primary)] focus:ring-2 focus:ring-[var(--hw-primary)]/20 focus:outline-none text-base text-[var(--hw-text-primary)] placeholder:text-[var(--hw-text-muted)] disabled:opacity-50"
+            style={{ minHeight: '48px', maxHeight: '120px' }}
+            rows={1}
+          />
 
-            {/* Send Button */}
-            <button
-              onClick={sendText}
-              disabled={disabled || !textInput.trim()}
-              className="mb-1 w-12 h-12 rounded-full bg-amber-500 hover:bg-amber-600 text-white flex items-center justify-center shadow-lg disabled:opacity-50 disabled:cursor-not-allowed transition-transform active:scale-95 flex-shrink-0"
-            >
-              <Send className="w-5 h-5 ml-0.5" />
-            </button>
-          </div>
+          {/* Send Button - 48px min per design guidelines */}
+          <button
+            onClick={sendText}
+            disabled={disabled || !textInput.trim()}
+            className="mb-1 w-12 h-12 rounded-full bg-[var(--hw-primary)] hover:bg-[var(--hw-primary-hover)] text-white flex items-center justify-center shadow-md disabled:opacity-50 disabled:cursor-not-allowed transition-transform active:scale-95 flex-shrink-0"
+          >
+            <Send className="w-5 h-5" />
+          </button>
         </div>
       )}
     </div>

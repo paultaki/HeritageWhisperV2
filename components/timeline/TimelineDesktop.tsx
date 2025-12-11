@@ -1228,6 +1228,9 @@ export function TimelineDesktop({ useV2Features = false }: { useV2Features?: boo
                 hasCurrentYearContent={sortedStories.some(
                   (s) => new Date(s.createdAt).getFullYear() === new Date().getFullYear()
                 )}
+                isViewingOwnAccount={isViewingOwnAccount}
+                storytellerId={storytellerId}
+                storytellerName={activeContext?.storytellerName || user?.name || 'Storyteller'}
                 onAddMemory={() => router.push("/recording")}
               />
             )}

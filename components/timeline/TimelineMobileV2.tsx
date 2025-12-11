@@ -375,6 +375,9 @@ export function TimelineMobileV2() {
                   hasCurrentYearContent={sortedStories.some(
                     (s: any) => new Date(s.createdAt).getFullYear() === new Date().getFullYear()
                   )}
+                  isViewingOwnAccount={isViewingOwnAccount}
+                  storytellerId={activeContext?.storytellerId || user?.id}
+                  storytellerName={activeContext?.storytellerName || user?.name || 'Storyteller'}
                   onAddMemory={() => router.push("/recording")}
                 />
               </>

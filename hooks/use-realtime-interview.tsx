@@ -17,9 +17,45 @@ import { startRealtime, RealtimeHandles, RealtimeConfig } from '@/lib/realtimeCl
 import { startMixedRecorder } from '@/lib/mixedRecorder';
 import { startUserOnlyRecorder } from '@/lib/userOnlyRecorder';
 import { shouldCancelResponse } from '@/lib/responseTrimmer';
+import { supabase } from '@/lib/supabase';
 // NOTE: Post-processing disabled for Realtime API to prevent audio/text mismatch
 // import { sanitizeResponse } from '@/lib/responseSanitizer';
 // import { enforceScope } from '@/lib/scopeEnforcer';
+
+/**
+ * Fetch ephemeral token from server-side proxy
+ * SECURITY: Never expose OPENAI_API_KEY to browser
+ * Token expires in ~60 seconds, so fetch immediately before WebRTC connection
+ */
+async function fetchEphemeralToken(): Promise<string> {
+  const { data: { session } } = await supabase.auth.getSession();
+  const token = session?.access_token;
+
+  if (!token) {
+    throw new Error('Not authenticated - please sign in to use Pearl');
+  }
+
+  const response = await fetch('/api/realtime-session', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json',
+    },
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
+    throw new Error(errorData.error || `Failed to get session token (${response.status})`);
+  }
+
+  const data = await response.json();
+
+  if (!data.client_secret) {
+    throw new Error('No client secret received from server');
+  }
+
+  return data.client_secret;
+}
 
 export type RealtimeStatus = 'disconnected' | 'connecting' | 'connected' | 'error';
 
@@ -37,6 +73,12 @@ YOUR GOAL:
 - Help them tell RICH, VIVID stories full of sensory details and emotion.
 - Make them feel listened to and valued.
 - Go DEEP on each topic before moving to new ones.
+
+=== SESSION START ===
+When the conversation FIRST begins (your very first response), warmly greet them:
+"Hi! I'm so excited to hear your stories today. Just speak naturally - there's no rush, and I'm here to listen. Whenever you're ready!"
+
+Do NOT repeat this greeting later in the conversation.
 
 === SENSORY PROBING TECHNIQUES (Use these!) ===
 When they mention a memory, help them "place themselves there" with these probes:
@@ -62,6 +104,12 @@ Layer 3 (MEANING): "Looking back now, why do you think that mattered?"
 
 ONLY move to a new topic after exploring all three layers, or if they signal they want to move on.
 
+=== HANDLING DIFFICULTIES ===
+- If they seem confused: "No worries! Let me ask that a different way..."
+- If they go off-topic: Gently acknowledge, then guide back: "That's interesting! I'd also love to hear more about [original topic]..."
+- If they give very short answers: Encourage with sensory questions: "Tell me more - what did it look like? Sound like?"
+- If there's silence: Be patient. Say: "Take your time... I'm right here."
+
 === HOW TO SPEAK ===
 - Use simple, natural language. Don't sound like a robot or a professor.
 - Say things like: "Wow!", "Really?", "That's amazing!", "I never knew that!"
@@ -77,6 +125,12 @@ ONLY move to a new topic after exploring all three layers, or if they signal the
 - If they ask for advice, say: "I'm not sure, but I'd love to hear what you think."
 - If their answer is short or surface-level, gently probe for more detail using sensory questions.
 
+=== ENDING THE SESSION ===
+If they say they're done or want to stop:
+- Summarize one highlight: "I loved hearing about [specific detail they shared]!"
+- Express gratitude: "Thank you so much for sharing these precious memories with me."
+- Keep it brief - they've already said they want to stop.
+
 === EXAMPLE INTERACTION ===
 User: "I grew up on a farm."
 You: "Wow, a farm! Picture the farmhouse for me - what's the first thing you see when you walk up to it?"
@@ -91,8 +145,11 @@ You: "What a beautiful feeling. Looking back, why do you think those porch swing
 // Legacy export for backwards compatibility
 export const PEARL_INSTRUCTIONS = GRANDCHILD_INSTRUCTIONS;
 
+export type ConversationPhase = 'idle' | 'listening' | 'thinking' | 'speaking';
+
 export function useRealtimeInterview() {
   const [status, setStatus] = useState<RealtimeStatus>('disconnected');
+  const [conversationPhase, setConversationPhase] = useState<ConversationPhase>('idle');
   const [provisionalTranscript, setProvisionalTranscript] = useState('');
   const [voiceEnabled, setVoiceEnabled] = useState(true); // Enable voice by default for V2
   const [error, setError] = useState<string | null>(null);
@@ -132,6 +189,10 @@ export function useRealtimeInterview() {
       durationTimerRef.current = setInterval(() => {
         setRecordingDuration(Math.floor((Date.now() - startTimeRef.current) / 1000));
       }, 1000);
+
+      // Fetch ephemeral token from server-side proxy
+      // Token expires in ~60 seconds, so fetch immediately before connection
+      const ephemeralToken = await fetchEphemeralToken();
 
       const handles = await startRealtime({
         // Live transcript updates (gray provisional text)
@@ -246,6 +307,7 @@ export function useRealtimeInterview() {
 
         // Assistant response started (first text delta) - show typing indicator
         onAssistantResponseStarted: () => {
+          setConversationPhase('speaking');
           if (onAssistantResponse) {
             onAssistantResponse('__COMPOSING__');
           }
@@ -300,6 +362,9 @@ export function useRealtimeInterview() {
           // Reset for next response
           assistantResponseRef.current = '';
           cancelSentRef.current = false; // Reset cancel flag for next response
+
+          // Pearl finished speaking, now listening for user
+          setConversationPhase('listening');
         },
 
         // Barge-in: DISABLED - Pearl will not be interrupted while speaking
@@ -308,6 +373,9 @@ export function useRealtimeInterview() {
           if (!micEnabledRef.current) {
             return;
           }
+
+          // User started speaking
+          setConversationPhase('listening');
 
           // Notify page to show waveform
           if (onUserSpeechStart) {
@@ -341,6 +409,9 @@ export function useRealtimeInterview() {
 
           waitingForUserTranscriptRef.current = true;
 
+          // User stopped speaking, now processing/thinking
+          setConversationPhase('thinking');
+
           // NO NEED TO RESUME AUDIO: Since barge-in is disabled, audio was never paused
           // The user's speech will be transcribed and processed after Pearl finishes speaking
         },
@@ -348,6 +419,7 @@ export function useRealtimeInterview() {
         // Connection established
         onConnected: () => {
           setStatus('connected');
+          setConversationPhase('listening'); // Start in listening mode
         },
 
         // Error handling
@@ -358,10 +430,9 @@ export function useRealtimeInterview() {
           onError?.(err);
         },
       },
-        // TODO: SECURITY - Implement server-side ephemeral token proxy before re-enabling
-        // Client-side API key exposure removed for beta launch
-        // See: /app/api/realtime-session/route.ts (needs implementation)
-        '' /* process.env.NEXT_PUBLIC_OPENAI_API_KEY || '' */,
+        // Ephemeral token from server-side proxy (60-second TTL)
+        // SECURITY: API key never exposed to browser
+        ephemeralToken,
         {
           ...config,
           instructions: config?.instructions
@@ -430,6 +501,7 @@ export function useRealtimeInterview() {
     }
 
     setStatus('disconnected');
+    setConversationPhase('idle');
     setProvisionalTranscript('');
     assistantResponseRef.current = ''; // Reset accumulated response
 
@@ -517,6 +589,7 @@ export function useRealtimeInterview() {
 
   return {
     status,
+    conversationPhase,
     provisionalTranscript,
     voiceEnabled,
     error,

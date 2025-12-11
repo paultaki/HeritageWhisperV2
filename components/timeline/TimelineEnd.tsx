@@ -2,7 +2,8 @@
  * TimelineEnd Component
  *
  * Graceful ending for timeline with:
- * - Add Memory Card (matches timeline card styling)
+ * - Add Memory Card (for storyteller viewing their own timeline)
+ * - Suggest Story Card (for family viewers)
  * - Accessibility features
  */
 
@@ -11,6 +12,7 @@
 import React from "react";
 import { useRouter } from "next/navigation";
 import { AddMemoryCard } from "./AddMemoryCard";
+import { SuggestStoryCard } from "./SuggestStoryCard";
 
 type TimelineEndProps = {
   isDark?: boolean;
@@ -19,11 +21,16 @@ type TimelineEndProps = {
   hasCurrentYearContent?: boolean;
   isProxyMode?: boolean;
   storytellerName?: string;
+  storytellerId?: string;
+  isViewingOwnAccount?: boolean;
   onAddMemory?: () => void;
 };
 
 export function TimelineEnd({
   isDark = false,
+  storytellerName,
+  storytellerId,
+  isViewingOwnAccount = true,
   onAddMemory,
 }: TimelineEndProps) {
   const router = useRouter();
@@ -45,9 +52,19 @@ export function TimelineEnd({
         marginTop: "0",
       }}
     >
-      {/* Add Memory Card - Centered */}
+      {/* Card - Centered */}
       <div className="flex justify-center w-full px-4" style={{ marginTop: "80px" }}>
-        <AddMemoryCard onCreateMemory={handleCreateMemory} isDark={isDark} />
+        {isViewingOwnAccount ? (
+          <AddMemoryCard onCreateMemory={handleCreateMemory} isDark={isDark} />
+        ) : (
+          storytellerId && storytellerName && (
+            <SuggestStoryCard
+              storytellerId={storytellerId}
+              storytellerName={storytellerName}
+              isDark={isDark}
+            />
+          )
+        )}
       </div>
 
       {/* Success toast container (for aria-live announcements) */}

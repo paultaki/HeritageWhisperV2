@@ -54,7 +54,7 @@ export default function GlassNavWrapper() {
 
   // Hide navigation on specific pages
   const isLandingPage = pathname === '/';
-  const isInterviewChat = pathname === '/interview-chat';
+  const isInterviewChat = pathname.startsWith('/interview-chat'); // Includes both v1 and v2
   const isAuthPage = pathname.startsWith('/auth');
   const isRecordingPage = pathname.startsWith('/recording');
   const isReviewPage = pathname.startsWith('/review/book-style');

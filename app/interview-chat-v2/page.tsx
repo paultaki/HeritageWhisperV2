@@ -19,8 +19,9 @@ import {
   combineAudioBlobs, // This might become redundant if we use getMixedAudioBlob/getUserAudioBlob
 } from "@/lib/conversationModeIntegration";
 import { useRecordingState } from "@/contexts/RecordingContext";
-import { Loader2, Check } from "lucide-react";
+import { Loader2, Check, RefreshCw, AlertTriangle, Mic, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { supabase } from "@/lib/supabase";
 
 
 export type MessageType =
@@ -68,6 +69,7 @@ export default function InterviewChatPage() {
     startSession,
     stopSession,
     status,
+    conversationPhase,
     getMixedAudioBlob,
     getUserAudioBlob,
     recordingDuration,
@@ -111,6 +113,21 @@ export default function InterviewChatPage() {
     totalDuration: 0,
   });
 
+  // Auto-save draft state
+  const [showResumeModal, setShowResumeModal] = useState(false);
+  const [existingDraft, setExistingDraft] = useState<{
+    id: string;
+    transcriptJson: Message[];
+    theme: string | null;
+    sessionDuration: number;
+    updatedAt: string;
+  } | null>(null);
+  const autoSaveTimerRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Error handling state
+  const [connectionError, setConnectionError] = useState<string | null>(null);
+  const [showErrorFallback, setShowErrorFallback] = useState(false);
+
   // Helper to convert base64 to blob
   const dataURItoBlob = (dataURI: string) => {
     const byteString = atob(dataURI.split(',')[1]);
@@ -146,6 +163,9 @@ export default function InterviewChatPage() {
         .filter(m => m.type !== 'system')
         .map(m => `${m.sender === 'user' ? 'User' : 'Pearl'}: ${m.content}`)
         .join('\n\n');
+
+      // Delete draft before redirecting (draft no longer needed after successful save)
+      await deleteDraft();
 
       await completeConversationAndRedirect({
         qaPairs,
@@ -349,6 +369,25 @@ export default function InterviewChatPage() {
     }
   }, [sessionStartTime, handleComplete]); // Add handleComplete to dependencies
 
+  // Warn user before leaving during active interview
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      // Only warn if session is active and user has given at least one response
+      const hasResponses = messages.some(m =>
+        m.type === 'audio-response' || m.type === 'text-response'
+      );
+
+      if (sessionStartTime && hasResponses) {
+        e.preventDefault();
+        e.returnValue = 'You have an interview in progress. Your responses will be lost if you leave. Are you sure?';
+        return e.returnValue;
+      }
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, [sessionStartTime, messages]);
+
   // Clean up recording state on unmount
   useEffect(() => {
     return () => {
@@ -358,8 +397,223 @@ export default function InterviewChatPage() {
       if (sessionTimerRef.current) {
         clearInterval(sessionTimerRef.current);
       }
+      if (autoSaveTimerRef.current) {
+        clearInterval(autoSaveTimerRef.current);
+      }
     };
   }, [stopTraditionalRecording, stopSession]);
+
+  // Check for existing draft on mount
+  useEffect(() => {
+    const checkForDraft = async () => {
+      if (!user) return;
+
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session?.access_token) return;
+
+        const response = await fetch('/api/interview-drafts', {
+          headers: {
+            'Authorization': `Bearer ${session.access_token}`,
+          },
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          if (data.draft && data.draft.transcriptJson?.length > 0) {
+            setExistingDraft(data.draft);
+            setShowResumeModal(true);
+          }
+        }
+      } catch (error) {
+        console.error('Failed to check for draft:', error);
+      }
+    };
+
+    checkForDraft();
+  }, [user]);
+
+  // Auto-save interval (every 60 seconds during active session)
+  useEffect(() => {
+    // Only auto-save if session is active and has responses
+    const hasResponses = messages.some(m =>
+      m.type === 'audio-response' || m.type === 'text-response'
+    );
+
+    if (!sessionStartTime || !hasResponses) {
+      if (autoSaveTimerRef.current) {
+        clearInterval(autoSaveTimerRef.current);
+        autoSaveTimerRef.current = null;
+      }
+      return;
+    }
+
+    const saveDraft = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session?.access_token) return;
+
+        // Serialize messages (remove non-serializable audioBlob)
+        const serializableMessages = messages.map(m => ({
+          id: m.id,
+          type: m.type,
+          content: m.content,
+          timestamp: m.timestamp.toISOString(),
+          sender: m.sender,
+          options: m.options,
+          selectedOption: m.selectedOption,
+          // Note: audioBlob is not serialized - transcript is saved instead
+        }));
+
+        await fetch('/api/interview-drafts', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${session.access_token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            transcriptJson: serializableMessages,
+            theme: selectedTheme?.id || null,
+            sessionDuration: sessionDuration,
+          }),
+        });
+      } catch (error) {
+        console.error('Auto-save failed:', error);
+      }
+    };
+
+    // Save immediately on first mount with responses
+    saveDraft();
+
+    // Then save every 60 seconds
+    autoSaveTimerRef.current = setInterval(saveDraft, 60000);
+
+    return () => {
+      if (autoSaveTimerRef.current) {
+        clearInterval(autoSaveTimerRef.current);
+        autoSaveTimerRef.current = null;
+      }
+    };
+  }, [sessionStartTime, messages, selectedTheme, sessionDuration]);
+
+  // Delete draft after successful story completion
+  const deleteDraft = async () => {
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.access_token) return;
+
+      await fetch('/api/interview-drafts', {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`,
+        },
+      });
+    } catch (error) {
+      console.error('Failed to delete draft:', error);
+    }
+  };
+
+  // Handle resume from draft
+  const handleResumeDraft = () => {
+    if (!existingDraft) return;
+
+    // Restore messages (convert timestamp strings back to Date objects)
+    const restoredMessages: Message[] = existingDraft.transcriptJson.map(m => ({
+      ...m,
+      timestamp: new Date(m.timestamp),
+    }));
+
+    setMessages(restoredMessages);
+    setSessionDuration(existingDraft.sessionDuration || 0);
+    setSessionStartTime(Date.now() - (existingDraft.sessionDuration || 0) * 1000);
+
+    // Find and restore theme if available
+    if (existingDraft.theme) {
+      // Theme restoration would require importing interviewThemes
+      // For now, just skip to main phase
+      setInterviewPhase('main');
+    } else {
+      setInterviewPhase('main');
+    }
+
+    setShowResumeModal(false);
+    setShowWelcome(false);
+
+    // Start recording session
+    if (isRealtimeEnabled) {
+      startSession((text) => handleTranscriptUpdate(text, true));
+    } else {
+      startTraditionalRecording('conversation');
+    }
+  };
+
+  // Handle starting fresh (discard draft)
+  const handleStartFresh = async () => {
+    await deleteDraft();
+    setExistingDraft(null);
+    setShowResumeModal(false);
+    // Continue with normal welcome flow
+  };
+
+  // Handle retry connection after error
+  const handleRetryConnection = async () => {
+    if (!selectedTheme) {
+      setShowErrorFallback(false);
+      setConnectionError(null);
+      setInterviewPhase('theme_selection');
+      return;
+    }
+
+    setShowErrorFallback(false);
+    setConnectionError(null);
+
+    try {
+      await startSession(
+        (text) => handleTranscriptUpdate(text, true),
+        (error) => {
+          console.error('Realtime session retry error:', error);
+          setConnectionError(error.message);
+          setShowErrorFallback(true);
+        }
+      );
+    } catch (error) {
+      console.error('Failed to retry realtime session:', error);
+      setConnectionError(error instanceof Error ? error.message : 'Failed to connect');
+      setShowErrorFallback(true);
+    }
+  };
+
+  // Handle fallback to standard recording
+  const handleFallbackToRecording = () => {
+    router.push('/recording');
+  };
+
+  // Handle cancel interview
+  const handleCancelInterview = () => {
+    const hasResponses = messages.some(m =>
+      m.type === 'audio-response' || m.type === 'text-response'
+    );
+
+    if (hasResponses) {
+      const confirmCancel = window.confirm(
+        'Are you sure you want to cancel? Your responses will be lost.'
+      );
+      if (!confirmCancel) return;
+    }
+
+    // Clean up session
+    stopSession();
+    stopTraditionalRecording();
+    if (sessionTimerRef.current) {
+      clearInterval(sessionTimerRef.current);
+    }
+
+    // Delete any draft
+    deleteDraft();
+
+    // Navigate back
+    router.push('/timeline');
+  };
 
   // Initialize conversation after welcome dismissed
   const handleWelcomeDismiss = () => {
@@ -369,17 +623,34 @@ export default function InterviewChatPage() {
   };
 
   // Handle theme selection - start the warm-up phase
-  const handleThemeSelect = (theme: InterviewTheme) => {
+  const handleThemeSelect = async (theme: InterviewTheme) => {
     setSelectedTheme(theme);
     setInterviewPhase('warmup');
     setWarmUpIndex(0);
+    setConnectionError(null);
+    setShowErrorFallback(false);
 
     // Start session timer
     setSessionStartTime(Date.now());
 
     // Start recording state for the interview
     if (isRealtimeEnabled) {
-      startSession((text) => handleTranscriptUpdate(text, true));
+      try {
+        await startSession(
+          (text) => handleTranscriptUpdate(text, true),
+          (error) => {
+            // Error callback from hook
+            console.error('Realtime session error:', error);
+            setConnectionError(error.message);
+            setShowErrorFallback(true);
+          }
+        );
+      } catch (error) {
+        console.error('Failed to start realtime session:', error);
+        setConnectionError(error instanceof Error ? error.message : 'Failed to connect');
+        setShowErrorFallback(true);
+        return; // Don't proceed if connection fails
+      }
     } else {
       startTraditionalRecording('conversation');
     }
@@ -791,10 +1062,10 @@ export default function InterviewChatPage() {
   // Show loading state while checking auth
   if (isAuthLoading) {
     return (
-      <div className="hw-page flex items-center justify-center" style={{ background: 'var(--color-page)' }}>
+      <div className="hw-page flex items-center justify-center" style={{ background: 'var(--hw-page-bg)' }}>
         <div className="text-center">
-          <div className="w-16 h-16 rounded-full bg-gradient-to-br from-amber-500 to-rose-500 mx-auto mb-4 animate-pulse" />
-          <p className="text-gray-600">Loading...</p>
+          <div className="w-12 h-12 border-4 border-[var(--hw-primary)]/20 border-t-[var(--hw-primary)] rounded-full mx-auto mb-4 animate-spin" />
+          <p className="text-[var(--hw-text-secondary)] text-lg">Loading...</p>
         </div>
       </div>
     );
@@ -806,7 +1077,99 @@ export default function InterviewChatPage() {
   }
 
   return (
-    <div className="hw-page" style={{ background: '#fdfbf7' }}>{/* Warm paper-like background */}
+    <div className="hw-page" style={{ background: 'var(--hw-page-bg)' }}>
+      {/* Resume Draft Modal */}
+      {showResumeModal && existingDraft && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl p-6 sm:p-8 max-w-md w-full mx-4 shadow-xl">
+            <div className="text-center mb-6">
+              <div className="w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <RefreshCw className="w-8 h-8 text-amber-600" />
+              </div>
+              <h2 className="text-xl sm:text-2xl font-semibold text-gray-900 mb-2">
+                Continue Previous Interview?
+              </h2>
+              <p className="text-gray-600 text-sm sm:text-base">
+                You have an unfinished interview from{' '}
+                {new Date(existingDraft.updatedAt).toLocaleDateString('en-US', {
+                  month: 'short',
+                  day: 'numeric',
+                  hour: 'numeric',
+                  minute: '2-digit',
+                })}
+              </p>
+              {existingDraft.sessionDuration > 0 && (
+                <p className="text-amber-700 text-sm mt-1">
+                  {Math.floor(existingDraft.sessionDuration / 60)} min {existingDraft.sessionDuration % 60} sec recorded
+                </p>
+              )}
+            </div>
+
+            <div className="flex flex-col gap-3">
+              <Button
+                onClick={handleResumeDraft}
+                className="w-full min-h-[48px] bg-amber-600 hover:bg-amber-700 text-white font-medium"
+              >
+                Continue Interview
+              </Button>
+              <Button
+                onClick={handleStartFresh}
+                variant="outline"
+                className="w-full min-h-[48px] border-gray-300 text-gray-700 hover:bg-gray-50"
+              >
+                Start Fresh
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Connection Error Fallback Modal */}
+      {showErrorFallback && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl p-6 sm:p-8 max-w-md w-full mx-4 shadow-xl">
+            <div className="text-center mb-6">
+              <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <AlertTriangle className="w-8 h-8 text-red-600" />
+              </div>
+              <h2 className="text-xl sm:text-2xl font-semibold text-gray-900 mb-2">
+                Connection Issue
+              </h2>
+              <p className="text-gray-600 text-sm sm:text-base">
+                We're having trouble connecting to Pearl. This could be a temporary network issue.
+              </p>
+              {connectionError && (
+                <p className="text-red-600 text-xs mt-2 bg-red-50 rounded-lg p-2">
+                  {connectionError}
+                </p>
+              )}
+            </div>
+
+            <div className="flex flex-col gap-3">
+              <Button
+                onClick={handleRetryConnection}
+                className="w-full min-h-[48px] bg-amber-600 hover:bg-amber-700 text-white font-medium"
+              >
+                <RefreshCw className="w-4 h-4 mr-2" />
+                Try Again
+              </Button>
+              <Button
+                onClick={handleFallbackToRecording}
+                variant="outline"
+                className="w-full min-h-[48px] border-gray-300 text-gray-700 hover:bg-gray-50"
+              >
+                <Mic className="w-4 h-4 mr-2" />
+                Record Story Instead
+              </Button>
+            </div>
+
+            <p className="text-xs text-gray-500 text-center mt-4">
+              You can still record your story using our standard recording feature
+            </p>
+          </div>
+        </div>
+      )}
+
       {/* Story Split Modal */}
       <StorySplitModal
         isOpen={showSplitModal}
@@ -833,87 +1196,94 @@ export default function InterviewChatPage() {
         />
       )}
 
-      {/* Chat Container - adjust height to account for bottom nav on mobile */}
+      {/* Chat Container - full height (bottom nav hidden during interview) */}
       {/* Hide when showing theme selector */}
-      <div className={`max-w-3xl mx-auto flex flex-col ${interviewPhase === 'theme_selection' && !showWelcome ? 'hidden' : ''}`} style={{ height: 'calc(100vh - 80px)', marginBottom: '80px' }}>
-        {/* Header */}
-        <div className="sticky top-0 z-10 bg-white border-b border-gray-200 px-4 sm:px-6 py-2 sm:py-4">
-          {/* Mobile Layout - stacked when complete button is visible */}
-          {messages.some(m => m.type === 'audio-response' || m.type === 'text-response') ? (
-            <div className="flex flex-col items-center gap-2">
+      <div className={`max-w-3xl mx-auto flex flex-col ${interviewPhase === 'theme_selection' && !showWelcome ? 'hidden' : ''}`} style={{ height: '100dvh' }}>
+        {/* Header - design guidelines compliant */}
+        <div className="sticky top-0 z-10 bg-[var(--hw-surface)] border-b border-[var(--hw-border-subtle)] px-4 py-3">
+          {/* Always show: Cancel on left, Logo center, Finish on right (when available) */}
+          <div className="flex items-center justify-between gap-2">
+            {/* Cancel Button */}
+            <button
+              onClick={handleCancelInterview}
+              className="min-w-[48px] min-h-[48px] flex items-center justify-center text-[var(--hw-text-secondary)] hover:text-[var(--hw-text-primary)] transition-colors"
+              aria-label="Cancel interview"
+            >
+              <X className="w-6 h-6" />
+            </button>
+
+            {/* Center: Logo + Timer */}
+            <div className="flex-1 flex flex-col items-center">
               <Image
                 src="/final logo/logo-new.svg"
                 alt="Heritage Whisper"
-                width={200}
-                height={50}
-                className="h-8 sm:h-10 w-auto"
+                width={140}
+                height={35}
+                className="h-7 w-auto"
                 priority
               />
-              {isAnalyzing ? (
-                <div className="flex items-center gap-2 text-amber-800">
-                  <Loader2 className="w-5 h-5 animate-spin" />
-                  <span className="font-medium">Analyzing your story...</span>
+            </div>
+
+            {/* Finish Button (when user has responses) */}
+            {messages.some(m => m.type === 'audio-response' || m.type === 'text-response') ? (
+              isAnalyzing ? (
+                <div className="min-w-[48px] flex items-center justify-center">
+                  <Loader2 className="w-5 h-5 animate-spin text-[var(--hw-primary)]" />
                 </div>
               ) : (
                 <Button
                   onClick={handleComplete}
-                  className="bg-amber-100 hover:bg-amber-200 text-amber-900 border border-amber-200 shadow-sm transition-all"
+                  className="min-h-[48px] px-4 bg-[var(--hw-primary)] hover:bg-[var(--hw-primary-hover)] text-white font-medium rounded-xl"
                   size="sm"
                   disabled={isProcessing}
                 >
-                  <Check className="w-4 h-4 mr-1.5" />
-                  Finish Interview
+                  <Check className="w-4 h-4 mr-1" />
+                  Done
                 </Button>
-              )}
-            </div>
-          ) : (
-            // Original layout when no complete button
-            <div className="flex flex-col items-center gap-1 sm:gap-2">
-              <Image
-                src="/final logo/logo-new.svg"
-                alt="Heritage Whisper"
-                width={200}
-                height={50}
-                className="h-10 w-auto opacity-90" // Slightly softer logo
-                priority
-              />
-              <p className="text-xl font-serif text-amber-900/80 italic">Sharing your story</p>
-            </div>
-          )}
+              )
+            ) : (
+              <div className="min-w-[48px]" />
+            )}
+          </div>
 
-          {/* Session Timer & Warning */}
+          {/* Session Timer & Status - compact row below header */}
           {sessionStartTime && (
-            <div className="mt-2 flex flex-col items-center gap-1">
-              {/* Timer Display */}
-              <div className={`text-sm font-medium tabular-nums transition-colors ${sessionDuration >= 1740 // Last 60 seconds (29 minutes)
-                ? 'text-red-600 font-bold text-base animate-pulse'
-                : sessionDuration >= 1500 // After 25 minutes
-                  ? 'text-amber-600'
-                  : 'text-gray-500'
-                }`}>
+            <div className="mt-2 flex items-center justify-center gap-3 text-sm">
+              {/* Timer */}
+              <span className={`tabular-nums font-medium ${
+                sessionDuration >= 1740 ? 'text-[var(--hw-error)] animate-pulse' :
+                sessionDuration >= 1500 ? 'text-[var(--hw-warning-accent)]' :
+                'text-[var(--hw-text-muted)]'
+              }`}>
                 {Math.floor(sessionDuration / 60)}:{(sessionDuration % 60).toString().padStart(2, '0')}
-                {sessionDuration >= 1740 && ' remaining'}
-              </div>
+              </span>
 
-              {/* Warning Banner */}
-              {showTimeWarning && sessionDuration < 1740 && (
-                <div className="text-xs text-amber-600 bg-amber-50 px-3 py-1 rounded-full">
-                  5 minutes remaining
-                </div>
+              {/* Status Indicator */}
+              {isRealtimeEnabled && status === 'connected' && conversationPhase !== 'idle' && (
+                <span className="flex items-center gap-1.5 text-[var(--hw-text-secondary)]">
+                  <span className={`w-2 h-2 rounded-full animate-pulse ${
+                    conversationPhase === 'listening' ? 'bg-[var(--hw-success)]' :
+                    conversationPhase === 'thinking' ? 'bg-[var(--hw-warning-accent)]' :
+                    'bg-[var(--hw-primary)]'
+                  }`} />
+                  <span>
+                    {conversationPhase === 'listening' && 'Listening'}
+                    {conversationPhase === 'thinking' && 'Processing'}
+                    {conversationPhase === 'speaking' && 'Pearl speaking'}
+                  </span>
+                </span>
               )}
 
-              {/* Final Minute Countdown */}
-              {sessionDuration >= 1740 && (
-                <div className="text-xs text-red-600 bg-red-50 px-3 py-1 rounded-full font-medium">
-                  Interview will auto-complete at 30:00
-                </div>
+              {/* Time Warning */}
+              {showTimeWarning && sessionDuration < 1740 && (
+                <span className="text-[var(--hw-warning-accent)]">5 min left</span>
               )}
             </div>
           )}
         </div>
 
         {/* Messages */}
-        <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-3 sm:py-6 space-y-4">
+        <div className="flex-1 overflow-y-auto px-4 py-4 space-y-3">
           {messages.map((message) => (
             <div key={message.id}>
               {message.type === 'typing' ? (

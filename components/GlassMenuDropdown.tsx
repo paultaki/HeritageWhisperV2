@@ -209,9 +209,16 @@ export default function GlassMenuDropdown({ isOpen, onClose }: GlassMenuDropdown
                   </p>
                 </div>
                 {hasFamilyAccess && (
-                  <ChevronDown
-                    className={`w-5 h-5 text-gray-400 transition-transform ${isAccountSwitcherOpen ? 'rotate-180' : ''}`}
-                  />
+                  <div className="flex items-center gap-1.5">
+                    {!isAccountSwitcherOpen && (
+                      <span className="text-xs text-blue-600 font-medium whitespace-nowrap">
+                        Switch
+                      </span>
+                    )}
+                    <ChevronDown
+                      className={`w-5 h-5 text-gray-400 transition-transform ${isAccountSwitcherOpen ? 'rotate-180' : ''}`}
+                    />
+                  </div>
                 )}
               </button>
 

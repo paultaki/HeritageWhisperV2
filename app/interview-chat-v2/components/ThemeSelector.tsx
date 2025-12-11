@@ -24,51 +24,48 @@ export function ThemeSelector({ onSelectTheme, userName }: ThemeSelectorProps) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-gradient-to-b from-amber-50 to-white p-4 overflow-y-auto">
-      <div className="w-full max-w-2xl">
-        {/* Header */}
-        <div className="text-center mb-8">
-          <h1 className="text-2xl sm:text-3xl font-serif text-amber-900 mb-3">
-            Welcome, {userName?.split(' ')[0] || 'friend'}!
-          </h1>
-          <p className="text-gray-600 text-lg">
-            What chapter of your life would you like to explore today?
-          </p>
-          <p className="text-gray-500 text-sm mt-2">
-            Choose a theme to guide our conversation
-          </p>
-        </div>
+    <div className="fixed inset-0 z-50 flex flex-col bg-[var(--hw-page-bg)] overflow-hidden">
+      {/* Header - Fixed at top */}
+      <div className="bg-[var(--hw-surface)] border-b border-[var(--hw-border-subtle)] px-4 py-6 text-center">
+        <h1 className="text-2xl font-semibold text-[var(--hw-text-primary)] mb-2">
+          Choose a Topic
+        </h1>
+        <p className="text-lg text-[var(--hw-text-secondary)]">
+          What part of your life story would you like to share today?
+        </p>
+      </div>
 
-        {/* Theme Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-8">
+      {/* Scrollable Theme List */}
+      <div className="flex-1 overflow-y-auto px-4 py-4">
+        <div className="max-w-lg mx-auto space-y-3">
           {INTERVIEW_THEMES.map((theme) => (
             <button
               key={theme.id}
               onClick={() => handleThemeClick(theme)}
               className={`
-                p-4 rounded-xl border-2 text-left transition-all duration-200
-                hover:shadow-md hover:border-amber-400
+                w-full p-4 rounded-xl border-2 text-left transition-all duration-200 min-h-[80px]
+                hover:shadow-md
                 ${selectedTheme?.id === theme.id
-                  ? 'border-amber-500 bg-amber-50 shadow-md'
-                  : 'border-gray-200 bg-white'
+                  ? 'border-[var(--hw-primary)] bg-[var(--hw-primary-soft)] shadow-md'
+                  : 'border-[var(--hw-border-subtle)] bg-[var(--hw-surface)] hover:border-[var(--hw-primary)]'
                 }
               `}
             >
-              <div className="flex items-start gap-3">
-                <span className="text-2xl">{theme.icon}</span>
+              <div className="flex items-start gap-4">
+                <span className="text-3xl flex-shrink-0">{theme.icon}</span>
                 <div className="flex-1 min-w-0">
-                  <h3 className={`font-semibold truncate ${
-                    selectedTheme?.id === theme.id ? 'text-amber-900' : 'text-gray-900'
+                  <h3 className={`text-lg font-semibold ${
+                    selectedTheme?.id === theme.id ? 'text-[var(--hw-primary)]' : 'text-[var(--hw-text-primary)]'
                   }`}>
                     {theme.title}
                   </h3>
-                  <p className="text-sm text-gray-500 line-clamp-2">
+                  <p className="text-base text-[var(--hw-text-secondary)] mt-0.5">
                     {theme.description}
                   </p>
                 </div>
                 {selectedTheme?.id === theme.id && (
-                  <div className="w-5 h-5 rounded-full bg-amber-500 flex items-center justify-center flex-shrink-0">
-                    <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <div className="w-6 h-6 rounded-full bg-[var(--hw-primary)] flex items-center justify-center flex-shrink-0">
+                    <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
                     </svg>
                   </div>
@@ -77,59 +74,43 @@ export function ThemeSelector({ onSelectTheme, userName }: ThemeSelectorProps) {
             </button>
           ))}
         </div>
+      </div>
 
-        {/* Continue Button */}
-        <div className="flex flex-col items-center gap-4">
+      {/* Fixed Bottom Action Area */}
+      <div className="bg-[var(--hw-surface)] border-t border-[var(--hw-border-subtle)] px-4 py-4 safe-area-pb">
+        <div className="max-w-lg mx-auto flex flex-col items-center gap-3">
           <Button
             onClick={handleContinue}
             disabled={!selectedTheme}
             className={`
-              px-8 py-6 text-lg font-semibold rounded-full transition-all
+              w-full min-h-[60px] text-lg font-medium rounded-xl transition-all
               ${selectedTheme
-                ? 'bg-gradient-to-r from-amber-500 to-rose-500 hover:from-amber-600 hover:to-rose-600 text-white shadow-lg'
-                : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                ? 'bg-[var(--hw-primary)] hover:bg-[var(--hw-primary-hover)] text-white shadow-md'
+                : 'bg-[var(--hw-border-subtle)] text-[var(--hw-text-muted)] cursor-not-allowed'
               }
             `}
           >
             {selectedTheme ? (
               <>
-                Let's Begin
-                <ChevronRight className="w-5 h-5 ml-2" />
+                Continue
+                <ChevronRight className="w-5 h-5 ml-1" />
               </>
             ) : (
-              'Select a theme to continue'
+              'Select a topic to continue'
             )}
           </Button>
 
           {/* Skip Option */}
           <button
             onClick={() => {
-              // Use childhood as default if user wants to skip
               const defaultTheme = INTERVIEW_THEMES.find(t => t.id === 'wisdom') || INTERVIEW_THEMES[0];
               onSelectTheme(defaultTheme);
             }}
-            className="text-sm text-gray-400 hover:text-gray-600 underline"
+            className="text-base text-[var(--hw-text-muted)] hover:text-[var(--hw-text-secondary)] underline py-2"
           >
             Skip and let Pearl choose
           </button>
         </div>
-
-        {/* Selected Theme Preview */}
-        {selectedTheme && (
-          <div className="mt-6 p-4 bg-white rounded-xl border border-amber-200 shadow-sm">
-            <p className="text-sm text-amber-800 font-medium mb-2">
-              We'll start by warming up with a few easy questions:
-            </p>
-            <ul className="text-sm text-gray-600 space-y-1">
-              {selectedTheme.warmUpQuestions.map((q, i) => (
-                <li key={i} className="flex items-start gap-2">
-                  <span className="text-amber-500">•</span>
-                  <span>{q}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
       </div>
     </div>
   );

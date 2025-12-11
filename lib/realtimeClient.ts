@@ -239,6 +239,10 @@ export async function startRealtime(
     const sessionConfig: any = {
       type: 'session.update',
       session: {
+        // CRITICAL: Enable both text and audio modalities for Pearl to speak
+        modalities: ['text', 'audio'],
+        // Set Pearl's voice
+        voice: 'shimmer',
         // Enable input transcription (whisper-1 required to receive transcript events)
         input_audio_transcription: {
           model: 'whisper-1',
