@@ -11,7 +11,6 @@ type NavItem = {
   href: string;
   Icon?: React.ComponentType<React.SVGProps<SVGSVGElement>>;
   onClick?: () => void;
-  highlighted?: boolean;
 };
 
 type GlassNavProps = {
@@ -108,7 +107,7 @@ export default function GlassNav({
       />
 
       {/* items */}
-      {items.map(({ key, label, href, Icon, onClick, highlighted }) => {
+      {items.map(({ key, label, href, Icon, onClick }) => {
         const active = key === activeKey;
         const isMenu = key === 'menu';
         const hasOnClick = !!onClick || isMenu;
@@ -130,10 +129,8 @@ export default function GlassNav({
               <Icon
                 className={cn(
                   "w-[18px] h-[18px] transition-colors duration-200",
-                  // Icon colors - highlighted items are always blue
-                  highlighted
-                    ? "text-blue-600"
-                    : dataInk === "light"
+                  // Icon colors - conditional on ink and active state
+                  dataInk === "light"
                     ? "text-white drop-shadow-[0_1px_1px_rgba(0,0,0,0.30)]"
                     : active
                     ? "text-black"
@@ -144,10 +141,8 @@ export default function GlassNav({
             <span
               className={cn(
                 "relative text-sm leading-tight font-medium transition-colors duration-200",
-                // Label colors - highlighted items are always blue
-                highlighted
-                  ? "text-blue-600"
-                  : dataInk === "light"
+                // Label colors - conditional on ink and active state
+                dataInk === "light"
                   ? "text-white drop-shadow-[0_1px_1px_rgba(0,0,0,0.30)]"
                   : active
                   ? "text-black"
