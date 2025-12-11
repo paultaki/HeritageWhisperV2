@@ -29,7 +29,7 @@ export default function FamilyNav({
     {
       key: "timeline",
       label: "Timeline",
-      href: `/family/timeline-v2/${userId}`,
+      href: `/family/timeline/${userId}`,
       Icon: Clock,
     },
     {
