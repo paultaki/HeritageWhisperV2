@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { Mic, Square, Send, Type, Volume2, VolumeX } from "lucide-react";
+import { Mic, Square, Send, Keyboard, Volume2, VolumeX } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useRealtimeInterview } from "@/hooks/use-realtime-interview";
 
@@ -214,28 +214,29 @@ export function ChatInput({
 
   return (
     <div
-      className="border-t border-[var(--hw-border-subtle)] bg-[var(--hw-page-bg)] px-4 py-3 z-40"
+      className="border-t border-[var(--hw-border-subtle)] bg-[var(--hw-page-bg)] px-4 z-40"
       style={{
-        paddingBottom: 'max(12px, env(safe-area-inset-bottom, 0px))',
+        paddingTop: '8px',
+        paddingBottom: 'max(8px, env(safe-area-inset-bottom, 0px))',
       }}
     >
       {/* Provisional Transcript Display (Realtime mode only) */}
       {useRealtime && isRecording && provisionalTranscript && (
-        <div className="mb-4 px-4 py-3 rounded-2xl bg-white border border-amber-100 shadow-sm">
-          <p className="text-xs text-amber-800/60 mb-1 font-medium uppercase tracking-wider">Listening...</p>
-          <p className="text-lg text-gray-700 font-serif italic leading-relaxed">{provisionalTranscript}</p>
+        <div className="mb-3 px-4 py-2 rounded-xl bg-white border border-[var(--hw-primary)]/20 shadow-sm">
+          <p className="text-xs text-[var(--hw-text-muted)] mb-1 font-medium">Listening...</p>
+          <p className="text-base text-[var(--hw-text-primary)] leading-relaxed">{provisionalTranscript}</p>
         </div>
       )}
 
       {/* Audio Mode (Default) */}
       {mode === 'audio' && (
-        <div className="flex flex-col items-center gap-2">
+        <div className="flex flex-col items-center">
           {isRecording ? (
-            <div className="w-full flex items-center gap-3">
+            <div className="flex items-center justify-center gap-4">
               {/* Recording Indicator & Timer */}
-              <div className="flex-1 flex items-center justify-center gap-2 px-4 py-2 rounded-xl bg-red-50 border border-red-200">
+              <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-red-50 border border-red-200">
                 <div className="w-2 h-2 bg-[var(--hw-error)] rounded-full animate-pulse" />
-                <span className="text-base font-medium text-[var(--hw-error)] tabular-nums">
+                <span className="text-sm font-medium text-[var(--hw-error)] tabular-nums">
                   {formatTime(recordingDuration)}
                 </span>
               </div>
@@ -243,41 +244,42 @@ export function ChatInput({
               {/* Stop Button - 60px per design guidelines */}
               <button
                 onClick={stopRecording}
-                className="w-[60px] h-[60px] rounded-full bg-[var(--hw-error)] hover:bg-red-700 flex items-center justify-center shadow-md transition-transform active:scale-95"
+                className="w-[60px] h-[60px] rounded-full bg-[var(--hw-error)] hover:bg-red-700 flex items-center justify-center shadow-lg transition-transform active:scale-95"
                 aria-label="Stop recording"
               >
                 <Square className="w-6 h-6 text-white fill-white" />
               </button>
             </div>
           ) : (
-            <div className="w-full flex items-center justify-center gap-3">
-              {/* Switch to Text */}
+            <div className="flex items-center justify-center gap-4">
+              {/* Switch to Text - Keyboard icon is clearer */}
               <button
                 onClick={() => setMode('text')}
-                className="w-12 h-12 rounded-full bg-[var(--hw-surface)] border border-[var(--hw-border-subtle)] text-[var(--hw-text-secondary)] flex items-center justify-center hover:bg-[var(--hw-section-bg)] transition-colors"
+                className="w-10 h-10 rounded-full bg-[var(--hw-surface)] border border-[var(--hw-border-subtle)] text-[var(--hw-text-secondary)] flex items-center justify-center hover:bg-[var(--hw-section-bg)] transition-colors"
                 title="Type instead"
+                aria-label="Switch to typing"
               >
-                <Type className="w-5 h-5" />
+                <Keyboard className="w-5 h-5" />
               </button>
 
-              {/* RECORD BUTTON - 60px per design guidelines */}
+              {/* RECORD BUTTON - 60px centered, iPhone camera style */}
               <button
                 onClick={startRecording}
                 disabled={disabled}
-                className="w-[60px] h-[60px] rounded-full bg-[var(--hw-primary)] hover:bg-[var(--hw-primary-hover)] flex items-center justify-center shadow-md transition-transform active:scale-95 disabled:opacity-50"
+                className="w-[60px] h-[60px] rounded-full bg-[var(--hw-primary)] hover:bg-[var(--hw-primary-hover)] flex items-center justify-center shadow-lg transition-transform active:scale-95 disabled:opacity-50"
                 aria-label="Start recording"
               >
-                <Mic className="w-6 h-6 text-white" />
+                <Mic className="w-7 h-7 text-white" />
               </button>
 
               {/* Spacer for balance */}
-              <div className="w-12" />
+              <div className="w-10" />
             </div>
           )}
 
-          {/* Helper Text */}
+          {/* Helper Text - compact */}
           {!isRecording && (
-            <p className="text-sm text-[var(--hw-text-muted)]">
+            <p className="text-xs text-[var(--hw-text-muted)] mt-1">
               Tap to answer
             </p>
           )}
@@ -290,8 +292,9 @@ export function ChatInput({
           {/* Switch back to Audio */}
           <button
             onClick={() => setMode('audio')}
-            className="mb-1 w-12 h-12 rounded-full bg-[var(--hw-surface)] border border-[var(--hw-border-subtle)] text-[var(--hw-text-secondary)] flex items-center justify-center hover:bg-[var(--hw-section-bg)] transition-colors flex-shrink-0"
+            className="mb-1 w-10 h-10 rounded-full bg-[var(--hw-surface)] border border-[var(--hw-border-subtle)] text-[var(--hw-text-secondary)] flex items-center justify-center hover:bg-[var(--hw-section-bg)] transition-colors flex-shrink-0"
             title="Switch to voice"
+            aria-label="Switch to voice recording"
           >
             <Mic className="w-5 h-5" />
           </button>
@@ -308,16 +311,16 @@ export function ChatInput({
             }}
             disabled={disabled}
             placeholder="Type your response..."
-            className="flex-1 resize-none px-4 py-3 rounded-xl border border-[var(--hw-border-subtle)] bg-[var(--hw-surface)] focus:border-[var(--hw-primary)] focus:ring-2 focus:ring-[var(--hw-primary)]/20 focus:outline-none text-base text-[var(--hw-text-primary)] placeholder:text-[var(--hw-text-muted)] disabled:opacity-50"
-            style={{ minHeight: '48px', maxHeight: '120px' }}
+            className="flex-1 resize-none px-4 py-2 rounded-xl border border-[var(--hw-border-subtle)] bg-[var(--hw-surface)] focus:border-[var(--hw-primary)] focus:ring-2 focus:ring-[var(--hw-primary)]/20 focus:outline-none text-base text-[var(--hw-text-primary)] placeholder:text-[var(--hw-text-muted)] disabled:opacity-50"
+            style={{ minHeight: '44px', maxHeight: '100px' }}
             rows={1}
           />
 
-          {/* Send Button - 48px min per design guidelines */}
+          {/* Send Button */}
           <button
             onClick={sendText}
             disabled={disabled || !textInput.trim()}
-            className="mb-1 w-12 h-12 rounded-full bg-[var(--hw-primary)] hover:bg-[var(--hw-primary-hover)] text-white flex items-center justify-center shadow-md disabled:opacity-50 disabled:cursor-not-allowed transition-transform active:scale-95 flex-shrink-0"
+            className="mb-1 w-10 h-10 rounded-full bg-[var(--hw-primary)] hover:bg-[var(--hw-primary-hover)] text-white flex items-center justify-center shadow-md disabled:opacity-50 disabled:cursor-not-allowed transition-transform active:scale-95 flex-shrink-0"
           >
             <Send className="w-5 h-5" />
           </button>

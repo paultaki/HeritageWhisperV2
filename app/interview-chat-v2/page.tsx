@@ -128,6 +128,11 @@ export default function InterviewChatPage() {
   const [connectionError, setConnectionError] = useState<string | null>(null);
   const [showErrorFallback, setShowErrorFallback] = useState(false);
 
+  // Custom confirmation modal state (replaces browser confirm dialogs)
+  const [showCancelConfirm, setShowCancelConfirm] = useState(false);
+  const [showCompleteConfirm, setShowCompleteConfirm] = useState(false);
+  const [pendingResponseCount, setPendingResponseCount] = useState(0);
+
   // Helper to convert base64 to blob
   const dataURItoBlob = (dataURI: string) => {
     const byteString = atob(dataURI.split(',')[1]);
@@ -264,7 +269,7 @@ export default function InterviewChatPage() {
     }
   };
 
-  // Handle conversation completion
+  // Handle conversation completion - step 1: show confirmation modal
   const handleComplete = useCallback(async () => {
     // Require at least one Q&A exchange
     const userResponses = messages.filter(m =>
@@ -276,13 +281,14 @@ export default function InterviewChatPage() {
       return;
     }
 
-    // Confirm completion
-    const confirmComplete = confirm(
-      `Complete this interview with ${userResponses.length} ${userResponses.length === 1 ? 'response' : 'responses'}?\n\n` +
-      'You\'ll be taken to review and finalize your story.'
-    );
+    // Show custom confirmation modal instead of browser confirm
+    setPendingResponseCount(userResponses.length);
+    setShowCompleteConfirm(true);
+  }, [messages]);
 
-    if (!confirmComplete) return;
+  // Handle confirmed completion - step 2: actually process
+  const handleConfirmedComplete = useCallback(async () => {
+    setShowCompleteConfirm(false);
 
     // Stop recording if active
     if (isRealtimeEnabled && status === 'connected') {
@@ -328,7 +334,7 @@ export default function InterviewChatPage() {
       // Fallback to single story flow
       await proceedWithSingleStory();
     }
-  }, [messages, isRealtimeEnabled, status, isRecording, stopSession, stopTraditionalRecording, user?.name, audioState.chunks, audioState.totalDuration, recordingDuration, getMixedAudioBlob, getUserAudioBlob]);
+  }, [messages, isRealtimeEnabled, status, isRecording, stopSession, stopTraditionalRecording, user?.name, audioState.chunks, audioState.totalDuration, recordingDuration, getMixedAudioBlob, getUserAudioBlob, proceedWithSingleStory]);
 
   // Redirect if not authenticated (only after loading completes)
   useEffect(() => {
@@ -552,7 +558,17 @@ export default function InterviewChatPage() {
     await deleteDraft();
     setExistingDraft(null);
     setShowResumeModal(false);
-    // Continue with normal welcome flow
+
+    // Reset all interview state to start fresh
+    setMessages([]);
+    setSelectedTheme(null);
+    setInterviewPhase('theme_selection');
+    setWarmUpIndex(0);
+    setFollowUpCount(0);
+    setSessionStartTime(null);
+    setSessionDuration(0);
+    setAudioState({ chunks: [], fullTranscript: '', totalDuration: 0 });
+    setShowWelcome(true); // Show welcome modal again
   };
 
   // Handle retry connection after error
@@ -588,18 +604,25 @@ export default function InterviewChatPage() {
     router.push('/recording');
   };
 
-  // Handle cancel interview
+  // Handle cancel interview - step 1: check if confirmation needed
   const handleCancelInterview = () => {
     const hasResponses = messages.some(m =>
       m.type === 'audio-response' || m.type === 'text-response'
     );
 
     if (hasResponses) {
-      const confirmCancel = window.confirm(
-        'Are you sure you want to cancel? Your responses will be lost.'
-      );
-      if (!confirmCancel) return;
+      // Show custom confirmation modal
+      setShowCancelConfirm(true);
+      return;
     }
+
+    // No responses, cancel immediately
+    performCancelInterview();
+  };
+
+  // Handle confirmed cancel - step 2: actually cancel
+  const performCancelInterview = () => {
+    setShowCancelConfirm(false);
 
     // Clean up session
     stopSession();
@@ -1083,13 +1106,13 @@ export default function InterviewChatPage() {
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-2xl p-6 sm:p-8 max-w-md w-full mx-4 shadow-xl">
             <div className="text-center mb-6">
-              <div className="w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <RefreshCw className="w-8 h-8 text-amber-600" />
+              <div className="w-16 h-16 bg-[var(--hw-primary-soft)] rounded-full flex items-center justify-center mx-auto mb-4">
+                <RefreshCw className="w-8 h-8 text-[var(--hw-primary)]" />
               </div>
               <h2 className="text-xl sm:text-2xl font-semibold text-gray-900 mb-2">
                 Continue Previous Interview?
               </h2>
-              <p className="text-gray-600 text-sm sm:text-base">
+              <p className="text-gray-600 text-base">
                 You have an unfinished interview from{' '}
                 {new Date(existingDraft.updatedAt).toLocaleDateString('en-US', {
                   month: 'short',
@@ -1099,7 +1122,7 @@ export default function InterviewChatPage() {
                 })}
               </p>
               {existingDraft.sessionDuration > 0 && (
-                <p className="text-amber-700 text-sm mt-1">
+                <p className="text-[var(--hw-primary)] text-base mt-1">
                   {Math.floor(existingDraft.sessionDuration / 60)} min {existingDraft.sessionDuration % 60} sec recorded
                 </p>
               )}
@@ -1108,7 +1131,7 @@ export default function InterviewChatPage() {
             <div className="flex flex-col gap-3">
               <Button
                 onClick={handleResumeDraft}
-                className="w-full min-h-[48px] bg-amber-600 hover:bg-amber-700 text-white font-medium"
+                className="w-full min-h-[48px] bg-[var(--hw-primary)] hover:bg-[var(--hw-primary-hover)] text-white font-medium"
               >
                 Continue Interview
               </Button>
@@ -1135,7 +1158,7 @@ export default function InterviewChatPage() {
               <h2 className="text-xl sm:text-2xl font-semibold text-gray-900 mb-2">
                 Connection Issue
               </h2>
-              <p className="text-gray-600 text-sm sm:text-base">
+              <p className="text-gray-600 text-base">
                 We're having trouble connecting to Pearl. This could be a temporary network issue.
               </p>
               {connectionError && (
@@ -1148,7 +1171,7 @@ export default function InterviewChatPage() {
             <div className="flex flex-col gap-3">
               <Button
                 onClick={handleRetryConnection}
-                className="w-full min-h-[48px] bg-amber-600 hover:bg-amber-700 text-white font-medium"
+                className="w-full min-h-[48px] bg-[var(--hw-primary)] hover:bg-[var(--hw-primary-hover)] text-white font-medium"
               >
                 <RefreshCw className="w-4 h-4 mr-2" />
                 Try Again
@@ -1179,6 +1202,77 @@ export default function InterviewChatPage() {
         onKeepOne={() => proceedWithSingleStory(detectedStories[0])}
         isProcessing={isSplitting}
       />
+
+      {/* Cancel Confirmation Modal */}
+      {showCancelConfirm && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl p-6 sm:p-8 max-w-md w-full mx-4 shadow-xl">
+            <div className="text-center mb-6">
+              <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <AlertTriangle className="w-8 h-8 text-red-600" />
+              </div>
+              <h2 className="text-xl sm:text-2xl font-semibold text-gray-900 mb-2">
+                Cancel Interview?
+              </h2>
+              <p className="text-gray-600 text-base">
+                Your responses will be lost. Are you sure you want to cancel?
+              </p>
+            </div>
+
+            <div className="flex flex-col gap-3">
+              <Button
+                onClick={() => setShowCancelConfirm(false)}
+                className="w-full min-h-[48px] bg-[var(--hw-primary)] hover:bg-[var(--hw-primary-hover)] text-white font-medium"
+              >
+                Keep Recording
+              </Button>
+              <Button
+                onClick={performCancelInterview}
+                variant="outline"
+                className="w-full min-h-[48px] border-red-300 text-red-700 hover:bg-red-50"
+              >
+                Yes, Cancel Interview
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Complete Confirmation Modal */}
+      {showCompleteConfirm && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl p-6 sm:p-8 max-w-md w-full mx-4 shadow-xl">
+            <div className="text-center mb-6">
+              <div className="w-16 h-16 bg-[var(--hw-primary-soft)] rounded-full flex items-center justify-center mx-auto mb-4">
+                <Check className="w-8 h-8 text-[var(--hw-primary)]" />
+              </div>
+              <h2 className="text-xl sm:text-2xl font-semibold text-gray-900 mb-2">
+                Finish Interview?
+              </h2>
+              <p className="text-gray-600 text-base">
+                You've shared {pendingResponseCount} {pendingResponseCount === 1 ? 'response' : 'responses'}.
+                You'll be taken to review and finalize your story.
+              </p>
+            </div>
+
+            <div className="flex flex-col gap-3">
+              <Button
+                onClick={handleConfirmedComplete}
+                className="w-full min-h-[48px] bg-[var(--hw-primary)] hover:bg-[var(--hw-primary-hover)] text-white font-medium"
+              >
+                Finish & Review Story
+              </Button>
+              <Button
+                onClick={() => setShowCompleteConfirm(false)}
+                variant="outline"
+                className="w-full min-h-[48px] border-gray-300 text-gray-700 hover:bg-gray-50"
+              >
+                Keep Recording
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Welcome Modal */}
       {showWelcome && (
