@@ -132,10 +132,11 @@ export default function GlassNavWrapper() {
     },
     {
       key: 'question',
-      label: 'Ask',
+      label: 'Request',
       href: '#',
       Icon: MessageSquarePlus,
       viewerOnly: true, // Only show for viewers
+      highlighted: true, // Blue highlight to stand out
       onClick: () => setIsQuestionDialogOpen(true),
     },
     {
