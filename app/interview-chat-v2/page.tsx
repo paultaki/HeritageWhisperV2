@@ -122,6 +122,7 @@ export default function InterviewChatPage() {
     sessionDuration: number;
     updatedAt: string;
   } | null>(null);
+  const [draftCheckComplete, setDraftCheckComplete] = useState(false); // Track if we've checked for drafts
   const autoSaveTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   // Error handling state
@@ -409,14 +410,20 @@ export default function InterviewChatPage() {
     };
   }, [stopTraditionalRecording, stopSession]);
 
-  // Check for existing draft on mount
+  // Check for existing draft on mount - MUST complete before showing welcome
   useEffect(() => {
     const checkForDraft = async () => {
-      if (!user) return;
+      if (!user) {
+        setDraftCheckComplete(true);
+        return;
+      }
 
       try {
         const { data: { session } } = await supabase.auth.getSession();
-        if (!session?.access_token) return;
+        if (!session?.access_token) {
+          setDraftCheckComplete(true);
+          return;
+        }
 
         const response = await fetch('/api/interview-drafts', {
           headers: {
@@ -429,10 +436,13 @@ export default function InterviewChatPage() {
           if (data.draft && data.draft.transcriptJson?.length > 0) {
             setExistingDraft(data.draft);
             setShowResumeModal(true);
+            setShowWelcome(false); // Hide welcome when resume modal shows
           }
         }
       } catch (error) {
         console.error('Failed to check for draft:', error);
+      } finally {
+        setDraftCheckComplete(true);
       }
     };
 
@@ -1082,8 +1092,8 @@ export default function InterviewChatPage() {
     );
   }
 
-  // Show loading state while checking auth
-  if (isAuthLoading) {
+  // Show loading state while checking auth OR checking for drafts
+  if (isAuthLoading || !draftCheckComplete) {
     return (
       <div className="hw-page flex items-center justify-center" style={{ background: 'var(--hw-page-bg)' }}>
         <div className="text-center">

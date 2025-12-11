@@ -67,11 +67,25 @@ export async function startRealtime(
     try {
       const msg = JSON.parse(event.data);
 
+      // DEBUG: Log all events to diagnose response generation
+      const importantEvents = [
+        'session.created', 'session.updated',
+        'input_audio_buffer.speech_started', 'input_audio_buffer.speech_stopped',
+        'input_audio_buffer.committed',
+        'response.created', 'response.done',
+        'conversation.item.created',
+        'error'
+      ];
+      if (importantEvents.includes(msg.type)) {
+        console.log('[Realtime] 📨 Event:', msg.type, msg.type === 'error' ? msg.error : '');
+      }
+
       // User speech transcript events (CANONICAL NAMES)
       if (msg.type === 'conversation.item.input_audio_transcription.delta') {
         callbacks.onTranscriptDelta(msg.delta || '');
       }
       if (msg.type === 'conversation.item.input_audio_transcription.completed') {
+        console.log('[Realtime] 📝 User transcript completed:', msg.transcript?.substring(0, 50) + '...');
         callbacks.onTranscriptFinal(msg.transcript || '');
       }
       if (msg.type === 'conversation.item.input_audio_transcription.failed') {
@@ -83,7 +97,7 @@ export async function startRealtime(
       if (msg.type === 'conversation.item.created') {
         // Check if this is a user audio item that needs transcription
         if (msg.item?.type === 'message' && msg.item?.role === 'user') {
-          // User message committed, waiting for transcription...
+          console.log('[Realtime] 👤 User message committed to conversation');
         }
       }
 
@@ -176,10 +190,11 @@ export async function startRealtime(
   const offer = await pc.createOffer();
   await pc.setLocalDescription(offer);
 
-  // 7. Connect to OpenAI Realtime via WebRTC (Direct API Key approach)
+  // 7. Connect to OpenAI Realtime via WebRTC (Ephemeral Token approach)
   // Docs: https://platform.openai.com/docs/guides/realtime-webrtc
-  // Using direct API key = 30-minute session TTL
-  const sdpResponse = await fetch('https://api.openai.com/v1/realtime?model=gpt-4o-realtime-preview-2024-12-17', {
+  // Using ephemeral token from /v1/realtime/client_secrets endpoint
+  // POST to /v1/realtime/calls with ephemeral token for WebRTC SDP exchange
+  const sdpResponse = await fetch('https://api.openai.com/v1/realtime/calls', {
     method: 'POST',
     headers: {
       'Authorization': `Bearer ${apiKey}`,
@@ -256,6 +271,7 @@ export async function startRealtime(
           threshold: 0.7,  // Higher threshold = less sensitive to ambient noise
           prefix_padding_ms: 300,  // Include 300ms before speech starts
           silence_duration_ms: 2000, // 2 seconds of silence - seniors need thinking time!
+          create_response: true,  // CRITICAL: Auto-generate response when user stops speaking
         },
         // Allow longer responses for natural conversation flow (1200 tokens ≈ 15-18 sentences)
         max_response_output_tokens: 1200,
@@ -285,8 +301,9 @@ export async function startRealtime(
   // 9. Reconnection logic (handle ICE failures)
   const reconnect = async (): Promise<RealtimeHandles> => {
     pc.close();
-    // Recursively call startRealtime to get new session (with same API key)
-    return startRealtime(callbacks, apiKey);
+    // Recursively call startRealtime to get new session
+    // NOTE: Caller should fetch a new ephemeral token for reconnection
+    return startRealtime(callbacks, apiKey, config);
   };
 
   pc.oniceconnectionstatechange = () => {
