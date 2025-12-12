@@ -249,6 +249,7 @@ function InterviewChatPageContent() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
   const [followUpCount, setFollowUpCount] = useState(0);
+  const [currentPearlMessageId, setCurrentPearlMessageId] = useState<string | null>(null); // Track current Pearl message for incremental updates
 
   // Interview phase tracking (research-backed warm-up flow)
   type InterviewPhase = 'theme_selection' | 'warmup' | 'main';
@@ -729,9 +730,10 @@ function InterviewChatPageContent() {
         (text) => handleTranscriptUpdate(text, true),
         undefined, // onError
         undefined, // config
-        handlePearlResponse, // onAssistantResponse
+        handlePearlResponse, // onAssistantResponse (fallback)
         undefined, // onUserSpeechStart
-        user?.name // userName
+        user?.name, // userName
+        handlePearlTextDelta // onAssistantTextDelta (real-time streaming)
       );
     } else {
       startTraditionalRecording('conversation');
@@ -784,9 +786,10 @@ function InterviewChatPageContent() {
           setShowErrorFallback(true);
         },
         undefined, // config
-        handlePearlResponse, // onAssistantResponse
+        handlePearlResponse, // onAssistantResponse (fallback)
         undefined, // onUserSpeechStart
-        user?.name // userName
+        user?.name, // userName
+        handlePearlTextDelta // onAssistantTextDelta (real-time streaming)
       );
     } catch (error) {
       console.error('Failed to retry realtime session:', error);
@@ -868,9 +871,10 @@ function InterviewChatPageContent() {
             setShowErrorFallback(true);
           },
           { instructions: perlInstructionsV3 },
-          handlePearlResponse,
-          undefined,
-          user?.name
+          handlePearlResponse, // onAssistantResponse (fallback)
+          undefined, // onUserSpeechStart
+          user?.name, // userName
+          handlePearlTextDelta // onAssistantTextDelta (real-time streaming)
         );
         console.log('[InterviewChat] ✅ Realtime session started with context');
       } catch (error) {
@@ -940,9 +944,10 @@ function InterviewChatPageContent() {
             setShowErrorFallback(true);
           },
           { instructions: perlInstructionsV3 }, // Pass Perl v3 instructions
-          handlePearlResponse, // onAssistantResponse
+          handlePearlResponse, // onAssistantResponse (fallback)
           undefined, // onUserSpeechStart
-          user?.name // userName
+          user?.name, // userName
+          handlePearlTextDelta // onAssistantTextDelta (real-time streaming)
         );
         console.log('[InterviewChat] ✅ Realtime session started successfully');
       } catch (error) {
@@ -1237,44 +1242,82 @@ function InterviewChatPageContent() {
     setMessages(prev => prev.filter(msg => msg.type !== 'typing'));
   };
 
-  // Handle Pearl's realtime responses (from OpenAI Realtime API)
-  const handlePearlResponse = useCallback((text: string) => {
-    console.log('[InterviewChat] 🎙️ handlePearlResponse called with text:', text);
-    console.log('[InterviewChat] Text length:', text?.length);
-    console.log('[InterviewChat] Text type:', typeof text);
+  // Handle Pearl's real-time text deltas (streaming transcript)
+  const handlePearlTextDelta = useCallback((delta: string) => {
+    console.log('[InterviewChat] 📝 handlePearlTextDelta called with delta:', delta);
 
-    if (text === '__COMPOSING__') {
-      // Pearl started speaking - show typing indicator
-      console.log('[InterviewChat] Pearl started composing...');
-      addTypingIndicator();
-      return;
-    }
+    if (delta === '__PEARL_START__') {
+      // Pearl started speaking - create empty message bubble
+      console.log('[InterviewChat] Pearl started speaking, creating empty bubble...');
+      removeTypingIndicator(); // Remove any existing typing indicator
 
-    // Pearl finished - remove typing indicator and add her message
-    console.log('[InterviewChat] Pearl finished speaking, adding message bubble');
-    console.log('[InterviewChat] Text to add:', text);
-    removeTypingIndicator();
-
-    if (text && text.trim()) {
+      const pearlMessageId = `msg-pearl-${Date.now()}`;
       const pearlMessage: Message = {
-        id: `msg-pearl-${Date.now()}`,
-        type: 'question', // Pearl's responses are displayed as questions
-        content: text.trim(),
+        id: pearlMessageId,
+        type: 'question',
+        content: '', // Start with empty content
         timestamp: new Date(),
         sender: 'hw',
       };
 
-      console.log('[InterviewChat] Created Pearl message:', pearlMessage);
-      setMessages(prev => {
-        const newMessages = [...prev, pearlMessage];
-        console.log('[InterviewChat] Total messages after adding Pearl:', newMessages.length);
-        console.log('[InterviewChat] All messages:', newMessages);
-        return newMessages;
-      });
+      setCurrentPearlMessageId(pearlMessageId);
+      setMessages(prev => [...prev, pearlMessage]);
+      return;
+    }
+
+    // Append text delta to current Pearl message
+    if (currentPearlMessageId) {
+      setMessages(prev => prev.map(msg =>
+        msg.id === currentPearlMessageId
+          ? { ...msg, content: msg.content + delta }
+          : msg
+      ));
+    } else {
+      console.warn('[InterviewChat] ⚠️ Received text delta but no current Pearl message!');
+    }
+  }, [currentPearlMessageId]);
+
+  // Handle Pearl's realtime responses (LEGACY - now only used as fallback)
+  const handlePearlResponse = useCallback((text: string) => {
+    console.log('[InterviewChat] 🎙️ handlePearlResponse called (fallback mode)');
+
+    if (text === '__COMPOSING__') {
+      // Legacy: Pearl started speaking - show typing indicator
+      console.log('[InterviewChat] Pearl started composing (legacy)...');
+      addTypingIndicator();
+      return;
+    }
+
+    // Pearl finished - remove typing indicator and add/update her message
+    console.log('[InterviewChat] Pearl finished speaking (fallback), finalizing message');
+    removeTypingIndicator();
+
+    if (text && text.trim()) {
+      // If we have a current Pearl message (from streaming), finalize it
+      if (currentPearlMessageId) {
+        console.log('[InterviewChat] Finalizing existing Pearl message:', currentPearlMessageId);
+        setMessages(prev => prev.map(msg =>
+          msg.id === currentPearlMessageId
+            ? { ...msg, content: text.trim() } // Replace with final text
+            : msg
+        ));
+        setCurrentPearlMessageId(null);
+      } else {
+        // No current message - create a new one (fallback path)
+        console.log('[InterviewChat] Creating new Pearl message (fallback path)');
+        const pearlMessage: Message = {
+          id: `msg-pearl-${Date.now()}`,
+          type: 'question',
+          content: text.trim(),
+          timestamp: new Date(),
+          sender: 'hw',
+        };
+        setMessages(prev => [...prev, pearlMessage]);
+      }
     } else {
       console.warn('[InterviewChat] ⚠️ Pearl text was empty or undefined!');
     }
-  }, []);
+  }, [currentPearlMessageId]);
 
   // Transcribe audio blob (traditional mode only)
   const transcribeChunk = async (audioBlob: Blob): Promise<string> => {

@@ -184,7 +184,8 @@ export function useRealtimeInterview() {
   const pearlAudioRecorderRef = useRef<MediaRecorder | null>(null); // Record Pearl's audio for transcription
   const pearlAudioChunksRef = useRef<Blob[]>([]); // Chunks of Pearl's audio
   const pearlAudioStreamRef = useRef<MediaStream | null>(null); // Store Pearl's audio stream for creating new recorders
-  const onAssistantResponseCallbackRef = useRef<((text: string) => void) | null>(null); // Store callback for Pearl's transcribed text
+  const onAssistantResponseCallbackRef = useRef<((text: string) => void) | null>(null); // Store callback for Pearl's final transcribed text
+  const onAssistantTextDeltaCallbackRef = useRef<((delta: string) => void) | null>(null); // Store callback for Pearl's text deltas (real-time streaming)
   const lastChunkTimeRef = useRef<number>(0); // Track when last audio chunk was received
 
   // Start Realtime session
@@ -194,7 +195,8 @@ export function useRealtimeInterview() {
     config?: RealtimeConfig,
     onAssistantResponse?: (text: string) => void,
     onUserSpeechStart?: () => void,  // Callback when user starts speaking
-    userName?: string // Optional user name for personalization
+    userName?: string, // Optional user name for personalization
+    onAssistantTextDelta?: (delta: string) => void // Callback for real-time text streaming
   ) => {
     console.log('[RealtimeInterview] 🚀 startSession called');
     try {
@@ -214,8 +216,9 @@ export function useRealtimeInterview() {
       const ephemeralToken = await fetchEphemeralToken();
       console.log('[RealtimeInterview] ✅ Got ephemeral token, starting WebRTC...');
 
-      // Store callback for later use
+      // Store callbacks for later use
       onAssistantResponseCallbackRef.current = onAssistantResponse || null;
+      onAssistantTextDeltaCallbackRef.current = onAssistantTextDelta || null;
 
       const handles = await startRealtime({
         // Live transcript updates (gray provisional text)
@@ -243,6 +246,11 @@ export function useRealtimeInterview() {
         onAssistantResponseCreated: () => {
           console.log('[RealtimeInterview] 🎙️ Pearl started speaking, creating new recorder...');
           pearlAudioChunksRef.current = [];
+
+          // Signal to UI that Pearl started composing (show typing indicator / create empty bubble)
+          if (onAssistantTextDeltaCallbackRef.current) {
+            onAssistantTextDeltaCallbackRef.current('__PEARL_START__');
+          }
 
           // Stop previous recorder if it exists
           if (pearlAudioRecorderRef.current && pearlAudioRecorderRef.current.state !== 'inactive') {
@@ -281,52 +289,30 @@ export function useRealtimeInterview() {
           }
         },
 
-        // Pearl response complete - transcribe her audio
+        // Pearl response complete - finalize audio recording (text already streamed)
         onAssistantResponseComplete: async () => {
-          console.log('[RealtimeInterview] ✅ Pearl finished generating response...');
+          console.log('[RealtimeInterview] ✅ Pearl finished generating response (text already streamed)');
 
-          // Wait for audio chunks to stop arriving
-          // The response.done event fires when generation completes, but audio continues streaming
-          // We wait until no new chunks have arrived for 2 seconds (indicating audio finished)
-          console.log('[RealtimeInterview] ⏳ Waiting for audio chunks to stop...');
-
-          const CHUNK_TIMEOUT = 2000; // Wait 2s after last chunk
-          const MAX_WAIT = 15000; // Maximum 15s total wait
-          const startWait = Date.now();
-
-          while (true) {
-            const timeSinceLastChunk = Date.now() - lastChunkTimeRef.current;
-            const totalWaitTime = Date.now() - startWait;
-
-            // Exit if no chunks for 2 seconds OR we've waited 15 seconds total
-            if (timeSinceLastChunk >= CHUNK_TIMEOUT || totalWaitTime >= MAX_WAIT) {
-              console.log('[RealtimeInterview] Audio stream complete after', totalWaitTime, 'ms');
-              console.log('[RealtimeInterview] Time since last chunk:', timeSinceLastChunk, 'ms');
-              break;
-            }
-
-            // Check every 500ms
-            await new Promise(resolve => setTimeout(resolve, 500));
-          }
-
-          // Stop recording to get a complete WebM file
+          // Stop recording to get a complete WebM file (for saving/playback, not for transcription)
           if (pearlAudioRecorderRef.current && pearlAudioRecorderRef.current.state === 'recording') {
             pearlAudioRecorderRef.current.stop();
             console.log('[RealtimeInterview] Stopped Pearl audio recorder');
           }
 
-          // Wait for final chunks to be collected
+          // Short flush delay to ensure final chunks are collected
           await new Promise(resolve => setTimeout(resolve, 200));
 
-          console.log('[RealtimeInterview] Chunks collected:', pearlAudioChunksRef.current.length);
+          console.log('[RealtimeInterview] Audio chunks collected:', pearlAudioChunksRef.current.length, 'chunks for saving/playback');
 
-          // Transcribe the recorded audio
-          if (pearlAudioChunksRef.current.length > 0) {
+          // NOTE: We do NOT transcribe Pearl's audio here anymore
+          // The transcript was already streamed in real-time via onAssistantTextDelta
+          // Audio is kept for saving/playback purposes only
+
+          // Fallback: If no text deltas were received (shouldn't happen), use Whisper as backup
+          if (assistantResponseRef.current.trim().length === 0 && pearlAudioChunksRef.current.length > 0) {
+            console.warn('[RealtimeInterview] ⚠️ No text deltas received, falling back to Whisper transcription');
             try {
               const audioBlob = new Blob(pearlAudioChunksRef.current, { type: 'audio/webm' });
-              console.log('[RealtimeInterview] Transcribing Pearl audio blob:', audioBlob.size, 'bytes');
-
-              // Send to transcription API
               const formData = new FormData();
               formData.append('audio', audioBlob, 'pearl.webm');
 
@@ -342,21 +328,15 @@ export function useRealtimeInterview() {
               if (response.ok) {
                 const data = await response.json();
                 const transcribedText = data.transcription;
-                console.log('[RealtimeInterview] Pearl transcribed:', transcribedText);
+                console.log('[RealtimeInterview] Fallback Whisper transcription:', transcribedText);
 
-                // Send transcribed text to callback
+                // Send transcribed text to callback as fallback
                 if (onAssistantResponseCallbackRef.current) {
                   onAssistantResponseCallbackRef.current(transcribedText);
                 }
-              } else {
-                const errorText = await response.text();
-                console.error('[RealtimeInterview] ❌ Transcription failed:', response.status);
-                console.error('[RealtimeInterview] Error details:', errorText);
-                console.error('[RealtimeInterview] Audio blob size:', audioBlob.size, 'bytes');
-                console.error('[RealtimeInterview] Audio blob type:', audioBlob.type);
               }
             } catch (error) {
-              console.error('[RealtimeInterview] Failed to transcribe Pearl audio:', error);
+              console.error('[RealtimeInterview] Fallback Whisper transcription failed:', error);
             }
           }
 
@@ -464,9 +444,14 @@ export function useRealtimeInterview() {
           }
         },
 
-        // Assistant text streaming (for response trimming)
+        // Assistant text streaming - forward deltas to UI for real-time transcript
         onAssistantTextDelta: (text) => {
           assistantResponseRef.current += text;
+
+          // Forward text delta to UI for real-time streaming
+          if (onAssistantTextDeltaCallbackRef.current) {
+            onAssistantTextDeltaCallbackRef.current(text);
+          }
 
           // DISABLED: Response trimmer was causing Pearl to be cut off mid-question
           // The shouldCancelResponse logic was too aggressive, canceling valid multi-sentence responses
