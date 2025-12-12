@@ -271,29 +271,38 @@ export async function startRealtime(
   dataChannel.onopen = () => {
     console.log('[Realtime] ✅ Data channel opened, sending session.update...');
 
-    // Session configuration - Hybrid format (nested structure + session.type required)
-    const sessionConfig: any = {
+    const sessionConfig = {
       type: 'session.update',
       session: {
-        type: 'realtime',  // REQUIRED by WebRTC
-        model: 'gpt-4o-realtime-preview',  // REQUIRED
-        instructions: config?.instructions || 'You are a helpful assistant.',
-        modalities: ['audio'],  // ONLY audio (not both audio and text!)
-        voice: 'shimmer',
-        input_audio_format: 'pcm16',
-        output_audio_format: 'pcm16',
-        input_audio_transcription: {
-          model: 'whisper-1',
-          language: 'en',  // Force English
-        },
-        turn_detection: {
-          type: 'server_vad',
-          threshold: 0.85,
-          prefix_padding_ms: 500,
-          silence_duration_ms: 2000,
-          create_response: true,
-        },
+        type: 'realtime',
+        output_modalities: ['audio'],
+        instructions: config?.instructions || 'Speak only English. Ask one question at a time.',
         temperature: 0.8,
+        audio: {
+          input: {
+            transcription: {
+              model: 'whisper-1',
+              language: 'en',
+            },
+            turn_detection: {
+              type: 'server_vad',
+              threshold: 0.85,
+              prefix_padding_ms: 500,
+              silence_duration_ms: 2000,
+              create_response: true,
+            },
+            format: {
+              type: 'audio/pcm',
+              rate: 24000,
+            },
+          },
+          output: {
+            voice: 'shimmer',
+            format: {
+              type: 'audio/pcm',
+            },
+          },
+        },
       },
     };
 
