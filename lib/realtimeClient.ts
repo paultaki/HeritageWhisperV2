@@ -108,13 +108,16 @@ export async function startRealtime(
       if (msg.type === 'response.output_text.delta' ||
           msg.type === 'response.output_audio_transcript.delta') {
         const delta = msg.delta || msg.text || msg.transcript || '';
+        console.log('[Realtime] 📝 Text delta received:', delta, 'Callback defined?', !!callbacks.onAssistantTextDelta);
         if (delta) {
           // On first delta, notify that response has started (show typing indicator)
           if (!hasSeenFirstDelta) {
             hasSeenFirstDelta = true;
+            console.log('[Realtime] 🎬 First delta - calling onAssistantResponseStarted');
             callbacks.onAssistantResponseStarted?.();
           }
 
+          console.log('[Realtime] 📤 Forwarding delta to callback:', delta);
           callbacks.onAssistantTextDelta?.(delta);
         }
       }

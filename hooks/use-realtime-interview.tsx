@@ -446,11 +446,16 @@ export function useRealtimeInterview() {
 
         // Assistant text streaming - forward deltas to UI for real-time transcript
         onAssistantTextDelta: (text) => {
+          console.log('[RealtimeInterview] 📝 onAssistantTextDelta called with:', text);
           assistantResponseRef.current += text;
+          console.log('[RealtimeInterview] 📊 Accumulated text so far:', assistantResponseRef.current.length, 'chars');
 
           // Forward text delta to UI for real-time streaming
           if (onAssistantTextDeltaCallbackRef.current) {
+            console.log('[RealtimeInterview] 📤 Forwarding to UI callback');
             onAssistantTextDeltaCallbackRef.current(text);
+          } else {
+            console.warn('[RealtimeInterview] ⚠️ UI callback not defined!');
           }
 
           // DISABLED: Response trimmer was causing Pearl to be cut off mid-question
