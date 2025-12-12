@@ -1,0 +1,1100 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HeritageWhisper – Uncomplicated Story Capture, Unforgettable Storytelling</title>
+  <meta name="description"
+    content="Preserve your family's stories with voice, photos, and text. The Living Timeline, Living Book, and Memory Box—your legacy, everywhere at once.">
+
+  <style>
+    /* ===== CSS RESET & BASE ===== */
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    /* ===== DESIGN TOKENS ===== */
+    :root {
+      /* Colors */
+      --color-navy: #203954;
+      --color-navy-light: #2d4a66;
+      --color-gold: #cba46a;
+      --color-gold-light: #d4b581;
+      --color-cream: #f5f0e8;
+      --color-cream-dark: #e8e0d4;
+      --color-white: #ffffff;
+      --color-text: #333333;
+      --color-text-light: #666666;
+
+      /* Typography */
+      --font-display: 'Georgia', 'Times New Roman', serif;
+      --font-body: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+
+      /* Spacing */
+      --section-padding: 80px 24px;
+      --container-max: 1200px;
+
+      /* Shadows */
+      --shadow-soft: 0 4px 20px rgba(32, 57, 84, 0.08);
+      --shadow-medium: 0 8px 32px rgba(32, 57, 84, 0.12);
+      --shadow-strong: 0 12px 48px rgba(32, 57, 84, 0.16);
+    }
+
+    body {
+      font-family: var(--font-body);
+      color: var(--color-text);
+      background: var(--color-cream);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .container {
+      max-width: var(--container-max);
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    /* ===== HEADER ===== */
+    .header {
+      background: var(--color-white);
+      padding: 16px 24px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: var(--shadow-soft);
+    }
+
+    .header-inner {
+      max-width: var(--container-max);
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      text-decoration: none;
+      color: var(--color-navy);
+    }
+
+    .logo-icon {
+      width: 48px;
+      height: 32px;
+    }
+
+    .logo-text {
+      font-family: var(--font-display);
+      font-size: 1.25rem;
+      font-weight: 600;
+    }
+
+    .nav {
+      display: none;
+    }
+
+    @media (min-width: 768px) {
+      .nav {
+        display: flex;
+        gap: 32px;
+        align-items: center;
+      }
+    }
+
+    .nav a {
+      color: var(--color-navy);
+      text-decoration: none;
+      font-size: 0.95rem;
+      font-weight: 500;
+      transition: color 0.2s;
+    }
+
+    .nav a:hover {
+      color: var(--color-gold);
+    }
+
+    .btn-primary {
+      background: var(--color-navy);
+      color: var(--color-white);
+      padding: 12px 24px;
+      border-radius: 25px;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 0.95rem;
+      transition: all 0.2s;
+      border: none;
+      cursor: pointer;
+    }
+
+    .btn-primary:hover {
+      background: var(--color-navy-light);
+      transform: translateY(-1px);
+    }
+
+    /* ===== HERO SECTION ===== */
+    .hero {
+      background: linear-gradient(135deg, var(--color-cream-dark) 0%, var(--color-cream) 50%, #d4c8b8 100%);
+      padding: 60px 24px 80px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero-inner {
+      max-width: var(--container-max);
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 48px;
+      align-items: center;
+    }
+
+    @media (min-width: 768px) {
+      .hero-inner {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    .hero-content h1 {
+      font-family: var(--font-display);
+      font-size: clamp(2rem, 5vw, 3rem);
+      color: var(--color-navy);
+      line-height: 1.2;
+      margin-bottom: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.02em;
+    }
+
+    .hero-content h2 {
+      font-family: var(--font-display);
+      font-size: clamp(1.75rem, 4vw, 2.5rem);
+      color: var(--color-navy);
+      line-height: 1.2;
+      margin-bottom: 24px;
+      text-transform: uppercase;
+      letter-spacing: 0.02em;
+    }
+
+    .hero-images {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+    }
+
+    .hero-image {
+      width: 140px;
+      height: 100px;
+      object-fit: cover;
+      border-radius: 8px;
+      box-shadow: var(--shadow-medium);
+    }
+
+    @media (min-width: 768px) {
+      .hero-image {
+        width: 180px;
+        height: 130px;
+      }
+    }
+
+    /* ===== TAGLINE BAR ===== */
+    .tagline-bar {
+      background: var(--color-white);
+      padding: 32px 24px;
+      text-align: center;
+      border-top: 1px solid var(--color-cream-dark);
+      border-bottom: 1px solid var(--color-cream-dark);
+    }
+
+    .tagline-bar p {
+      font-family: var(--font-display);
+      font-size: clamp(1rem, 2.5vw, 1.25rem);
+      color: var(--color-navy);
+      max-width: 800px;
+      margin: 0 auto;
+      line-height: 1.5;
+    }
+
+    /* ===== FEATURES GRID ===== */
+    .features {
+      padding: var(--section-padding);
+    }
+
+    .features-grid {
+      max-width: var(--container-max);
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 64px;
+    }
+
+    @media (min-width: 900px) {
+      .features-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    .feature-card {
+      text-align: center;
+    }
+
+    .feature-title {
+      font-family: var(--font-display);
+      font-size: clamp(1.5rem, 3vw, 2rem);
+      color: var(--color-navy);
+      margin-bottom: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .feature-subtitle {
+      font-size: 1rem;
+      color: var(--color-text-light);
+      margin-bottom: 24px;
+    }
+
+    .feature-subtitle strong {
+      color: var(--color-gold);
+    }
+
+    .feature-image {
+      width: 100%;
+      max-width: 500px;
+      border-radius: 12px;
+      box-shadow: var(--shadow-strong);
+      margin: 0 auto;
+      display: block;
+    }
+
+    /* ===== MEMORY BOX SECTION ===== */
+    .memory-box-section {
+      background: var(--color-white);
+      padding: var(--section-padding);
+    }
+
+    .memory-box-section .container {
+      text-align: center;
+    }
+
+    .memory-box-section .feature-title {
+      margin-bottom: 12px;
+    }
+
+    .memory-box-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 16px;
+      max-width: 800px;
+      margin: 32px auto 0;
+    }
+
+    .memory-item {
+      background: var(--color-cream);
+      border-radius: 8px;
+      padding: 12px;
+      text-align: center;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .memory-item:hover {
+      transform: translateY(-4px);
+      box-shadow: var(--shadow-medium);
+    }
+
+    .memory-item-image {
+      width: 100%;
+      height: 80px;
+      object-fit: cover;
+      border-radius: 6px;
+      margin-bottom: 8px;
+      background: var(--color-cream-dark);
+    }
+
+    .memory-item-label {
+      font-size: 0.85rem;
+      color: var(--color-navy);
+      font-weight: 500;
+    }
+
+    /* ===== VOICE QUOTE SECTION ===== */
+    .voice-quote {
+      background: var(--color-cream);
+      padding: var(--section-padding);
+    }
+
+    .voice-quote-card {
+      max-width: 600px;
+      margin: 0 auto;
+      background: var(--color-white);
+      border-radius: 16px;
+      padding: 40px;
+      box-shadow: var(--shadow-medium);
+    }
+
+    .voice-quote h3 {
+      font-family: var(--font-display);
+      font-size: clamp(1.5rem, 3vw, 2rem);
+      color: var(--color-navy);
+      margin-bottom: 16px;
+      line-height: 1.3;
+    }
+
+    .voice-quote p {
+      font-size: 1rem;
+      color: var(--color-text-light);
+      margin-bottom: 24px;
+      line-height: 1.7;
+    }
+
+    .audio-player {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      background: var(--color-cream);
+      padding: 16px 20px;
+      border-radius: 50px;
+    }
+
+    .play-btn {
+      width: 44px;
+      height: 44px;
+      background: var(--color-white);
+      border: 2px solid var(--color-navy);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s;
+      flex-shrink: 0;
+    }
+
+    .play-btn:hover {
+      background: var(--color-navy);
+    }
+
+    .play-btn:hover svg {
+      fill: var(--color-white);
+    }
+
+    .play-btn svg {
+      width: 16px;
+      height: 16px;
+      fill: var(--color-navy);
+      margin-left: 2px;
+    }
+
+    .waveform {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      gap: 2px;
+      height: 24px;
+    }
+
+    .waveform-bar {
+      width: 3px;
+      background: var(--color-gold);
+      border-radius: 2px;
+      animation: waveform 1s ease-in-out infinite;
+    }
+
+    @keyframes waveform {
+
+      0%,
+      100% {
+        height: 8px;
+      }
+
+      50% {
+        height: 20px;
+      }
+    }
+
+    .waveform-bar:nth-child(1) {
+      animation-delay: 0s;
+    }
+
+    .waveform-bar:nth-child(2) {
+      animation-delay: 0.1s;
+    }
+
+    .waveform-bar:nth-child(3) {
+      animation-delay: 0.2s;
+    }
+
+    .waveform-bar:nth-child(4) {
+      animation-delay: 0.3s;
+    }
+
+    .waveform-bar:nth-child(5) {
+      animation-delay: 0.4s;
+    }
+
+    .waveform-bar:nth-child(6) {
+      animation-delay: 0.5s;
+    }
+
+    .waveform-bar:nth-child(7) {
+      animation-delay: 0.6s;
+    }
+
+    .waveform-bar:nth-child(8) {
+      animation-delay: 0.7s;
+    }
+
+    .waveform-bar:nth-child(9) {
+      animation-delay: 0.8s;
+    }
+
+    .waveform-bar:nth-child(10) {
+      animation-delay: 0.9s;
+    }
+
+    .waveform-bar:nth-child(11) {
+      animation-delay: 0.3s;
+    }
+
+    .waveform-bar:nth-child(12) {
+      animation-delay: 0.5s;
+    }
+
+    .audio-label {
+      font-size: 0.9rem;
+      color: var(--color-text-light);
+      white-space: nowrap;
+    }
+
+    /* ===== HUB AND SPOKE SECTION ===== */
+    .hub-spoke {
+      background: var(--color-navy);
+      padding: var(--section-padding);
+      color: var(--color-white);
+      text-align: center;
+    }
+
+    .hub-spoke h2 {
+      font-family: var(--font-display);
+      font-size: clamp(1.75rem, 4vw, 2.5rem);
+      margin-bottom: 16px;
+    }
+
+    .hub-spoke p {
+      font-size: 1.1rem;
+      opacity: 0.9;
+      max-width: 600px;
+      margin: 0 auto 48px;
+    }
+
+    .hub-diagram {
+      position: relative;
+      max-width: 500px;
+      margin: 0 auto;
+      padding: 40px;
+    }
+
+    .hub-center {
+      width: 120px;
+      height: 120px;
+      background: var(--color-gold);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto;
+      position: relative;
+      z-index: 2;
+      box-shadow: 0 0 40px rgba(203, 164, 106, 0.4);
+    }
+
+    .hub-center svg {
+      width: 48px;
+      height: 48px;
+      fill: var(--color-navy);
+    }
+
+    .spoke-container {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+    }
+
+    .spoke {
+      position: absolute;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .spoke-icon {
+      width: 56px;
+      height: 56px;
+      background: var(--color-white);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: var(--shadow-medium);
+    }
+
+    .spoke-icon svg {
+      width: 24px;
+      height: 24px;
+      fill: var(--color-navy);
+    }
+
+    .spoke-label {
+      font-size: 0.75rem;
+      color: var(--color-cream);
+      max-width: 80px;
+      text-align: center;
+    }
+
+    .spoke:nth-child(1) {
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+
+    .spoke:nth-child(2) {
+      top: 15%;
+      right: 5%;
+    }
+
+    .spoke:nth-child(3) {
+      bottom: 15%;
+      right: 5%;
+    }
+
+    .spoke:nth-child(4) {
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+
+    .spoke:nth-child(5) {
+      bottom: 15%;
+      left: 5%;
+    }
+
+    .spoke:nth-child(6) {
+      top: 15%;
+      left: 5%;
+    }
+
+    /* ===== COMPARISON SECTION ===== */
+    .comparison {
+      background: var(--color-cream);
+      padding: var(--section-padding);
+    }
+
+    .comparison h2 {
+      font-family: var(--font-display);
+      font-size: clamp(1.5rem, 3vw, 2rem);
+      color: var(--color-navy);
+      text-align: center;
+      margin-bottom: 48px;
+    }
+
+    .comparison-grid {
+      max-width: 900px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 24px;
+    }
+
+    @media (min-width: 600px) {
+      .comparison-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    .comparison-card {
+      background: var(--color-white);
+      border-radius: 16px;
+      padding: 32px;
+      box-shadow: var(--shadow-soft);
+    }
+
+    .comparison-card.highlight {
+      border: 2px solid var(--color-gold);
+    }
+
+    .comparison-card h3 {
+      font-family: var(--font-display);
+      font-size: 1.25rem;
+      color: var(--color-navy);
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .comparison-card.old h3 {
+      color: var(--color-text-light);
+      text-decoration: line-through;
+    }
+
+    .comparison-list {
+      list-style: none;
+    }
+
+    .comparison-list li {
+      padding: 8px 0;
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      font-size: 0.95rem;
+      color: var(--color-text);
+    }
+
+    .comparison-list .icon {
+      flex-shrink: 0;
+      width: 24px;
+      height: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
+    }
+
+    /* ===== U WORDS SECTION ===== */
+    .u-words {
+      background: var(--color-white);
+      padding: var(--section-padding);
+    }
+
+    .u-words-grid {
+      max-width: var(--container-max);
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 32px;
+    }
+
+    .u-word-card {
+      text-align: center;
+      padding: 32px;
+    }
+
+    .u-word-icon {
+      width: 64px;
+      height: 64px;
+      background: var(--color-cream);
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 16px;
+    }
+
+    .u-word-icon svg {
+      width: 32px;
+      height: 32px;
+      stroke: var(--color-navy);
+      fill: none;
+    }
+
+    .u-word-card h3 {
+      font-family: var(--font-display);
+      font-size: 1.5rem;
+      color: var(--color-navy);
+      margin-bottom: 8px;
+    }
+
+    .u-word-card p {
+      font-size: 0.95rem;
+      color: var(--color-text-light);
+    }
+
+    /* ===== CTA SECTION ===== */
+    .cta-section {
+      background: linear-gradient(135deg, var(--color-navy) 0%, var(--color-navy-light) 100%);
+      padding: var(--section-padding);
+      text-align: center;
+      color: var(--color-white);
+    }
+
+    .cta-section h2 {
+      font-family: var(--font-display);
+      font-size: clamp(1.75rem, 4vw, 2.5rem);
+      margin-bottom: 16px;
+    }
+
+    .cta-section p {
+      font-size: 1.1rem;
+      opacity: 0.9;
+      margin-bottom: 32px;
+      max-width: 500px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .btn-cta {
+      background: var(--color-gold);
+      color: var(--color-navy);
+      padding: 16px 40px;
+      border-radius: 30px;
+      font-size: 1.1rem;
+      font-weight: 700;
+      text-decoration: none;
+      display: inline-block;
+      transition: all 0.2s;
+    }
+
+    .btn-cta:hover {
+      background: var(--color-gold-light);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(203, 164, 106, 0.4);
+    }
+
+    .cta-note {
+      font-size: 0.9rem;
+      opacity: 0.7;
+      margin-top: 16px;
+    }
+
+    /* ===== FOOTER ===== */
+    .footer {
+      background: var(--color-navy);
+      color: var(--color-white);
+      padding: 48px 24px;
+    }
+
+    .footer-inner {
+      max-width: var(--container-max);
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+      align-items: center;
+      text-align: center;
+    }
+
+    @media (min-width: 600px) {
+      .footer-inner {
+        flex-direction: row;
+        justify-content: space-between;
+        text-align: left;
+      }
+    }
+
+    .footer-brand {
+      font-family: var(--font-display);
+      font-size: 1.25rem;
+    }
+
+    .footer-links {
+      display: flex;
+      gap: 24px;
+    }
+
+    .footer-links a {
+      color: var(--color-cream);
+      text-decoration: none;
+      font-size: 0.9rem;
+      opacity: 0.8;
+      transition: opacity 0.2s;
+    }
+
+    .footer-links a:hover {
+      opacity: 1;
+    }
+
+    .footer-copyright {
+      font-size: 0.85rem;
+      opacity: 0.6;
+    }
+
+    /* ===== REDUCED MOTION ===== */
+    @media (prefers-reduced-motion: reduce) {
+
+      *,
+      *::before,
+      *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+
+      html {
+        scroll-behavior: auto;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- HEADER -->
+  <header class="header">
+    <div class="header-inner">
+      <a href="#" class="logo">
+        <svg class="logo-icon" viewBox="0 0 240 160">
+          <path fill="#203954" stroke="#203954" stroke-width="4" stroke-miterlimit="10"
+            d="M50.98,145.36c3.2-2.35,6.31-4.82,9.39-7.31,6.88-5.53,13.57-11.45,20.59-16.8.69-.53,1.63-1.35,2.47-1.51l54.37-.05c4.27.82,4.11,6.18-.16,6.65l-52.67.03c-10.61,8.12-20.76,16.86-31.25,25.18-1.1.88-3.84,3.24-4.9,3.73-1.43.65-2.71.25-3.61-.96-.12-.16-.67-1.04-.67-1.1v-26.88c0-.29-5.22.04-5.86,0-13.1-.86-24.12-11.63-25.98-24.47-.55-23.98-.12-48.06-.22-72.06,1.16-13.1,11.78-23.96,24.86-25.37h165.33c13.08,1.57,23.67,12.18,24.9,25.33v70.59c-1.73,16.71-16.53,27.78-33.1,25.98-4.35-.47-4.16-6.1-.2-6.63,2.65-.35,5.78.27,8.51-.12,9.14-1.33,16.72-9.1,18.12-18.18.41-24.12.39-48.39,0-72.51-1.88-9.76-10.1-17.02-20-17.84H39.57c-10.55.75-18.98,8.45-20.43,18.94-.41,23.55-.41,47.19,0,70.74,1.33,9,7.59,16.33,16.53,18.43,4.29,1,8.74.22,13.12.61.71.08,2.2,1.61,2.2,2.24v23.35h0Z" />
+          <rect fill="#cba46a" stroke="#cba46a" stroke-width="2" stroke-miterlimit="10" x="162.6" y="108.25"
+            width="7.65" height="29.33" rx="1.95" ry="1.95" />
+          <rect fill="#cba46a" stroke="#cba46a" stroke-width="2" stroke-miterlimit="10" x="148.97" y="114.87"
+            width="7.65" height="16.06" rx="1.95" ry="1.95" />
+          <rect fill="#cba46a" stroke="#cba46a" stroke-width="2" stroke-miterlimit="10" x="176.21" y="114.87"
+            width="7.65" height="16.06" rx="1.95" ry="1.95" />
+        </svg>
+        <span class="logo-text">HeritageWhisper</span>
+      </a>
+      <nav class="nav">
+        <a href="#features">Features</a>
+        <a href="#how-it-works">How It Works</a>
+        <a href="#pricing">Pricing</a>
+        <a href="#faq">FAQ</a>
+        <a href="#" class="btn-primary">Start Free</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-inner">
+      <div class="hero-content">
+        <h1>Uncomplicated<br>Story Capture</h1>
+        <h2>Unforgettable<br>Storytelling</h2>
+      </div>
+      <div class="hero-images">
+        <img src="landing page ideas/Images/grandpa-story.jpeg" alt="Grandfather sharing story" class="hero-image">
+        <img src="landing page ideas/Images/johnsons.webp" alt="Family listening together" class="hero-image">
+        <img src="landing page ideas/Images/grandparent.webp" alt="Grandparent with family" class="hero-image">
+      </div>
+    </div>
+  </section>
+
+  <!-- TAGLINE -->
+  <div class="tagline-bar">
+    <p>HeritageWhisper Seamlessly Captures a Rich Lifetime of Experiences and Family Legacies</p>
+  </div>
+
+  <!-- FEATURES: LIVING TIMELINE & LIVING BOOK -->
+  <section id="features" class="features">
+    <div class="features-grid">
+
+      <!-- Living Timeline -->
+      <div class="feature-card">
+        <h2 class="feature-title">The Living Timeline</h2>
+        <p class="feature-subtitle">The <strong>Living Timeline</strong> Lets Family Members Watch Your Life Story
+          Unfold</p>
+        <img src="landing page ideas/Images/TimeLine.webp" alt="Living Timeline interface showing family stories"
+          class="feature-image">
+      </div>
+
+      <!-- Living Book -->
+      <div class="feature-card">
+        <h2 class="feature-title">The Living Book</h2>
+        <p class="feature-subtitle">The <strong>Living Book</strong> Immerses Family Members in Each Story</p>
+        <img src="landing page ideas/Images/story.webp" alt="Living Book showing My Earliest Memory story"
+          class="feature-image">
+      </div>
+
+    </div>
+  </section>
+
+  <!-- MEMORY BOX -->
+  <section class="memory-box-section">
+    <div class="container">
+      <h2 class="feature-title">A Memory Box</h2>
+      <p class="feature-subtitle">The <strong style="color: var(--color-gold);">Memory Box</strong> Preserves the Story
+        Behind Timeless Keepsakes</p>
+
+      <div class="memory-box-grid">
+        <div class="memory-item">
+          <div class="memory-item-image" style="background: linear-gradient(135deg, #d4c8b8, #c4b8a8);"></div>
+          <span class="memory-item-label">First Record Purchase</span>
+        </div>
+        <div class="memory-item">
+          <div class="memory-item-image" style="background: linear-gradient(135deg, #e8e0d4, #d4c8b8);"></div>
+          <span class="memory-item-label">Our Wedding Vows</span>
+        </div>
+        <div class="memory-item">
+          <div class="memory-item-image" style="background: linear-gradient(135deg, #f5f0e8, #e8e0d4);"></div>
+          <span class="memory-item-label">Ashley's Letter</span>
+        </div>
+        <div class="memory-item">
+          <div class="memory-item-image" style="background: linear-gradient(135deg, #d4c8b8, #c4b8a8);"></div>
+          <span class="memory-item-label">Dad's Gift</span>
+        </div>
+        <div class="memory-item">
+          <div class="memory-item-image" style="background: linear-gradient(135deg, #e8e0d4, #d4c8b8);"></div>
+          <span class="memory-item-label">Daisey's Collar</span>
+        </div>
+        <div class="memory-item">
+          <div class="memory-item-image" style="background: linear-gradient(135deg, #f5f0e8, #e8e0d4);"></div>
+          <span class="memory-item-label">Championship Trophy</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- VOICE QUOTE -->
+  <section class="voice-quote">
+    <div class="voice-quote-card">
+      <h3>Text captures the facts.<br>Voice captures the soul.</h3>
+      <p>When Dad talks about his first car, you don't just get the make and model—you hear the pride in his voice when
+        he describes saving every paycheck. When Mom recalls her wedding day, you hear the catch in her throat. That's
+        what gets preserved.</p>
+
+      <div class="audio-player">
+        <button class="play-btn" aria-label="Play audio sample">
+          <svg viewBox="0 0 24 24">
+            <path d="M8 5v14l11-7z" />
+          </svg>
+        </button>
+        <div class="waveform">
+          <div class="waveform-bar"></div>
+          <div class="waveform-bar"></div>
+          <div class="waveform-bar"></div>
+          <div class="waveform-bar"></div>
+          <div class="waveform-bar"></div>
+          <div class="waveform-bar"></div>
+          <div class="waveform-bar"></div>
+          <div class="waveform-bar"></div>
+          <div class="waveform-bar"></div>
+          <div class="waveform-bar"></div>
+          <div class="waveform-bar"></div>
+          <div class="waveform-bar"></div>
+        </div>
+        <span class="audio-label">Hear the difference</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- HUB AND SPOKE: INSTANT SHARING -->
+  <section id="how-it-works" class="hub-spoke">
+    <h2>Your Story, Everywhere at Once</h2>
+    <p>The moment you record, your entire family is notified—no matter where they are in the world. No waiting. No
+      single book on a shelf.</p>
+
+    <div style="max-width: 700px; margin: 0 auto;">
+      <img src="landing page ideas/Images/hub-spoke-family.png"
+        alt="Grandmother recording a story in the center, with family members listening in different locations - on the subway, in the kitchen, huddled on the couch, at college, at work, and overseas. Golden connection lines show instant story sharing."
+        style="width: 100%; border-radius: 16px; box-shadow: 0 12px 48px rgba(0,0,0,0.3);">
+    </div>
+  </section>
+
+  <!-- COMPARISON -->
+  <section class="comparison">
+    <h2>Why Families Choose HeritageWhisper</h2>
+    <div class="comparison-grid">
+
+      <div class="comparison-card old">
+        <h3>Traditional Memory Books</h3>
+        <ul class="comparison-list">
+          <li><span class="icon">❌</span> Wait 52 weeks before anyone reads</li>
+          <li><span class="icon">❌</span> Single book, single shelf, single location</li>
+          <li><span class="icon">❌</span> Done when it's published—no more stories</li>
+          <li><span class="icon">❌</span> One-way: you write, they read (someday)</li>
+          <li><span class="icon">❌</span> Text only—voice is lost forever</li>
+        </ul>
+      </div>
+
+      <div class="comparison-card highlight">
+        <h3>✨ HeritageWhisper</h3>
+        <ul class="comparison-list">
+          <li><span class="icon">✅</span> Family notified <strong>instantly</strong> when you record</li>
+          <li><span class="icon">✅</span> In everyone's pocket, everywhere</li>
+          <li><span class="icon">✅</span> Your legacy grows <strong>forever</strong></li>
+          <li><span class="icon">✅</span> Two-way: family submits questions, you answer</li>
+          <li><span class="icon">✅</span> Voice, photos, and text—the complete memory</li>
+        </ul>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- U WORDS -->
+  <section class="u-words">
+    <div class="u-words-grid">
+
+      <div class="u-word-card">
+        <div class="u-word-icon">
+          <svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path
+              d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" />
+          </svg>
+        </div>
+        <h3>Unforgettable</h3>
+        <p>Your voice stays with your family forever—not just words on a page</p>
+      </div>
+
+      <div class="u-word-card">
+        <div class="u-word-icon">
+          <svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10" />
+            <path d="m9 12 2 2 4-4" />
+          </svg>
+        </div>
+        <h3>Uncomplicated</h3>
+        <p>One tap to record. AI handles the rest. Simple enough for anyone.</p>
+      </div>
+
+      <div class="u-word-card">
+        <div class="u-word-icon">
+          <svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+          </svg>
+        </div>
+        <h3>Unlimited</h3>
+        <p>No 52-week cutoff. No story limits. Keep adding memories forever.</p>
+      </div>
+
+      <div class="u-word-card">
+        <div class="u-word-icon">
+          <svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+            <circle cx="9" cy="7" r="4" />
+            <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
+            <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+          </svg>
+        </div>
+        <h3>Unified</h3>
+        <p>All family, everywhere, at the same moment. No one left out.</p>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section id="pricing" class="cta-section">
+    <h2>Start Your Living Legacy Today</h2>
+    <p>First 3 stories free. No credit card required. See the magic for yourself.</p>
+    <a href="#" class="btn-cta">Start Recording Free</a>
+    <p class="cta-note">$149/year for unlimited stories after your free trial</p>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="footer-inner">
+      <span class="footer-brand">HeritageWhisper</span>
+      <div class="footer-links">
+        <a href="#">Privacy</a>
+        <a href="#">Terms</a>
+        <a href="#">Contact</a>
+        <a href="#">FAQ</a>
+      </div>
+      <span class="footer-copyright">© 2025 HeritageWhisper. All rights reserved.</span>
+    </div>
+  </footer>
+
+</body>
+
+</html>
