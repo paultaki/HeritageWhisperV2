@@ -64,7 +64,7 @@ export default function DecadeNav({ entries }: { entries: DecadeEntry[] }) {
             aria-label={`Jump to decade: ${decadeRange}`}
           >
             <span className="decade-range-text">{decadeRange}</span>
-            <span className="caret" aria-hidden="true">▾</span>
+            <span className="caret" aria-hidden="true"></span>
           </button>
           {open && (
             <div className="hw-decade-sheet" role="menu">
