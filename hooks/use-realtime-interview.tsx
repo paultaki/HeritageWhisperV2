@@ -592,6 +592,7 @@ export function useRealtimeInterview() {
       );
 
       realtimeHandlesRef.current = handles;
+      console.log('[RealtimeInterview] ✅ Stored realtime handles:', !!handles, 'toggleMic:', !!handles?.toggleMic);
 
     } catch (err) {
       console.error('[RealtimeInterview] Failed to start session:', err);
@@ -742,11 +743,13 @@ export function useRealtimeInterview() {
 
   // Toggle microphone on/off
   const toggleMic = useCallback((enabled: boolean) => {
+    console.log('[RealtimeInterview] toggleMic called:', enabled, 'handles:', !!realtimeHandlesRef.current);
     // Update ref to track mic state (used to prevent barge-in when muted)
     micEnabledRef.current = enabled;
 
     if (realtimeHandlesRef.current) {
       realtimeHandlesRef.current.toggleMic(enabled);
+      console.log('[RealtimeInterview] ✅ Mic toggled to:', enabled);
     } else {
       console.warn('[RealtimeInterview] Cannot toggle mic - no active session');
     }
