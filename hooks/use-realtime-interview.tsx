@@ -183,6 +183,7 @@ export function useRealtimeInterview() {
   const bargeInTimeoutRef = useRef<NodeJS.Timeout | null>(null); // Delay before pausing Pearl (prevents false interrupts)
   const pearlAudioRecorderRef = useRef<MediaRecorder | null>(null); // Record Pearl's audio for transcription
   const pearlAudioChunksRef = useRef<Blob[]>([]); // Chunks of Pearl's audio
+  const pearlAudioStreamRef = useRef<MediaStream | null>(null); // Store Pearl's audio stream for creating new recorders
   const onAssistantResponseCallbackRef = useRef<((text: string) => void) | null>(null); // Store callback for Pearl's transcribed text
 
   // Start Realtime session
@@ -239,35 +240,59 @@ export function useRealtimeInterview() {
 
         // Pearl response started - start recording her audio for transcription
         onAssistantResponseCreated: () => {
-          console.log('[RealtimeInterview] 🎙️ Pearl started speaking, recording audio for transcription...');
-          console.log('[RealtimeInterview] Recorder state:', pearlAudioRecorderRef.current?.state);
-          console.log('[RealtimeInterview] Current chunks before clear:', pearlAudioChunksRef.current.length);
+          console.log('[RealtimeInterview] 🎙️ Pearl started speaking, creating new recorder...');
           pearlAudioChunksRef.current = [];
 
-          // Resume recorder if it's paused
-          if (pearlAudioRecorderRef.current && pearlAudioRecorderRef.current.state === 'paused') {
-            pearlAudioRecorderRef.current.resume();
-            console.log('[RealtimeInterview] Resumed Pearl audio recorder');
-          } else if (pearlAudioRecorderRef.current) {
-            console.log('[RealtimeInterview] Recorder already in state:', pearlAudioRecorderRef.current.state);
+          // Stop previous recorder if it exists
+          if (pearlAudioRecorderRef.current && pearlAudioRecorderRef.current.state !== 'inactive') {
+            pearlAudioRecorderRef.current.stop();
+          }
+
+          // Create a new MediaRecorder for this response
+          if (pearlAudioStreamRef.current) {
+            try {
+              const mimeType = MediaRecorder.isTypeSupported('audio/webm;codecs=opus')
+                ? 'audio/webm;codecs=opus'
+                : 'audio/webm';
+
+              const recorder = new MediaRecorder(pearlAudioStreamRef.current, { mimeType });
+
+              recorder.ondataavailable = (event) => {
+                if (event.data && event.data.size > 0) {
+                  pearlAudioChunksRef.current.push(event.data);
+                  console.log('[RealtimeInterview] Pearl chunk received:', event.data.size, 'bytes');
+                }
+              };
+
+              recorder.onstop = () => {
+                console.log('[RealtimeInterview] Pearl recorder stopped, chunks:', pearlAudioChunksRef.current.length);
+              };
+
+              recorder.start(100); // Collect data every 100ms
+              pearlAudioRecorderRef.current = recorder;
+              console.log('[RealtimeInterview] ✅ New MediaRecorder created and started');
+            } catch (error) {
+              console.error('[RealtimeInterview] Failed to create MediaRecorder:', error);
+            }
           } else {
-            console.warn('[RealtimeInterview] ⚠️ No Pearl audio recorder yet!');
+            console.warn('[RealtimeInterview] ⚠️ No Pearl audio stream available yet');
           }
         },
 
         // Pearl response complete - transcribe her audio
         onAssistantResponseComplete: async () => {
           console.log('[RealtimeInterview] ✅ Pearl finished speaking, transcribing audio...');
-          console.log('[RealtimeInterview] Recorder state before pause:', pearlAudioRecorderRef.current?.state);
-          console.log('[RealtimeInterview] Chunks collected:', pearlAudioChunksRef.current.length);
 
-          // Pause recording Pearl's audio (don't stop, so we can resume later)
+          // Stop recording to get a complete WebM file
           if (pearlAudioRecorderRef.current && pearlAudioRecorderRef.current.state === 'recording') {
-            pearlAudioRecorderRef.current.pause();
-            console.log('[RealtimeInterview] Paused Pearl audio recorder');
+            pearlAudioRecorderRef.current.stop();
+            console.log('[RealtimeInterview] Stopped Pearl audio recorder');
           }
 
-          console.log('[RealtimeInterview] Chunks after pause:', pearlAudioChunksRef.current.length);
+          // Wait a bit for ondataavailable to fire and collect final chunks
+          await new Promise(resolve => setTimeout(resolve, 100));
+
+          console.log('[RealtimeInterview] Chunks collected:', pearlAudioChunksRef.current.length);
 
           // Transcribe the recorded audio
           if (pearlAudioChunksRef.current.length > 0) {
@@ -315,32 +340,8 @@ export function useRealtimeInterview() {
 
         // Assistant audio output (voice mode + mixed recording)
         onAssistantAudio: (stream) => {
-          // Create MediaRecorder for Pearl's audio (for transcription)
-          if (!pearlAudioRecorderRef.current) {
-            try {
-              const mimeType = MediaRecorder.isTypeSupported('audio/webm;codecs=opus')
-                ? 'audio/webm;codecs=opus'
-                : 'audio/webm';
-
-              const recorder = new MediaRecorder(stream, { mimeType });
-
-              recorder.ondataavailable = (event) => {
-                if (event.data && event.data.size > 0) {
-                  pearlAudioChunksRef.current.push(event.data);
-                }
-              };
-
-              recorder.onstop = () => {
-                console.log('[RealtimeInterview] Pearl audio recorder stopped');
-              };
-
-              recorder.start(100); // Collect data every 100ms
-              pearlAudioRecorderRef.current = recorder;
-              console.log('[RealtimeInterview] Started MediaRecorder for Pearl audio transcription');
-            } catch (error) {
-              console.error('[RealtimeInterview] Failed to create MediaRecorder for Pearl:', error);
-            }
-          }
+          // Store Pearl's audio stream for creating recorders per response
+          pearlAudioStreamRef.current = stream;
 
           // Play audio if voice enabled
           if (voiceEnabled) {
