@@ -572,6 +572,13 @@ export default function InterviewChatPage() {
 
   // Handle starting fresh (discard draft)
   const handleStartFresh = async () => {
+    // Stop any active session first
+    if (isRealtimeEnabled && status === 'connected') {
+      stopSession();
+    } else if (isRecording) {
+      stopTraditionalRecording();
+    }
+
     await deleteDraft();
     setExistingDraft(null);
     setShowResumeModal(false);
@@ -1395,16 +1402,16 @@ ONLY move to a new topic after exploring all three layers, or if they signal the
         </div>
       )}
 
-      {/* Welcome Modal */}
-      {showWelcome && (
+      {/* Welcome Modal - only show after draft check completes and no draft exists */}
+      {showWelcome && draftCheckComplete && !showResumeModal && (
         <WelcomeModal
           userName={user?.name || 'friend'}
           onDismiss={handleWelcomeDismiss}
         />
       )}
 
-      {/* Theme Selector - shown after welcome, before interview starts */}
-      {!showWelcome && interviewPhase === 'theme_selection' && (
+      {/* Theme Selector - shown after welcome, before interview starts, and no resume modal */}
+      {!showWelcome && interviewPhase === 'theme_selection' && !showResumeModal && draftCheckComplete && (
         <ThemeSelector
           userName={user?.name}
           onSelectTheme={handleThemeSelect}
