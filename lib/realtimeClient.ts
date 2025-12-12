@@ -163,10 +163,19 @@ export async function startRealtime(
 
       // Error events
       if (msg.type === 'error') {
-        console.error('[Realtime] ❌ ERROR:', msg.error);
-        if (msg.error?.type) {
+        console.error('[Realtime] ❌ ERROR event received');
+        console.error('[Realtime] Full error object:', JSON.stringify(msg, null, 2));
+        if (msg.error) {
           console.error('[Realtime] Error type:', msg.error.type);
+          console.error('[Realtime] Error code:', msg.error.code);
           console.error('[Realtime] Error message:', msg.error.message);
+          console.error('[Realtime] Error param:', msg.error.param);
+        } else {
+          console.error('[Realtime] Error object is empty or undefined');
+        }
+        // Notify callback if error is critical
+        if (msg.error?.type === 'invalid_request_error') {
+          callbacks.onError(new Error(`OpenAI API Error: ${msg.error.message || 'Unknown error'}`));
         }
       }
 
@@ -269,18 +278,19 @@ export async function startRealtime(
       session: {
         instructions: config?.instructions || 'You are a helpful assistant.',
         output_modalities: ['text', 'audio'],
-        // Enable input transcription
+        // Enable input transcription - FORCE ENGLISH to prevent Spanish/other language detection
         input_audio_transcription: {
           model: 'whisper-1',
+          language: 'en',  // CRITICAL: Explicit English to prevent auto-detection errors
         },
         // Server VAD for turn detection - SENIOR FRIENDLY settings
         // Seniors need time to think and gather thoughts during interviews
-        // 5 seconds silence = plenty of time to gather thoughts
+        // Reduced from 5s to 2s per user feedback - allows natural pauses without long delays
         turn_detection: {
           type: 'server_vad',
-          threshold: 0.8,            // Higher threshold to avoid false triggers from background noise
+          threshold: 0.85,           // Raised from 0.8 - stricter threshold to avoid false triggers from background noise
           prefix_padding_ms: 500,    // More padding before speech starts
-          silence_duration_ms: 5000, // 5 SECONDS - seniors need time to think!
+          silence_duration_ms: 2000, // 2 SECONDS - natural conversation rhythm, seniors can pause to think
           create_response: true,     // CRITICAL: Auto-generate response
         },
         max_response_output_tokens: 1200,

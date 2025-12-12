@@ -69,14 +69,26 @@ export async function POST(req: NextRequest) {
     // 4. Create ephemeral client secret with session configuration
     // Docs: https://platform.openai.com/docs/guides/realtime-webrtc
     // Format from OpenAI official docs for ephemeral token endpoint
+    // CRITICAL: Set language to English here to prevent Spanish auto-detection
     const sessionConfig = {
       session: {
         type: 'realtime',
         model: 'gpt-4o-realtime-preview',
-        audio: {
-          output: {
-            voice: 'shimmer',
-          },
+        voice: 'shimmer',  // Voice at session level, not nested in audio
+        modalities: ['text', 'audio'],
+        instructions: 'You are a helpful assistant. CRITICAL: You MUST speak ONLY in English. Never speak Spanish or any other language.',
+        // Force English transcription from the start
+        input_audio_transcription: {
+          model: 'whisper-1',
+          language: 'en',  // CRITICAL: English only
+        },
+        // Senior-friendly turn detection
+        turn_detection: {
+          type: 'server_vad',
+          threshold: 0.85,
+          prefix_padding_ms: 500,
+          silence_duration_ms: 2000,  // 2 seconds for natural pauses
+          create_response: true,
         },
       },
     };

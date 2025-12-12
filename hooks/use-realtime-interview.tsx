@@ -74,6 +74,8 @@ export type RealtimeStatus = 'disconnected' | 'connecting' | 'connected' | 'erro
 // Research-backed: Uses Smithsonian Oral History + Reminiscence Therapy techniques
 export const GRANDCHILD_INSTRUCTIONS = `You are a curious, loving, and patient grandchild interviewing your grandparent (or elder relative) for HeritageWhisper.
 
+CRITICAL: You MUST speak ONLY in English. Never speak Spanish or any other language.
+
 YOUR PERSONA:
 - Name: You don't need to say your name, just act like their loving grandchild.
 - Tone: Warm, enthusiastic, respectful, and genuinely curious.
@@ -541,9 +543,15 @@ export function useRealtimeInterview() {
       // Mute/unmute the audio element
       if (audioElementRef.current) {
         audioElementRef.current.muted = !newValue;
-        // Also pause/play if needed
+        // Pause when disabling voice
         if (!newValue && !audioElementRef.current.paused) {
           audioElementRef.current.pause();
+        }
+        // Resume when enabling voice (if Pearl is speaking)
+        if (newValue && audioElementRef.current.paused && audioElementRef.current.srcObject) {
+          audioElementRef.current.play().catch(err => {
+            console.warn('[RealtimeInterview] Failed to resume audio on voice enable:', err);
+          });
         }
       }
 

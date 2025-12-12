@@ -627,17 +627,14 @@ export default function InterviewChatPage() {
 
   // Handle cancel interview - step 1: check if confirmation needed
   const handleCancelInterview = () => {
-    const hasResponses = messages.some(m =>
-      m.type === 'audio-response' || m.type === 'text-response'
-    );
-
-    if (hasResponses) {
-      // Show custom confirmation modal
+    // Show confirmation if session has started (regardless of whether user has responded)
+    // This prevents accidental cancellation when Pearl is speaking or user is about to respond
+    if (sessionStartTime) {
       setShowCancelConfirm(true);
       return;
     }
 
-    // No responses, cancel immediately
+    // No session started yet, cancel immediately (shouldn't happen in normal flow)
     performCancelInterview();
   };
 
