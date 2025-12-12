@@ -287,7 +287,7 @@ export async function startRealtime(
       type: 'session.update',
       session: {
         type: 'realtime',
-        output_modalities: ['audio', 'text'], // Enable text streaming for real-time transcript
+        output_modalities: ['audio'], // Audio mode with transcription enabled below
         instructions: config?.instructions || 'Speak only English. Ask one question at a time.',
         audio: {
           input: {
@@ -313,16 +313,19 @@ export async function startRealtime(
               type: 'audio/pcm',
               rate: 24000,
             },
+            transcription: {
+              model: 'whisper-1', // Enable audio transcription for real-time text
+            },
           },
         },
       },
     };
 
-    // Defensive check: Ensure output_modalities includes audio and text
-    const expectedModalities = ['audio', 'text'];
+    // Defensive check: Ensure output_modalities is audio-only
+    const expectedModalities = ['audio'];
     if (JSON.stringify(sessionConfig.session.output_modalities) !== JSON.stringify(expectedModalities)) {
       console.error('[Realtime] ❌ Invalid output_modalities detected:', sessionConfig.session.output_modalities);
-      console.error('[Realtime] ⚠️ Forcing to ["audio", "text"] before sending');
+      console.error('[Realtime] ⚠️ Forcing to ["audio"] before sending');
       sessionConfig.session.output_modalities = expectedModalities;
     }
 
