@@ -185,7 +185,7 @@ export function useRealtimeInterview() {
   const pearlAudioChunksRef = useRef<Blob[]>([]); // Chunks of Pearl's audio
   const pearlAudioStreamRef = useRef<MediaStream | null>(null); // Store Pearl's audio stream for creating new recorders
   const onAssistantResponseCallbackRef = useRef<((text: string) => void) | null>(null); // Store callback for Pearl's final transcribed text
-  const onAssistantTextDeltaCallbackRef = useRef<((delta: string) => void) | null>(null); // Store callback for Pearl's text deltas (real-time streaming)
+  const onAssistantTextDeltaCallbackRef = useRef<((delta: string) => void) | null>(null); // Store callback for Pearl's real-time text streaming
   const lastChunkTimeRef = useRef<number>(0); // Track when last audio chunk was received
 
   // Start Realtime session
@@ -196,7 +196,7 @@ export function useRealtimeInterview() {
     onAssistantResponse?: (text: string) => void,
     onUserSpeechStart?: () => void,  // Callback when user starts speaking
     userName?: string, // Optional user name for personalization
-    onAssistantTextDelta?: (delta: string) => void // Callback for real-time text streaming
+    onAssistantTextDelta?: (delta: string) => void // Callback for real-time text streaming (from response.output_audio_transcript.delta)
   ) => {
     console.log('[RealtimeInterview] 🚀 startSession called');
     try {
@@ -247,7 +247,8 @@ export function useRealtimeInterview() {
           console.log('[RealtimeInterview] 🎙️ Pearl started speaking, creating new recorder...');
           pearlAudioChunksRef.current = [];
 
-          // Signal to UI that Pearl started composing (show typing indicator / create empty bubble)
+          // Signal to UI that Pearl started speaking (create empty message bubble)
+          // Text will stream in via response.output_audio_transcript.delta events
           if (onAssistantTextDeltaCallbackRef.current) {
             onAssistantTextDeltaCallbackRef.current('__PEARL_START__');
           }
@@ -303,14 +304,13 @@ export function useRealtimeInterview() {
           await new Promise(resolve => setTimeout(resolve, 200));
 
           console.log('[RealtimeInterview] Audio chunks collected:', pearlAudioChunksRef.current.length, 'chunks for saving/playback');
+          console.log('[RealtimeInterview] Accumulated transcript text length:', assistantResponseRef.current.length);
 
-          // NOTE: We do NOT transcribe Pearl's audio here anymore
-          // The transcript was already streamed in real-time via onAssistantTextDelta
-          // Audio is kept for saving/playback purposes only
-
-          // Fallback: If no text deltas were received (shouldn't happen), use Whisper as backup
+          // Whisper transcription FALLBACK - only if no transcript deltas were received
+          // Expected: response.output_audio_transcript.delta should provide the transcript in real-time
+          // If that fails (API issue, network problem, etc.), fall back to Whisper
           if (assistantResponseRef.current.trim().length === 0 && pearlAudioChunksRef.current.length > 0) {
-            console.warn('[RealtimeInterview] ⚠️ No text deltas received, falling back to Whisper transcription');
+            console.warn('[RealtimeInterview] ⚠️ No transcript deltas received, falling back to Whisper transcription');
             try {
               const audioBlob = new Blob(pearlAudioChunksRef.current, { type: 'audio/webm' });
               const formData = new FormData();

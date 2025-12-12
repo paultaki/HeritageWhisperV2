@@ -72,17 +72,12 @@ export async function startRealtime(
     try {
       const msg = JSON.parse(event.data);
 
-      // DEBUG: Log all events to diagnose response generation
-      const importantEvents = [
-        'session.created', 'session.updated',
-        'input_audio_buffer.speech_started', 'input_audio_buffer.speech_stopped',
-        'input_audio_buffer.committed',
-        'response.created', 'response.done',
-        'conversation.item.created',
-        'error'
-      ];
-      if (importantEvents.includes(msg.type)) {
-        console.log('[Realtime] 📨 Event:', msg.type, msg.type === 'error' ? msg.error : '');
+      // DEBUG: Log ALL events to diagnose transcript streaming
+      console.log('[Realtime] 📨 Event:', msg.type);
+
+      // Log transcript-related events with more detail
+      if (msg.type.includes('transcript') || msg.type.includes('text') || msg.type === 'error') {
+        console.log('[Realtime] 📨 Full event:', JSON.stringify(msg, null, 2));
       }
 
       // User speech transcript events (CANONICAL NAMES)
@@ -106,15 +101,13 @@ export async function startRealtime(
         }
       }
 
-      // Assistant text streaming (handle ALL variants)
+      // Assistant text streaming (GA event names)
       // Different event types for text depending on modality:
-      // - response.text.delta / response.text.done (text-only mode)
-      // - response.output_text.delta / response.output_text.done (some SDKs)
-      // - response.audio_transcript.delta / response.audio_transcript.done (audio mode with transcription)
-      if (msg.type === 'response.text.delta' ||
-          msg.type === 'response.output_text.delta' ||
-          msg.type === 'response.audio_transcript.delta') {
-        const delta = msg.delta || msg.text || '';
+      // - response.output_text.delta / response.output_text.done (text modality)
+      // - response.output_audio_transcript.delta / response.output_audio_transcript.done (audio modality transcript)
+      if (msg.type === 'response.output_text.delta' ||
+          msg.type === 'response.output_audio_transcript.delta') {
+        const delta = msg.delta || msg.text || msg.transcript || '';
         if (delta) {
           // On first delta, notify that response has started (show typing indicator)
           if (!hasSeenFirstDelta) {
@@ -125,9 +118,8 @@ export async function startRealtime(
           callbacks.onAssistantTextDelta?.(delta);
         }
       }
-      if (msg.type === 'response.text.done' ||
-          msg.type === 'response.output_text.done' ||
-          msg.type === 'response.audio_transcript.done') {
+      if (msg.type === 'response.output_text.done' ||
+          msg.type === 'response.output_audio_transcript.done') {
         hasSeenFirstDelta = false; // Reset for next response
         callbacks.onAssistantTextDone?.();
       }
