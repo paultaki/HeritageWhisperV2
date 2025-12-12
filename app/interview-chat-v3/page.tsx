@@ -1587,19 +1587,19 @@ function InterviewChatPageContent() {
       <div className={`max-w-3xl mx-auto flex flex-col ${interviewPhase === 'theme_selection' && !showWelcome ? 'hidden' : ''}`} style={{ height: '100dvh' }}>
         {/* Header - design guidelines compliant */}
         <div className="sticky top-0 z-10 bg-[var(--hw-surface)] border-b border-[var(--hw-border-subtle)] px-4 py-3">
-          {/* Always show: Cancel on left, Logo center, Finish on right (when available) */}
-          <div className="flex items-center justify-between gap-2">
-            {/* Cancel Button */}
+          {/* Top row: Close button left, Logo center, Finish button right */}
+          <div className="flex items-center justify-between gap-4">
+            {/* Close Button - clearly positioned on left */}
             <button
               onClick={handleCancelInterview}
-              className="min-w-[48px] min-h-[48px] flex items-center justify-center text-[var(--hw-text-secondary)] hover:text-[var(--hw-text-primary)] transition-colors"
-              aria-label="Cancel interview"
+              className="w-10 h-10 flex items-center justify-center text-[var(--hw-text-secondary)] hover:text-[var(--hw-text-primary)] transition-colors rounded-full hover:bg-[var(--hw-section-bg)]"
+              aria-label="Close interview"
             >
               <X className="w-6 h-6" />
             </button>
 
-            {/* Center: Logo + Timer */}
-            <div className="flex-1 flex flex-col items-center">
+            {/* Center: Logo */}
+            <div className="flex-1 flex justify-center">
               <Image
                 src="/final logo/logo-new.svg"
                 alt="Heritage Whisper"
@@ -1632,21 +1632,21 @@ function InterviewChatPageContent() {
             )}
           </div>
 
-          {/* Session Timer & Status - compact row below header */}
+          {/* Session Timer & Status - larger, more visible */}
           {sessionStartTime && (
-            <div className="mt-2 flex items-center justify-center gap-3 text-sm">
-              {/* Timer */}
-              <span className={`tabular-nums font-medium ${
+            <div className="mt-3 flex items-center justify-center gap-3">
+              {/* Timer - larger and more prominent */}
+              <span className={`text-lg tabular-nums font-semibold ${
                 sessionDuration >= 1740 ? 'text-[var(--hw-error)] animate-pulse' :
                 sessionDuration >= 1500 ? 'text-[var(--hw-warning-accent)]' :
-                'text-[var(--hw-text-muted)]'
+                'text-[var(--hw-text-primary)]'
               }`}>
                 {Math.floor(sessionDuration / 60)}:{(sessionDuration % 60).toString().padStart(2, '0')}
               </span>
 
               {/* Status Indicator */}
               {isRealtimeEnabled && status === 'connected' && conversationPhase !== 'idle' && (
-                <span className="flex items-center gap-1.5 text-[var(--hw-text-secondary)]">
+                <span className="flex items-center gap-1.5 text-sm text-[var(--hw-text-secondary)]">
                   <span className={`w-2 h-2 rounded-full animate-pulse ${
                     conversationPhase === 'listening' ? 'bg-[var(--hw-success)]' :
                     conversationPhase === 'thinking' ? 'bg-[var(--hw-warning-accent)]' :
@@ -1662,7 +1662,7 @@ function InterviewChatPageContent() {
 
               {/* Time Warning */}
               {showTimeWarning && sessionDuration < 1740 && (
-                <span className="text-[var(--hw-warning-accent)]">5 min left</span>
+                <span className="text-sm text-[var(--hw-warning-accent)]">5 min left</span>
               )}
             </div>
           )}

@@ -258,21 +258,21 @@ export function ChatInput({
         <div className="flex flex-col items-center">
           {/* Realtime Mode: Show Pause/Resume button when connected */}
           {useRealtime && realtimeConnected ? (
-            <div className="flex items-center justify-center gap-4">
-              {/* Switch to Text */}
+            <div className="w-full flex items-center justify-between px-2">
+              {/* Switch to Text - pushed to left */}
               <button
                 onClick={() => setMode('text')}
-                className="w-10 h-10 rounded-full bg-[var(--hw-surface)] border border-[var(--hw-border-subtle)] text-[var(--hw-text-secondary)] flex items-center justify-center hover:bg-[var(--hw-section-bg)] transition-colors"
+                className="w-12 h-12 rounded-full bg-[var(--hw-surface)] border border-[var(--hw-border-subtle)] text-[var(--hw-text-secondary)] flex items-center justify-center hover:bg-[var(--hw-section-bg)] transition-colors"
                 title="Type instead"
                 aria-label="Switch to typing"
               >
                 <Keyboard className="w-5 h-5" />
               </button>
 
-              {/* Pause/Resume Button - 60px */}
+              {/* Pause/Resume Button - wider rectangle */}
               <button
                 onClick={togglePause}
-                className={`w-[60px] h-[60px] rounded-full flex items-center justify-center shadow-lg transition-transform active:scale-95 ${
+                className={`min-w-[120px] h-[56px] rounded-2xl flex items-center justify-center gap-2 shadow-lg transition-transform active:scale-95 ${
                   isPaused
                     ? 'bg-[var(--hw-primary)] hover:bg-[var(--hw-primary-hover)]'
                     : 'bg-[var(--hw-warning-accent)] hover:bg-amber-600'
@@ -280,14 +280,17 @@ export function ChatInput({
                 aria-label={isPaused ? "Resume conversation" : "Pause conversation"}
               >
                 {isPaused ? (
-                  <Play className="w-7 h-7 text-white ml-1" />
+                  <Play className="w-6 h-6 text-white" />
                 ) : (
-                  <Pause className="w-7 h-7 text-white" />
+                  <Pause className="w-6 h-6 text-white" />
                 )}
+                <span className="text-white font-medium text-base">
+                  {isPaused ? 'Resume' : 'Pause'}
+                </span>
               </button>
 
-              {/* Spacer for balance */}
-              <div className="w-10" />
+              {/* Spacer for balance on right */}
+              <div className="w-12" />
             </div>
           ) : isRecording ? (
             /* Traditional Recording Mode: Show Stop button */
