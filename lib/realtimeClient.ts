@@ -277,7 +277,6 @@ export async function startRealtime(
         type: 'realtime',
         output_modalities: ['audio'],
         instructions: config?.instructions || 'Speak only English. Ask one question at a time.',
-        temperature: 0.8,
         audio: {
           input: {
             transcription: {
