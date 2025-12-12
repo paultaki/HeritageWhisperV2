@@ -185,6 +185,7 @@ export function useRealtimeInterview() {
   const pearlAudioChunksRef = useRef<Blob[]>([]); // Chunks of Pearl's audio
   const pearlAudioStreamRef = useRef<MediaStream | null>(null); // Store Pearl's audio stream for creating new recorders
   const onAssistantResponseCallbackRef = useRef<((text: string) => void) | null>(null); // Store callback for Pearl's transcribed text
+  const lastChunkTimeRef = useRef<number>(0); // Track when last audio chunk was received
 
   // Start Realtime session
   const startSession = useCallback(async (
@@ -260,6 +261,7 @@ export function useRealtimeInterview() {
               recorder.ondataavailable = (event) => {
                 if (event.data && event.data.size > 0) {
                   pearlAudioChunksRef.current.push(event.data);
+                  lastChunkTimeRef.current = Date.now(); // Track when last chunk arrived
                   console.log('[RealtimeInterview] Pearl chunk received:', event.data.size, 'bytes');
                 }
               };
@@ -283,11 +285,29 @@ export function useRealtimeInterview() {
         onAssistantResponseComplete: async () => {
           console.log('[RealtimeInterview] ✅ Pearl finished generating response...');
 
-          // Wait for audio to finish streaming (Pearl might still be speaking)
-          // The response.done event fires when generation completes, but audio continues
-          // Increased to 8000ms (8 seconds) to capture longer questions/responses
-          console.log('[RealtimeInterview] ⏳ Waiting 8s for audio stream to complete...');
-          await new Promise(resolve => setTimeout(resolve, 8000));
+          // Wait for audio chunks to stop arriving
+          // The response.done event fires when generation completes, but audio continues streaming
+          // We wait until no new chunks have arrived for 2 seconds (indicating audio finished)
+          console.log('[RealtimeInterview] ⏳ Waiting for audio chunks to stop...');
+
+          const CHUNK_TIMEOUT = 2000; // Wait 2s after last chunk
+          const MAX_WAIT = 15000; // Maximum 15s total wait
+          const startWait = Date.now();
+
+          while (true) {
+            const timeSinceLastChunk = Date.now() - lastChunkTimeRef.current;
+            const totalWaitTime = Date.now() - startWait;
+
+            // Exit if no chunks for 2 seconds OR we've waited 15 seconds total
+            if (timeSinceLastChunk >= CHUNK_TIMEOUT || totalWaitTime >= MAX_WAIT) {
+              console.log('[RealtimeInterview] Audio stream complete after', totalWaitTime, 'ms');
+              console.log('[RealtimeInterview] Time since last chunk:', timeSinceLastChunk, 'ms');
+              break;
+            }
+
+            // Check every 500ms
+            await new Promise(resolve => setTimeout(resolve, 500));
+          }
 
           // Stop recording to get a complete WebM file
           if (pearlAudioRecorderRef.current && pearlAudioRecorderRef.current.state === 'recording') {

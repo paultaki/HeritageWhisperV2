@@ -1,5 +1,8 @@
 "use client";
 
+// Force dynamic rendering since we use useSearchParams()
+export const dynamic = 'force-dynamic';
+
 import { useState, useRef, useEffect, useCallback } from "react";
 import { useAuth } from "@/lib/auth";
 import { useRouter, useSearchParams } from "next/navigation";
