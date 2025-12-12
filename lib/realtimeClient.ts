@@ -275,7 +275,7 @@ export async function startRealtime(
       type: 'session.update',
       session: {
         type: 'realtime',
-        output_modalities: ['audio', 'text'],
+        output_modalities: ['audio'],
         instructions: config?.instructions || 'Speak only English. Ask one question at a time.',
         audio: {
           input: {
@@ -305,6 +305,13 @@ export async function startRealtime(
         },
       },
     };
+
+    // Defensive check: Ensure output_modalities is exactly ['audio']
+    if (JSON.stringify(sessionConfig.session.output_modalities) !== JSON.stringify(['audio'])) {
+      console.error('[Realtime] ❌ Invalid output_modalities detected:', sessionConfig.session.output_modalities);
+      console.error('[Realtime] ⚠️ Forcing to ["audio"] before sending');
+      sessionConfig.session.output_modalities = ['audio'];
+    }
 
     console.log('[Realtime] 📤 Sending session.update:', JSON.stringify(sessionConfig, null, 2));
     safeSend(sessionConfig);
