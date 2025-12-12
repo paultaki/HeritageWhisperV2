@@ -241,8 +241,8 @@ export function ChatInput({
     <div
       className="border-t border-[var(--hw-border-subtle)] bg-[var(--hw-page-bg)] px-4 z-40"
       style={{
-        paddingTop: '8px',
-        paddingBottom: 'max(8px, env(safe-area-inset-bottom, 0px))',
+        paddingTop: '4px',
+        paddingBottom: 'max(4px, env(safe-area-inset-bottom, 0px))',
       }}
     >
       {/* Provisional Transcript Display (Realtime mode only) */}
@@ -269,10 +269,10 @@ export function ChatInput({
                 <Keyboard className="w-5 h-5" />
               </button>
 
-              {/* Pause/Resume Button - wider rectangle */}
+              {/* Pause/Resume Button - rectangle shape */}
               <button
                 onClick={togglePause}
-                className={`min-w-[120px] h-[56px] rounded-2xl flex items-center justify-center gap-2 shadow-lg transition-transform active:scale-95 ${
+                className={`min-w-[120px] h-[48px] rounded-lg flex items-center justify-center gap-2 shadow-lg transition-transform active:scale-95 ${
                   isPaused
                     ? 'bg-[var(--hw-primary)] hover:bg-[var(--hw-primary-hover)]'
                     : 'bg-[var(--hw-warning-accent)] hover:bg-amber-600'
