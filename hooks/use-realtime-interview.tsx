@@ -181,6 +181,9 @@ export function useRealtimeInterview() {
   const waitingForUserTranscriptRef = useRef<boolean>(false); // Track if we're waiting for user transcript
   const micEnabledRef = useRef<boolean>(true); // Track if mic is enabled (for preventing barge-in when muted)
   const bargeInTimeoutRef = useRef<NodeJS.Timeout | null>(null); // Delay before pausing Pearl (prevents false interrupts)
+  const pearlAudioRecorderRef = useRef<MediaRecorder | null>(null); // Record Pearl's audio for transcription
+  const pearlAudioChunksRef = useRef<Blob[]>([]); // Chunks of Pearl's audio
+  const onAssistantResponseCallbackRef = useRef<((text: string) => void) | null>(null); // Store callback for Pearl's transcribed text
 
   // Start Realtime session
   const startSession = useCallback(async (
@@ -209,6 +212,9 @@ export function useRealtimeInterview() {
       const ephemeralToken = await fetchEphemeralToken();
       console.log('[RealtimeInterview] ✅ Got ephemeral token, starting WebRTC...');
 
+      // Store callback for later use
+      onAssistantResponseCallbackRef.current = onAssistantResponse || null;
+
       const handles = await startRealtime({
         // Live transcript updates (gray provisional text)
         onTranscriptDelta: (text) => {
@@ -231,8 +237,97 @@ export function useRealtimeInterview() {
           waitingForUserTranscriptRef.current = false;
         },
 
+        // Pearl response started - start recording her audio for transcription
+        onAssistantResponseCreated: () => {
+          console.log('[RealtimeInterview] 🎙️ Pearl started speaking, recording audio for transcription...');
+          pearlAudioChunksRef.current = [];
+
+          // Resume recorder if it's paused
+          if (pearlAudioRecorderRef.current && pearlAudioRecorderRef.current.state === 'paused') {
+            pearlAudioRecorderRef.current.resume();
+            console.log('[RealtimeInterview] Resumed Pearl audio recorder');
+          }
+        },
+
+        // Pearl response complete - transcribe her audio
+        onAssistantResponseComplete: async () => {
+          console.log('[RealtimeInterview] ✅ Pearl finished speaking, transcribing audio...');
+
+          // Pause recording Pearl's audio (don't stop, so we can resume later)
+          if (pearlAudioRecorderRef.current && pearlAudioRecorderRef.current.state === 'recording') {
+            pearlAudioRecorderRef.current.pause();
+            console.log('[RealtimeInterview] Paused Pearl audio recorder');
+          }
+
+          // Transcribe the recorded audio
+          if (pearlAudioChunksRef.current.length > 0) {
+            try {
+              const audioBlob = new Blob(pearlAudioChunksRef.current, { type: 'audio/webm' });
+              console.log('[RealtimeInterview] Transcribing Pearl audio blob:', audioBlob.size, 'bytes');
+
+              // Send to transcription API
+              const formData = new FormData();
+              formData.append('audio', audioBlob, 'pearl.webm');
+
+              const { data: { session } } = await supabase.auth.getSession();
+              const response = await fetch('/api/interview-test/transcribe-chunk', {
+                method: 'POST',
+                headers: {
+                  'Authorization': `Bearer ${session?.access_token}`,
+                },
+                body: formData,
+              });
+
+              if (response.ok) {
+                const data = await response.json();
+                const transcribedText = data.transcription;
+                console.log('[RealtimeInterview] Pearl transcribed:', transcribedText);
+
+                // Send transcribed text to callback
+                if (onAssistantResponseCallbackRef.current) {
+                  onAssistantResponseCallbackRef.current(transcribedText);
+                }
+              } else {
+                console.error('[RealtimeInterview] Transcription failed:', response.status);
+              }
+            } catch (error) {
+              console.error('[RealtimeInterview] Failed to transcribe Pearl audio:', error);
+            }
+          }
+
+          // Reset for next response
+          pearlAudioChunksRef.current = [];
+        },
+
         // Assistant audio output (voice mode + mixed recording)
         onAssistantAudio: (stream) => {
+          // Create MediaRecorder for Pearl's audio (for transcription)
+          if (!pearlAudioRecorderRef.current) {
+            try {
+              const mimeType = MediaRecorder.isTypeSupported('audio/webm;codecs=opus')
+                ? 'audio/webm;codecs=opus'
+                : 'audio/webm';
+
+              const recorder = new MediaRecorder(stream, { mimeType });
+
+              recorder.ondataavailable = (event) => {
+                if (event.data && event.data.size > 0) {
+                  pearlAudioChunksRef.current.push(event.data);
+                }
+              };
+
+              recorder.onstop = () => {
+                console.log('[RealtimeInterview] Pearl audio recorder stopped');
+              };
+
+              recorder.start(100); // Collect data every 100ms
+              pearlAudioRecorderRef.current = recorder;
+              console.log('[RealtimeInterview] Started MediaRecorder for Pearl audio transcription');
+            } catch (error) {
+              console.error('[RealtimeInterview] Failed to create MediaRecorder for Pearl:', error);
+            }
+          }
+
           // Play audio if voice enabled
           if (voiceEnabled) {
             // Only create audio element ONCE per session (not per response)
@@ -504,6 +599,15 @@ export function useRealtimeInterview() {
       userOnlyRecorderRef.current.stop();
       userOnlyRecorderRef.current = null;
     }
+
+    // Stop Pearl audio recorder (for transcription)
+    if (pearlAudioRecorderRef.current) {
+      if (pearlAudioRecorderRef.current.state !== 'inactive') {
+        pearlAudioRecorderRef.current.stop();
+      }
+      pearlAudioRecorderRef.current = null;
+    }
+    pearlAudioChunksRef.current = [];
 
     // Stop audio playback and remove from DOM
     if (audioElementRef.current) {

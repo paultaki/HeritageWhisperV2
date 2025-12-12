@@ -206,8 +206,13 @@ export function ChatInput({
   // Toggle pause/resume for realtime mode
   // When paused: mute mic AND mute Pearl's audio output
   const togglePause = () => {
+    console.log('[ChatInput] 🔄 togglePause called, current isPaused:', isPaused);
     const newPausedState = !isPaused;
     setIsPaused(newPausedState);
+
+    console.log('[ChatInput] Setting isPaused to:', newPausedState);
+    console.log('[ChatInput] Calling toggleMic with:', !newPausedState);
+    console.log('[ChatInput] Calling toggleVoice with:', !newPausedState);
 
     // Toggle microphone (disable when paused)
     toggleMic(!newPausedState);
@@ -216,7 +221,7 @@ export function ChatInput({
     // Note: toggleVoice(true) = voice enabled, toggleVoice(false) = voice muted
     toggleVoice(!newPausedState);
 
-    console.log('[ChatInput] Pause toggled:', newPausedState ? 'PAUSED' : 'RESUMED');
+    console.log('[ChatInput] Pause toggled:', newPausedState ? 'PAUSED ⏸️' : 'RESUMED ▶️');
   };
 
   // Send text response

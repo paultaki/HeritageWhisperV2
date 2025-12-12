@@ -4,9 +4,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>HeritageWhisper – Uncomplicated Story Capture, Unforgettable Storytelling</title>
+  <title>HeritageWhisper – Meet Pearl, Your Personal Storyteller</title>
   <meta name="description"
-    content="Preserve your family's stories with voice, photos, and text. The Living Timeline, Living Book, and Memory Box—your legacy, everywhere at once.">
+    content="Meet Pearl, your personal storyteller. She guides you through capturing your life stories with warmth and wisdom. The Living Timeline, Living Book, and Memory Box—your legacy, everywhere at once.">
 
   <style>
     /* ===== CSS RESET & BASE ===== */
@@ -323,6 +323,192 @@
       font-size: 0.85rem;
       color: var(--color-navy);
       font-weight: 500;
+    }
+
+    /* ===== PEARL SECTION ===== */
+    .pearl-section {
+      background: linear-gradient(135deg, #f8f5f0 0%, var(--color-cream) 50%, #ede6db 100%);
+      padding: var(--section-padding);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .pearl-section::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      right: -20%;
+      width: 500px;
+      height: 500px;
+      background: radial-gradient(circle, rgba(203, 164, 106, 0.15) 0%, transparent 70%);
+      border-radius: 50%;
+    }
+
+    .pearl-intro {
+      max-width: 800px;
+      margin: 0 auto 48px;
+      text-align: center;
+      position: relative;
+      z-index: 1;
+    }
+
+    .pearl-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--color-gold);
+      color: var(--color-navy);
+      padding: 8px 20px;
+      border-radius: 30px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      margin-bottom: 24px;
+      box-shadow: 0 4px 16px rgba(203, 164, 106, 0.3);
+    }
+
+    .pearl-badge svg {
+      width: 18px;
+      height: 18px;
+      fill: var(--color-navy);
+    }
+
+    .pearl-intro h2 {
+      font-family: var(--font-display);
+      font-size: clamp(2rem, 4vw, 3rem);
+      color: var(--color-navy);
+      margin-bottom: 16px;
+      line-height: 1.2;
+    }
+
+    .pearl-intro .highlight {
+      color: var(--color-gold);
+      font-style: italic;
+    }
+
+    .pearl-intro p {
+      font-size: 1.15rem;
+      color: var(--color-text-light);
+      line-height: 1.7;
+      max-width: 650px;
+      margin: 0 auto;
+    }
+
+    .pearl-features {
+      max-width: var(--container-max);
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 32px;
+      position: relative;
+      z-index: 1;
+    }
+
+    @media (min-width: 768px) {
+      .pearl-features {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
+
+    .pearl-feature-card {
+      background: var(--color-white);
+      border-radius: 20px;
+      padding: 32px;
+      text-align: center;
+      box-shadow: var(--shadow-medium);
+      transition: transform 0.3s, box-shadow 0.3s;
+      position: relative;
+    }
+
+    .pearl-feature-card:hover {
+      transform: translateY(-8px);
+      box-shadow: var(--shadow-strong);
+    }
+
+    .pearl-feature-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, var(--color-gold) 0%, var(--color-gold-light) 100%);
+      border-radius: 20px 20px 0 0;
+    }
+
+    .pearl-icon {
+      width: 72px;
+      height: 72px;
+      background: linear-gradient(135deg, var(--color-gold) 0%, var(--color-gold-light) 100%);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 20px;
+      box-shadow: 0 8px 24px rgba(203, 164, 106, 0.3);
+    }
+
+    .pearl-icon svg {
+      width: 32px;
+      height: 32px;
+      fill: var(--color-navy);
+    }
+
+    .pearl-feature-card h3 {
+      font-family: var(--font-display);
+      font-size: 1.25rem;
+      color: var(--color-navy);
+      margin-bottom: 12px;
+    }
+
+    .pearl-feature-card p {
+      font-size: 0.95rem;
+      color: var(--color-text-light);
+      line-height: 1.6;
+    }
+
+    .pearl-quote {
+      max-width: 700px;
+      margin: 64px auto 0;
+      text-align: center;
+      position: relative;
+      z-index: 1;
+    }
+
+    .pearl-quote blockquote {
+      font-family: var(--font-display);
+      font-size: clamp(1.25rem, 2.5vw, 1.5rem);
+      color: var(--color-navy);
+      font-style: italic;
+      line-height: 1.5;
+      position: relative;
+      padding: 0 40px;
+    }
+
+    .pearl-quote blockquote::before,
+    .pearl-quote blockquote::after {
+      content: '"';
+      font-size: 3rem;
+      color: var(--color-gold);
+      position: absolute;
+      font-family: Georgia, serif;
+    }
+
+    .pearl-quote blockquote::before {
+      top: -10px;
+      left: 0;
+    }
+
+    .pearl-quote blockquote::after {
+      bottom: -30px;
+      right: 0;
+    }
+
+    .pearl-quote cite {
+      display: block;
+      margin-top: 20px;
+      font-size: 0.95rem;
+      color: var(--color-text-light);
+      font-style: normal;
     }
 
     /* ===== VOICE QUOTE SECTION ===== */
@@ -921,6 +1107,72 @@
           alt="Memory Box showing treasured keepsakes like First Record Purchase, Wedding Vows, Dad's Gift, and family mementos"
           style="width: 100%; border-radius: 12px; box-shadow: var(--shadow-strong);">
       </div>
+    </div>
+  </section>
+
+  <!-- PEARL: YOUR PERSONAL STORYTELLER -->
+  <section class="pearl-section">
+    <div class="pearl-intro">
+      <div class="pearl-badge">
+        <svg viewBox="0 0 24 24">
+          <path
+            d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
+        </svg>
+        Introducing Pearl
+      </div>
+      <h2>Meet <span class="highlight">Pearl</span>, Your Personal Storyteller</h2>
+      <p>Pearl is your warm, patient guide through the storytelling journey. She speaks with you, listens carefully, and
+        helps you capture memories you didn't even know you had. Like having a world-class interviewer in your
+        pocket—available whenever inspiration strikes.</p>
+    </div>
+
+    <div class="pearl-features">
+      <!-- Feature 1: Guided Conversations -->
+      <div class="pearl-feature-card">
+        <div class="pearl-icon">
+          <svg viewBox="0 0 24 24">
+            <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H6l-2 2V4h16v12z" />
+            <path d="M7 9h2v2H7zm4 0h2v2h-2zm4 0h2v2h-2z" />
+          </svg>
+        </div>
+        <h3>Guided Conversations</h3>
+        <p>Tell a quick story on your own, or let Pearl guide you with thoughtful questions—just like sitting down with
+          your favorite grandchild. She speaks, you speak. It's a conversation, not an interview.</p>
+      </div>
+
+      <!-- Feature 2: Questions That Matter -->
+      <div class="pearl-feature-card">
+        <div class="pearl-icon">
+          <svg viewBox="0 0 24 24">
+            <path
+              d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z" />
+          </svg>
+        </div>
+        <h3>Questions That Unlock Memories</h3>
+        <p>Pearl asks the questions your children and grandchildren would ask if they were sitting right there with you.
+          As she learns your history, her questions get smarter—uncovering stories you thought were lost forever.</p>
+      </div>
+
+      <!-- Feature 3: Wisdom Extraction -->
+      <div class="pearl-feature-card">
+        <div class="pearl-icon">
+          <svg viewBox="0 0 24 24">
+            <path
+              d="M12 3L1 9l4 2.18v6L12 21l7-3.82v-6l2-1.09V17h2V9L12 3zm6.82 6L12 12.72 5.18 9 12 5.28 18.82 9zM17 15.99l-5 2.73-5-2.73v-3.72L12 15l5-2.73v3.72z" />
+          </svg>
+        </div>
+        <h3>Wisdom & Lessons Learned</h3>
+        <p>More than just stories—Pearl helps you extract the wisdom, the lessons, the hard-won insights you want to
+          pass on. Your grandchildren won't just know what happened. They'll understand why it mattered.</p>
+      </div>
+    </div>
+
+    <div class="pearl-quote">
+      <blockquote>
+        Pearl asked me about my mother's kitchen. Suddenly I was back there, smelling her bread, hearing her humming. I
+        hadn't thought about that in fifty years.
+      </blockquote>
+      <cite>— Margaret, 78, using HeritageWhisper</cite>
     </div>
   </section>
 

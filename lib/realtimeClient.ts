@@ -29,6 +29,8 @@ export type RealtimeCallbacks = {
   onAssistantTextDelta?: (text: string) => void;
   onAssistantTextDone?: () => void;
   onAssistantResponseStarted?: () => void;  // When first text delta arrives
+  onAssistantResponseCreated?: () => void;  // When response.created arrives (Pearl starts)
+  onAssistantResponseComplete?: () => void;  // When response.done arrives (Pearl finishes)
   onSpeechStarted?: () => void;  // For barge-in
   onSpeechStopped?: () => void;
   onError: (error: Error) => void;
@@ -142,6 +144,16 @@ export async function startRealtime(
             }
           }
         }
+      }
+
+      // Pearl response lifecycle events (for audio-only mode transcription)
+      if (msg.type === 'response.created') {
+        console.log('[Realtime] 🎙️ Pearl response started (response.created)');
+        callbacks.onAssistantResponseCreated?.();
+      }
+      if (msg.type === 'response.done') {
+        console.log('[Realtime] ✅ Pearl response complete (response.done)');
+        callbacks.onAssistantResponseComplete?.();
       }
 
       // Speech detection events (for barge-in)
