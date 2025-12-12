@@ -1047,7 +1047,9 @@ ONLY move to a new topic after exploring all three layers, or if they signal the
 
   // Handle Pearl's realtime responses (from OpenAI Realtime API)
   const handlePearlResponse = useCallback((text: string) => {
-    console.log('[InterviewChat] 🎙️ handlePearlResponse called:', text?.substring(0, 50) + '...');
+    console.log('[InterviewChat] 🎙️ handlePearlResponse called with text:', text);
+    console.log('[InterviewChat] Text length:', text?.length);
+    console.log('[InterviewChat] Text type:', typeof text);
 
     if (text === '__COMPOSING__') {
       // Pearl started speaking - show typing indicator
@@ -1058,6 +1060,7 @@ ONLY move to a new topic after exploring all three layers, or if they signal the
 
     // Pearl finished - remove typing indicator and add her message
     console.log('[InterviewChat] Pearl finished speaking, adding message bubble');
+    console.log('[InterviewChat] Text to add:', text);
     removeTypingIndicator();
 
     if (text && text.trim()) {
@@ -1069,7 +1072,15 @@ ONLY move to a new topic after exploring all three layers, or if they signal the
         sender: 'hw',
       };
 
-      setMessages(prev => [...prev, pearlMessage]);
+      console.log('[InterviewChat] Created Pearl message:', pearlMessage);
+      setMessages(prev => {
+        const newMessages = [...prev, pearlMessage];
+        console.log('[InterviewChat] Total messages after adding Pearl:', newMessages.length);
+        console.log('[InterviewChat] All messages:', newMessages);
+        return newMessages;
+      });
+    } else {
+      console.warn('[InterviewChat] ⚠️ Pearl text was empty or undefined!');
     }
   }, []);
 
