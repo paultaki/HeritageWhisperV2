@@ -299,6 +299,7 @@ export async function startRealtime(
             voice: 'shimmer',
             format: {
               type: 'audio/pcm',
+              rate: 24000,
             },
           },
         },
