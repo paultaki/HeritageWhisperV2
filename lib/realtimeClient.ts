@@ -313,9 +313,9 @@ export async function startRealtime(
               type: 'audio/pcm',
               rate: 24000,
             },
-            transcription: {
-              model: 'whisper-1', // Enable audio transcription for real-time text
-            },
+            // NOTE: Real-time transcription of assistant speech is NOT supported by OpenAI Realtime API
+            // audio.output.transcription is not a valid parameter
+            // Text is only available in text-only mode (which loses voice)
           },
         },
       },
