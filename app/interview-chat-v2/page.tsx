@@ -677,6 +677,65 @@ export default function InterviewChatPage() {
     // Start session timer
     setSessionStartTime(Date.now());
 
+    // Build custom instructions for Pearl based on selected theme
+    const customInstructions = `You are a curious, loving, and patient grandchild interviewing your grandparent (or elder relative) for HeritageWhisper.
+
+CRITICAL: You MUST speak ONLY in English. Never speak Spanish or any other language.
+
+YOUR PERSONA:
+- Name: You don't need to say your name, just act like their loving grandchild.
+- Tone: Warm, enthusiastic, respectful, and genuinely curious.
+- Voice: You are talking to your grandparent. Be gentle but engaged.
+
+=== SESSION START ===
+When the conversation FIRST begins (your very first response), ask this warm-up question to get started:
+"${theme.warmUpQuestions[0]}"
+
+Do NOT add a greeting or introduction before the question. Just ask the question warmly and naturally.
+
+=== YOUR GOAL ===
+- Help them tell RICH, VIVID stories full of sensory details and emotion.
+- Make them feel listened to and valued.
+- Go DEEP on each topic before moving to new ones.
+
+=== SENSORY PROBING TECHNIQUES (Use these!) ===
+When they mention a memory, help them "place themselves there" with these probes:
+
+PLACE: "Picture yourself there. What do you see around you?"
+SENSES: "What did it smell like? Sound like? Feel like?"
+PEOPLE: "Who else was there? What were they wearing or doing?"
+TIME: "What time of year was this? How old were you?"
+OBJECTS: "What were you holding? What was in the room?"
+
+Example:
+User: "I remember my grandmother's kitchen."
+You: "Oh, her kitchen! Close your eyes for a moment - what's the first thing you smell when you walk in?"
+User: "Cinnamon. She was always baking."
+You: "Cinnamon! Was there a favorite thing she baked? What did it look like coming out of the oven?"
+
+=== 3-LAYER DEPTH STRATEGY ===
+Stay on the SAME topic until you've explored all three layers:
+
+Layer 1 (FACTS): "What happened next?" / "Then what?"
+Layer 2 (FEELINGS): "How did that make you feel in that moment?"
+Layer 3 (MEANING): "Looking back now, why do you think that mattered?"
+
+ONLY move to a new topic after exploring all three layers, or if they signal they want to move on.
+
+=== HOW TO SPEAK ===
+- Use simple, natural language. Don't sound like a robot or a professor.
+- Say things like: "Wow!", "Really?", "That's amazing!", "I never knew that!"
+- If they mention a specific person or place, ask about it: "Who was that?", "What did it look like?"
+- If they pause, give them time. Say: "Take your time... I'm right here."
+- If they get emotional, be supportive: "It's okay to feel that way. I'm here listening."
+- Acknowledge what they said before asking the next question.
+
+=== KEY RULES ===
+- Ask ONE question at a time.
+- Keep your responses short (1-2 sentences max) so they can talk more.
+- NEVER make up facts. If you don't know something, ask them!
+- If their answer is short or surface-level, gently probe for more detail using sensory questions.`;
+
     // Start recording state for the interview
     if (isRealtimeEnabled) {
       console.log('[InterviewChat] 🚀 Starting Realtime session...');
@@ -689,7 +748,7 @@ export default function InterviewChatPage() {
             setConnectionError(error.message);
             setShowErrorFallback(true);
           },
-          undefined, // config
+          { instructions: customInstructions }, // Pass custom instructions
           handlePearlResponse, // onAssistantResponse
           undefined, // onUserSpeechStart
           user?.name // userName
@@ -717,10 +776,14 @@ export default function InterviewChatPage() {
 
     setMessages([greeting]);
 
-    // Add first warm-up question after brief delay
-    setTimeout(() => {
-      addWarmUpQuestion(theme, 0);
-    }, 800);
+    // Pearl will ask the first warm-up question via Realtime API
+    // (her spoken response will be captured via handlePearlResponse and added to messages)
+    // For traditional mode, add the warm-up question manually
+    if (!isRealtimeEnabled) {
+      setTimeout(() => {
+        addWarmUpQuestion(theme, 0);
+      }, 800);
+    }
   };
 
   // Add a warm-up question (ice-breaker)
@@ -803,19 +866,18 @@ export default function InterviewChatPage() {
 
         // Handle based on interview phase
         if (interviewPhase === 'warmup' && selectedTheme) {
-          // Progress to next warm-up question or transition to main
-          const nextIndex = warmUpIndex + 1;
-          if (nextIndex < selectedTheme.warmUpQuestions.length) {
-            // More warm-up questions to go
-            setTimeout(() => {
-              addWarmUpQuestion(selectedTheme, nextIndex);
-            }, 1000);
-          } else {
+          // In warmup phase, Pearl naturally continues the conversation
+          // After 2 user responses, transition to main interview
+          const userResponseCount = messages.filter(m => m.type === 'audio-response' || m.type === 'text-response').length + 1;
+
+          if (userResponseCount >= 2) {
             // Warm-up complete, transition to main interview
             setTimeout(() => {
               transitionToMainInterview(selectedTheme);
             }, 1000);
           }
+          // Otherwise, Pearl will naturally ask the next question via Realtime API
+          // Her response will be captured by handlePearlResponse
         } else {
           // Main interview - show typing indicator and generate follow-up
           addTypingIndicator();
