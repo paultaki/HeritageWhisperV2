@@ -285,7 +285,9 @@ export function useRealtimeInterview() {
 
           // Wait for audio to finish streaming (Pearl might still be speaking)
           // The response.done event fires when generation completes, but audio continues
-          await new Promise(resolve => setTimeout(resolve, 1500));
+          // Increased to 8000ms (8 seconds) to capture longer questions/responses
+          console.log('[RealtimeInterview] ⏳ Waiting 8s for audio stream to complete...');
+          await new Promise(resolve => setTimeout(resolve, 8000));
 
           // Stop recording to get a complete WebM file
           if (pearlAudioRecorderRef.current && pearlAudioRecorderRef.current.state === 'recording') {
