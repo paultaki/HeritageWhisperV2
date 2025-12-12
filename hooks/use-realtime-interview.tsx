@@ -240,24 +240,34 @@ export function useRealtimeInterview() {
         // Pearl response started - start recording her audio for transcription
         onAssistantResponseCreated: () => {
           console.log('[RealtimeInterview] 🎙️ Pearl started speaking, recording audio for transcription...');
+          console.log('[RealtimeInterview] Recorder state:', pearlAudioRecorderRef.current?.state);
+          console.log('[RealtimeInterview] Current chunks before clear:', pearlAudioChunksRef.current.length);
           pearlAudioChunksRef.current = [];
 
           // Resume recorder if it's paused
           if (pearlAudioRecorderRef.current && pearlAudioRecorderRef.current.state === 'paused') {
             pearlAudioRecorderRef.current.resume();
             console.log('[RealtimeInterview] Resumed Pearl audio recorder');
+          } else if (pearlAudioRecorderRef.current) {
+            console.log('[RealtimeInterview] Recorder already in state:', pearlAudioRecorderRef.current.state);
+          } else {
+            console.warn('[RealtimeInterview] ⚠️ No Pearl audio recorder yet!');
           }
         },
 
         // Pearl response complete - transcribe her audio
         onAssistantResponseComplete: async () => {
           console.log('[RealtimeInterview] ✅ Pearl finished speaking, transcribing audio...');
+          console.log('[RealtimeInterview] Recorder state before pause:', pearlAudioRecorderRef.current?.state);
+          console.log('[RealtimeInterview] Chunks collected:', pearlAudioChunksRef.current.length);
 
           // Pause recording Pearl's audio (don't stop, so we can resume later)
           if (pearlAudioRecorderRef.current && pearlAudioRecorderRef.current.state === 'recording') {
             pearlAudioRecorderRef.current.pause();
             console.log('[RealtimeInterview] Paused Pearl audio recorder');
           }
+
+          console.log('[RealtimeInterview] Chunks after pause:', pearlAudioChunksRef.current.length);
 
           // Transcribe the recorded audio
           if (pearlAudioChunksRef.current.length > 0) {
@@ -288,7 +298,11 @@ export function useRealtimeInterview() {
                   onAssistantResponseCallbackRef.current(transcribedText);
                 }
               } else {
-                console.error('[RealtimeInterview] Transcription failed:', response.status);
+                const errorText = await response.text();
+                console.error('[RealtimeInterview] ❌ Transcription failed:', response.status);
+                console.error('[RealtimeInterview] Error details:', errorText);
+                console.error('[RealtimeInterview] Audio blob size:', audioBlob.size, 'bytes');
+                console.error('[RealtimeInterview] Audio blob type:', audioBlob.type);
               }
             } catch (error) {
               console.error('[RealtimeInterview] Failed to transcribe Pearl audio:', error);
