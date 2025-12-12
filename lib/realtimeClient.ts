@@ -271,29 +271,29 @@ export async function startRealtime(
   dataChannel.onopen = () => {
     console.log('[Realtime] ✅ Data channel opened, sending session.update...');
 
-    // Full session configuration including VAD and transcription
-    // Note: GA API uses output_modalities, not modalities
+    // Session configuration - Hybrid format (nested structure + session.type required)
     const sessionConfig: any = {
       type: 'session.update',
       session: {
+        type: 'realtime',  // REQUIRED by WebRTC
+        model: 'gpt-4o-realtime-preview',  // REQUIRED
         instructions: config?.instructions || 'You are a helpful assistant.',
-        output_modalities: ['text', 'audio'],
-        // Enable input transcription - FORCE ENGLISH to prevent Spanish/other language detection
+        modalities: ['audio'],  // ONLY audio (not both audio and text!)
+        voice: 'shimmer',
+        input_audio_format: 'pcm16',
+        output_audio_format: 'pcm16',
         input_audio_transcription: {
           model: 'whisper-1',
-          language: 'en',  // CRITICAL: Explicit English to prevent auto-detection errors
+          language: 'en',  // Force English
         },
-        // Server VAD for turn detection - SENIOR FRIENDLY settings
-        // Seniors need time to think and gather thoughts during interviews
-        // Reduced from 5s to 2s per user feedback - allows natural pauses without long delays
         turn_detection: {
           type: 'server_vad',
-          threshold: 0.85,           // Raised from 0.8 - stricter threshold to avoid false triggers from background noise
-          prefix_padding_ms: 500,    // More padding before speech starts
-          silence_duration_ms: 2000, // 2 SECONDS - natural conversation rhythm, seniors can pause to think
-          create_response: true,     // CRITICAL: Auto-generate response
+          threshold: 0.85,
+          prefix_padding_ms: 500,
+          silence_duration_ms: 2000,
+          create_response: true,
         },
-        max_response_output_tokens: 1200,
+        temperature: 0.8,
       },
     };
 

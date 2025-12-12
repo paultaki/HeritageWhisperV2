@@ -68,28 +68,13 @@ export async function POST(req: NextRequest) {
 
     // 4. Create ephemeral client secret with session configuration
     // Docs: https://platform.openai.com/docs/guides/realtime-webrtc
-    // Format from OpenAI official docs for ephemeral token endpoint
-    // CRITICAL: Set language to English here to prevent Spanish auto-detection
+    // Format based on OpenAI curl example:
+    // curl -X POST https://api.openai.com/v1/realtime/client_secrets \
+    //   -d '{"session": {"type": "realtime", "model": "gpt-4o-realtime-preview"}}'
     const sessionConfig = {
       session: {
         type: 'realtime',
         model: 'gpt-4o-realtime-preview',
-        voice: 'shimmer',  // Voice at session level, not nested in audio
-        modalities: ['text', 'audio'],
-        instructions: 'You are a helpful assistant. CRITICAL: You MUST speak ONLY in English. Never speak Spanish or any other language.',
-        // Force English transcription from the start
-        input_audio_transcription: {
-          model: 'whisper-1',
-          language: 'en',  // CRITICAL: English only
-        },
-        // Senior-friendly turn detection
-        turn_detection: {
-          type: 'server_vad',
-          threshold: 0.85,
-          prefix_padding_ms: 500,
-          silence_duration_ms: 2000,  // 2 seconds for natural pauses
-          create_response: true,
-        },
       },
     };
 
@@ -106,22 +91,32 @@ export async function POST(req: NextRequest) {
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error('[RealtimeSession] OpenAI API error:', {
+      console.error('[RealtimeSession] ❌ OpenAI API error:', {
         status: response.status,
         statusText: response.statusText,
         error: errorText,
         url: 'https://api.openai.com/v1/realtime/client_secrets',
         model: 'gpt-4o-realtime-preview',
+        requestBody: JSON.stringify(sessionConfig),
       });
 
-      // Return more detailed error for debugging
+      // Try to parse error as JSON for better details
+      let parsedError;
+      try {
+        parsedError = JSON.parse(errorText);
+      } catch (e) {
+        parsedError = errorText;
+      }
+
+      // Return detailed error to client for debugging
       return NextResponse.json(
         {
-          error: 'Failed to create session',
+          error: 'Failed to create session with OpenAI',
+          message: parsedError?.error?.message || errorText.substring(0, 200),
           debug: {
             status: response.status,
             statusText: response.statusText,
-            details: errorText.substring(0, 200), // First 200 chars
+            openaiError: parsedError,
           }
         },
         { status: 500 }
