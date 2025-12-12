@@ -275,7 +275,7 @@ export async function startRealtime(
       type: 'session.update',
       session: {
         type: 'realtime',
-        output_modalities: ['audio'],
+        output_modalities: ['audio', 'text'],
         instructions: config?.instructions || 'Speak only English. Ask one question at a time.',
         audio: {
           input: {
