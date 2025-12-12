@@ -281,7 +281,11 @@ export function useRealtimeInterview() {
 
         // Pearl response complete - transcribe her audio
         onAssistantResponseComplete: async () => {
-          console.log('[RealtimeInterview] ✅ Pearl finished speaking, transcribing audio...');
+          console.log('[RealtimeInterview] ✅ Pearl finished generating response...');
+
+          // Wait for audio to finish streaming (Pearl might still be speaking)
+          // The response.done event fires when generation completes, but audio continues
+          await new Promise(resolve => setTimeout(resolve, 1500));
 
           // Stop recording to get a complete WebM file
           if (pearlAudioRecorderRef.current && pearlAudioRecorderRef.current.state === 'recording') {
@@ -289,8 +293,8 @@ export function useRealtimeInterview() {
             console.log('[RealtimeInterview] Stopped Pearl audio recorder');
           }
 
-          // Wait a bit for ondataavailable to fire and collect final chunks
-          await new Promise(resolve => setTimeout(resolve, 100));
+          // Wait for final chunks to be collected
+          await new Promise(resolve => setTimeout(resolve, 200));
 
           console.log('[RealtimeInterview] Chunks collected:', pearlAudioChunksRef.current.length);
 
