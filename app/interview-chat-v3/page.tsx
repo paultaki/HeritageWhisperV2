@@ -1,9 +1,6 @@
 "use client";
 
-// Force dynamic rendering since we use useSearchParams()
-export const dynamic = 'force-dynamic';
-
-import { useState, useRef, useEffect, useCallback } from "react";
+import { useState, useRef, useEffect, useCallback, Suspense } from "react";
 import { useAuth } from "@/lib/auth";
 import { useRouter, useSearchParams } from "next/navigation";
 import Image from "next/image";
@@ -162,7 +159,8 @@ ${whisperBlock}`;
   return perlPrompt;
 }
 
-export default function InterviewChatPage() {
+// Main content component that uses useSearchParams
+function InterviewChatPageContent() {
   const { user, isLoading: isAuthLoading } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -1703,5 +1701,21 @@ export default function InterviewChatPage() {
         />
       </div>
     </div>
+  );
+}
+
+// Wrapper component with Suspense boundary for useSearchParams
+export default function InterviewChatPage() {
+  return (
+    <Suspense fallback={
+      <div className="hw-page flex items-center justify-center" style={{ background: 'var(--hw-page-bg)', minHeight: '100vh' }}>
+        <div className="text-center">
+          <div className="w-12 h-12 border-4 border-[var(--hw-primary)]/20 border-t-[var(--hw-primary)] rounded-full mx-auto mb-4 animate-spin" />
+          <p className="text-[var(--hw-text-secondary)] text-lg">Loading interview...</p>
+        </div>
+      </div>
+    }>
+      <InterviewChatPageContent />
+    </Suspense>
   );
 }
