@@ -219,6 +219,7 @@ export function useRealtimeInterview() {
       // Store callbacks for later use
       onAssistantResponseCallbackRef.current = onAssistantResponse || null;
       onAssistantTextDeltaCallbackRef.current = onAssistantTextDelta || null;
+      console.log('[RealtimeInterview] 💾 Stored callbacks - Response:', !!onAssistantResponse, 'TextDelta:', !!onAssistantTextDelta);
 
       const handles = await startRealtime({
         // Live transcript updates (gray provisional text)
@@ -342,6 +343,7 @@ export function useRealtimeInterview() {
 
           // Reset for next response
           pearlAudioChunksRef.current = [];
+          assistantResponseRef.current = ''; // Reset AFTER fallback check
         },
 
         // Assistant audio output (voice mode + mixed recording)
@@ -500,8 +502,8 @@ export function useRealtimeInterview() {
             }
           }
 
-          // Reset for next response
-          assistantResponseRef.current = '';
+          // DON'T reset assistantResponseRef here - it's needed for fallback check in onAssistantResponseComplete
+          // assistantResponseRef.current = '';
           cancelSentRef.current = false; // Reset cancel flag for next response
 
           // Pearl finished speaking, now listening for user
