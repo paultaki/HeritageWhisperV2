@@ -11,6 +11,7 @@ import { TypingIndicator } from "./components/TypingIndicator";
 import { ChatInput } from "./components/ChatInput";
 import { StorySplitModal } from "./components/StorySplitModal";
 import { ThemeSelector } from "./components/ThemeSelector";
+import { ProcessingOverlay } from "./components/ProcessingOverlay";
 import { useRealtimeInterview } from "@/hooks/use-realtime-interview";
 import { type InterviewTheme, getFirstMainPrompt } from "@/lib/interviewThemes";
 import {
@@ -328,12 +329,17 @@ function InterviewChatPageContent() {
     sessionDuration: number;
     updatedAt: string;
   } | null>(null);
+  const [existingReviewDraft, setExistingReviewDraft] = useState<{
+    interviewId: string;
+    updatedAt: string;
+  } | null>(null);
   const [draftCheckComplete, setDraftCheckComplete] = useState(false); // Track if we've checked for drafts
   const autoSaveTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   // Error handling state
   const [connectionError, setConnectionError] = useState<string | null>(null);
   const [showErrorFallback, setShowErrorFallback] = useState(false);
+  const [error, setError] = useState<string | null>(null); // General error state for custom error modals
 
   // Custom confirmation modal state (replaces browser confirm dialogs)
   const [showCancelConfirm, setShowCancelConfirm] = useState(false);
@@ -721,18 +727,24 @@ function InterviewChatPageContent() {
       // 6. Delete draft (no longer needed after successful save)
       await deleteDraft();
 
-      // 7. Redirect to new review page
+      // 7. Remove beforeunload listener to prevent "leave site?" warning
+      if (beforeUnloadHandlerRef.current) {
+        window.removeEventListener('beforeunload', beforeUnloadHandlerRef.current);
+        beforeUnloadHandlerRef.current = null;
+      }
+
+      // 8. Redirect to new review page
       console.log('[InterviewChat] 🚀 Redirecting to review page...');
       window.location.href = `/review/interview/${interviewId}`;
 
     } catch (error) {
       console.error('[InterviewChat] ❌ Error completing interview:', error);
       setIsAnalyzing(false);
-      
-      // Show user-friendly error message
-      alert(
-        error instanceof Error 
-          ? `Failed to save your interview: ${error.message}. Please try again.`
+
+      // Show user-friendly error message with custom modal (not browser alert)
+      setError(
+        error instanceof Error
+          ? `Failed to save your interview: ${error.message}`
           : 'Failed to save your interview. Please try again.'
       );
     }
@@ -779,6 +791,9 @@ function InterviewChatPageContent() {
   }, [sessionStartTime, handleComplete]); // Add handleComplete to dependencies
 
   // Warn user before leaving during active interview
+  // Store the handler in a ref so we can remove it before redirect
+  const beforeUnloadHandlerRef = useRef<((e: BeforeUnloadEvent) => string | void) | null>(null);
+
   useEffect(() => {
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {
       // Only warn if session is active and user has given at least one response
@@ -793,6 +808,7 @@ function InterviewChatPageContent() {
       }
     };
 
+    beforeUnloadHandlerRef.current = handleBeforeUnload;
     window.addEventListener('beforeunload', handleBeforeUnload);
     return () => window.removeEventListener('beforeunload', handleBeforeUnload);
   }, [sessionStartTime, messages]);
@@ -812,9 +828,10 @@ function InterviewChatPageContent() {
     };
   }, [stopTraditionalRecording, stopSession]);
 
-  // Check for existing draft on mount - MUST complete before showing welcome
+  // Check for existing drafts on mount - MUST complete before showing welcome
+  // Check both interview drafts (in-progress recordings) AND review drafts (uncompleted reviews)
   useEffect(() => {
-    const checkForDraft = async () => {
+    const checkForDrafts = async () => {
       if (!user) {
         setDraftCheckComplete(true);
         return;
@@ -827,29 +844,66 @@ function InterviewChatPageContent() {
           return;
         }
 
-        const response = await fetch('/api/interview-drafts', {
+        // 1. Check for interview draft (in-progress recording)
+        const interviewDraftResponse = await fetch('/api/interview-drafts', {
           headers: {
             'Authorization': `Bearer ${session.access_token}`,
           },
         });
 
-        if (response.ok) {
-          const data = await response.json();
+        if (interviewDraftResponse.ok) {
+          const data = await interviewDraftResponse.json();
           if (data.draft && data.draft.transcriptJson?.length > 0) {
             setExistingDraft(data.draft);
             setShowResumeModal(true);
             setShowWelcome(false); // Hide welcome when resume modal shows
+            setDraftCheckComplete(true);
+            return; // Found interview draft, don't check for review draft
+          }
+        }
+
+        // 2. Check for most recent interview that might have a review draft
+        const interviewsResponse = await fetch('/api/interviews/recent', {
+          headers: {
+            'Authorization': `Bearer ${session.access_token}`,
+          },
+        });
+
+        if (interviewsResponse.ok) {
+          const interviewsData = await interviewsResponse.json();
+          const recentInterview = interviewsData.interviews?.[0];
+
+          if (recentInterview) {
+            // Check if there's a review draft for this interview
+            const reviewDraftResponse = await fetch(
+              `/api/interview-drafts/review?interviewId=${recentInterview.id}`,
+              {
+                headers: {
+                  'Authorization': `Bearer ${session.access_token}`,
+                },
+              }
+            );
+
+            if (reviewDraftResponse.ok) {
+              const reviewData = await reviewDraftResponse.json();
+              if (reviewData.draft) {
+                // Found a review draft - redirect directly to review page
+                console.log('[InterviewChat] Found review draft, redirecting to review page...');
+                router.push(`/review/interview/${recentInterview.id}`);
+                return;
+              }
+            }
           }
         }
       } catch (error) {
-        console.error('Failed to check for draft:', error);
+        console.error('Failed to check for drafts:', error);
       } finally {
         setDraftCheckComplete(true);
       }
     };
 
-    checkForDraft();
-  }, [user]);
+    checkForDrafts();
+  }, [user, router]);
 
   // Auto-save interval (every 60 seconds during active session)
   useEffect(() => {
@@ -1708,6 +1762,40 @@ function InterviewChatPageContent() {
 
   return (
     <div className="hw-page" style={{ background: 'var(--hw-page-bg)' }}>
+      {/* Processing Overlay - cycling messages */}
+      <ProcessingOverlay isVisible={isAnalyzing} />
+
+      {/* Error Modal - custom popup instead of browser alert */}
+      {error && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl p-6 sm:p-8 max-w-md w-full mx-4 shadow-xl">
+            <div className="text-center mb-6">
+              <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <AlertTriangle className="w-8 h-8 text-red-600" />
+              </div>
+              <h2 className="text-xl sm:text-2xl font-semibold text-gray-900 mb-2">
+                Something went wrong
+              </h2>
+              <p className="text-gray-600 text-base">
+                {error}
+              </p>
+            </div>
+
+            <div className="flex flex-col gap-3">
+              <Button
+                onClick={() => {
+                  setError(null);
+                  // Optionally retry - for now just close
+                }}
+                className="w-full min-h-[48px] bg-[var(--hw-primary)] hover:bg-[var(--hw-primary-hover)] text-white font-medium"
+              >
+                Close
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Resume Draft Modal */}
       {showResumeModal && existingDraft && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">

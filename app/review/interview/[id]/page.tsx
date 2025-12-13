@@ -9,6 +9,7 @@ import { ArrowLeft, Loader2, Check, X, ChevronDown, Volume2 } from "lucide-react
 import { Button } from "@/components/ui/button";
 import { StoryReviewCard } from "@/components/review/StoryReviewCard";
 import { FullInterviewCard } from "@/components/review/FullInterviewCard";
+import { ProcessingOverlay } from "@/app/interview-chat-v3/components/ProcessingOverlay";
 import { formatDuration } from "@/lib/audioSlicer";
 import type { StoryPhoto } from "@/components/MultiPhotoUploader";
 
@@ -80,6 +81,10 @@ function InterviewReviewContent() {
   const [isSaving, setIsSaving] = useState(false);
   const [isFixingAudio, setIsFixingAudio] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Modal state
+  const [showCancelConfirm, setShowCancelConfirm] = useState(false);
+  const [showBackConfirm, setShowBackConfirm] = useState(false);
 
   // Story editing state
   const [storyEdits, setStoryEdits] = useState<StoryEdits>({});
@@ -187,8 +192,37 @@ function InterviewReviewContent() {
         }
       }
 
-      // 3. Initialize story edits
-      if (fetchedInterview.detectedStories?.parsedStories) {
+      // 3. Check for existing review draft
+      let reviewDraft = null;
+      try {
+        const reviewDraftResponse = await fetch(
+          `/api/interview-drafts/review?interviewId=${interviewId}`,
+          {
+            headers: {
+              "Authorization": `Bearer ${authToken}`,
+            },
+          }
+        );
+
+        if (reviewDraftResponse.ok) {
+          const reviewDraftData = await reviewDraftResponse.json();
+          reviewDraft = reviewDraftData.draft;
+          console.log('[InterviewReview] Found existing review draft:', reviewDraft);
+        }
+      } catch (draftError) {
+        console.warn('[InterviewReview] Failed to load review draft:', draftError);
+        // Non-critical, continue without draft
+      }
+
+      // 4. Initialize story edits (from draft if available, otherwise from parsed stories)
+      if (reviewDraft && reviewDraft.reviewData) {
+        // Load from draft
+        setStoryEdits(reviewDraft.reviewData.storyEdits || {});
+        setSaveAsFullInterview(reviewDraft.reviewData.saveAsFullInterview || false);
+        setFullInterviewTitle(reviewDraft.reviewData.fullInterviewTitle || '');
+        console.log('[InterviewReview] Restored review state from draft');
+      } else if (fetchedInterview.detectedStories?.parsedStories) {
+        // Initialize from parsed stories
         const initialEdits: StoryEdits = {};
         for (const story of fetchedInterview.detectedStories.parsedStories) {
           // Parse year - handle cases like "1980s" or "early 1980s"
@@ -223,13 +257,14 @@ function InterviewReviewContent() {
           };
         }
         setStoryEdits(initialEdits);
+
+        // Initialize full interview title (only if not loaded from draft)
+        const date = new Date(fetchedInterview.createdAt);
+        setFullInterviewTitle(
+          `Conversation with Pearl - ${date.toLocaleDateString("en-US", { month: "long", year: "numeric" })}`
+        );
       }
 
-      // Initialize full interview title
-      const date = new Date(fetchedInterview.createdAt);
-      setFullInterviewTitle(
-        `Conversation with Pearl - ${date.toLocaleDateString("en-US", { month: "long", year: "numeric" })}`
-      );
     } catch (err) {
       console.error("[InterviewReview] Error:", err);
       setError(err instanceof Error ? err.message : "Failed to load interview");
@@ -414,6 +449,32 @@ function InterviewReviewContent() {
       const result = await response.json();
       console.log("[InterviewReview] Stories saved:", result);
 
+      // Delete review draft (no longer needed)
+      try {
+        await fetch(`/api/interview-drafts/review?interviewId=${interviewId}`, {
+          method: "DELETE",
+          headers: {
+            "Authorization": `Bearer ${authToken}`,
+          },
+        });
+      } catch (draftError) {
+        console.warn("[InterviewReview] Failed to delete review draft:", draftError);
+        // Non-critical, continue anyway
+      }
+
+      // Also delete the interview draft (if it exists)
+      try {
+        await fetch(`/api/interview-drafts`, {
+          method: "DELETE",
+          headers: {
+            "Authorization": `Bearer ${authToken}`,
+          },
+        });
+      } catch (draftError) {
+        console.warn("[InterviewReview] Failed to delete interview draft:", draftError);
+        // Non-critical, continue anyway
+      }
+
       // Redirect to timeline with success message
       router.push(`/timeline?saved=${result.created}`);
     } catch (err) {
@@ -424,26 +485,104 @@ function InterviewReviewContent() {
     }
   };
 
-  // Handle discard
-  const handleDiscard = () => {
-    if (confirm("Are you sure you want to discard this interview? All stories will be lost.")) {
+  // Handle cancel button click
+  const handleCancelClick = () => {
+    setShowCancelConfirm(true);
+  };
+
+  // Handle confirmed cancel
+  const handleConfirmedCancel = async () => {
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      const authToken = session?.access_token;
+
+      if (authToken && interview) {
+        // Delete the interview from database
+        await fetch(`/api/interviews/${interview.id}`, {
+          method: "DELETE",
+          headers: {
+            "Authorization": `Bearer ${authToken}`,
+          },
+        });
+      }
+
+      // Navigate to timeline
+      router.push("/timeline");
+    } catch (error) {
+      console.error("Failed to delete interview:", error);
+      // Still navigate even if delete fails
       router.push("/timeline");
     }
   };
 
-  // Loading state
-  if (isAuthLoading || isLoading || isFixingAudio) {
-    let loadingMessage = "Loading your stories...";
-    if (isParsing) loadingMessage = "Analyzing your conversation...";
-    else if (isFixingAudio) loadingMessage = "Preparing audio for playback...";
+  // Handle back button click
+  const handleBackClick = () => {
+    // Check if user has made any edits
+    const hasEdits = Object.values(storyEdits).some(edit =>
+      edit.photos.length > 0 ||
+      edit.title !== interview?.detectedStories?.parsedStories.find(s => s.id === Object.keys(storyEdits).find(k => storyEdits[k] === edit))?.recommendedTitle
+    );
 
+    if (hasEdits) {
+      setShowBackConfirm(true);
+    } else {
+      router.back();
+    }
+  };
+
+  // Handle confirmed back (without saving)
+  const handleConfirmedBack = () => {
+    router.back();
+  };
+
+  // Save as draft and go back
+  const handleSaveDraftAndBack = async () => {
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      const authToken = session?.access_token;
+
+      if (!authToken || !interview) {
+        router.back();
+        return;
+      }
+
+      // Save review state as draft
+      await fetch(`/api/interview-drafts/review`, {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${authToken}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          interviewId: interview.id,
+          storyEdits,
+          saveAsFullInterview,
+          fullInterviewTitle,
+        }),
+      });
+
+      router.back();
+    } catch (error) {
+      console.error("Failed to save draft:", error);
+      router.back();
+    }
+  };
+
+  // Handle discard (called from footer)
+  const handleDiscard = () => {
+    setShowCancelConfirm(true);
+  };
+
+  // Show loading overlay while processing
+  const showLoadingOverlay = isAuthLoading || isLoading || isParsing || isFixingAudio;
+
+  // Loading state - use ProcessingOverlay for consistent UX
+  if (showLoadingOverlay && !interview) {
     return (
-      <div className="hw-page flex items-center justify-center" style={{ background: "var(--hw-page-bg)", minHeight: "100vh" }}>
-        <div className="text-center">
-          <div className="w-12 h-12 border-4 border-[var(--hw-primary)]/20 border-t-[var(--hw-primary)] rounded-full mx-auto mb-4 animate-spin" />
-          <p className="text-[var(--hw-text-secondary)] text-lg">{loadingMessage}</p>
-        </div>
-      </div>
+      <>
+        <div className="hw-page" style={{ background: "var(--hw-page-bg)", minHeight: "100vh" }} />
+        <ProcessingOverlay isVisible={true} />
+      </>
     );
   }
 
@@ -494,12 +633,89 @@ function InterviewReviewContent() {
 
   return (
     <div className="hw-page" style={{ background: "var(--hw-page-bg)", minHeight: "100vh" }}>
+      {/* Cancel Confirmation Modal */}
+      {showCancelConfirm && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl p-6 sm:p-8 max-w-md w-full mx-4 shadow-xl">
+            <div className="text-center mb-6">
+              <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <X className="w-8 h-8 text-red-600" />
+              </div>
+              <h2 className="text-xl sm:text-2xl font-semibold text-gray-900 mb-2">
+                Cancel and Delete?
+              </h2>
+              <p className="text-gray-600 text-base">
+                Are you sure? You&apos;ll lose all your stories and edits. This can&apos;t be undone.
+              </p>
+            </div>
+
+            <div className="flex flex-col gap-3">
+              <Button
+                onClick={() => setShowCancelConfirm(false)}
+                className="w-full min-h-[48px] bg-[var(--hw-primary)] hover:bg-[var(--hw-primary-hover)] text-white font-medium"
+              >
+                No, Keep Editing
+              </Button>
+              <Button
+                onClick={handleConfirmedCancel}
+                variant="outline"
+                className="w-full min-h-[48px] border-red-300 text-red-700 hover:bg-red-50"
+              >
+                Yes, Delete Everything
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Back Button Confirmation Modal */}
+      {showBackConfirm && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl p-6 sm:p-8 max-w-md w-full mx-4 shadow-xl">
+            <div className="text-center mb-6">
+              <div className="w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <ArrowLeft className="w-8 h-8 text-amber-600" />
+              </div>
+              <h2 className="text-xl sm:text-2xl font-semibold text-gray-900 mb-2">
+                Save Your Progress?
+              </h2>
+              <p className="text-gray-600 text-base">
+                You have unsaved edits. Would you like to save them as a draft before leaving?
+              </p>
+            </div>
+
+            <div className="flex flex-col gap-3">
+              <Button
+                onClick={handleSaveDraftAndBack}
+                className="w-full min-h-[48px] bg-[var(--hw-primary)] hover:bg-[var(--hw-primary-hover)] text-white font-medium"
+              >
+                Save Draft & Go Back
+              </Button>
+              <Button
+                onClick={handleConfirmedBack}
+                variant="outline"
+                className="w-full min-h-[48px] border-gray-300 text-gray-700 hover:bg-gray-50"
+              >
+                Discard Changes & Go Back
+              </Button>
+              <Button
+                onClick={() => setShowBackConfirm(false)}
+                variant="ghost"
+                className="w-full min-h-[48px] text-gray-600 hover:bg-gray-50"
+              >
+                Cancel
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Header */}
       <div className="sticky top-0 z-10 bg-[var(--hw-surface)] border-b border-[var(--hw-border-subtle)]">
         <div className="max-w-3xl mx-auto px-4 py-4">
           <div className="flex items-center gap-4">
             <button
-              onClick={() => router.back()}
+              onClick={handleBackClick}
               className="w-10 h-10 flex items-center justify-center text-[var(--hw-text-secondary)] hover:text-[var(--hw-text-primary)] transition-colors rounded-full hover:bg-[var(--hw-section-bg)]"
               aria-label="Go back"
             >
@@ -515,7 +731,13 @@ function InterviewReviewContent() {
                 priority
               />
             </div>
-            <div className="w-10" /> {/* Spacer for balance */}
+            <button
+              onClick={handleCancelClick}
+              className="w-10 h-10 flex items-center justify-center text-[var(--hw-text-secondary)] hover:text-[var(--hw-error)] transition-colors rounded-full hover:bg-red-50"
+              aria-label="Cancel and delete"
+            >
+              <X className="w-5 h-5" />
+            </button>
           </div>
         </div>
       </div>
