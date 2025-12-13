@@ -104,12 +104,8 @@ function RecordingContent() {
   const handleSelectMode = (mode: RecordingMode) => {
     setDraft((prev) => ({ ...prev, recordingMode: mode }));
 
-    if (mode === "photo_audio") {
-      // Photo + audio flow: go to photo/title screen
-      setStep("photoTitle");
-      setOriginStep("start");
-    } else if (mode === "audio") {
-      // Audio only: skip to recording
+    if (mode === "audio") {
+      // Audio: go directly to recording (photo already added on start screen if desired)
       setStep("audio");
       setOriginStep("start");
     } else if (mode === "text") {
@@ -234,6 +230,8 @@ function RecordingContent() {
     <>
       {step === "start" && (
         <StartStoryScreen
+          draft={draft}
+          onChange={handleDraftChange}
           onSelectMode={handleSelectMode}
           onCancel={handleCancel}
           promptText={promptText}

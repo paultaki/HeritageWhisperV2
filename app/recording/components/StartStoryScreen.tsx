@@ -1,14 +1,99 @@
 "use client";
 
-import { Keyboard, MessageCircle, Heart } from "lucide-react";
+import { useState, useRef } from "react";
+import { Keyboard, MessageCircle, Heart, Plus } from "lucide-react";
 import { type StartStoryScreenProps } from "../types";
 import "../recording.css";
 
 /**
  * StartStoryScreen - Entry point for recording flow V3
- * Matches heritage-whisper-recorder reference design exactly
+ * Consolidated photo upload into first screen
  */
-export function StartStoryScreen({ onSelectMode, onCancel, promptText, familyFrom, familyRelationship }: StartStoryScreenProps) {
+export function StartStoryScreen({
+  draft,
+  onChange,
+  onSelectMode,
+  onCancel,
+  promptText,
+  familyFrom,
+  familyRelationship
+}: StartStoryScreenProps) {
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [isDragOver, setIsDragOver] = useState(false);
+
+  // Photo upload handlers
+  const handlePhotoSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith("image/")) {
+      alert("Please select an image file");
+      return;
+    }
+
+    if (file.size > 10 * 1024 * 1024) {
+      alert("Image must be smaller than 10MB");
+      return;
+    }
+
+    const photoUrl = URL.createObjectURL(file);
+    onChange({
+      ...draft,
+      photoUrl,
+      photoFile: file,
+    });
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragOver(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragOver(false);
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragOver(false);
+
+    const file = e.dataTransfer.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith("image/")) {
+      alert("Please drop an image file");
+      return;
+    }
+
+    if (file.size > 10 * 1024 * 1024) {
+      alert("Image must be smaller than 10MB");
+      return;
+    }
+
+    const photoUrl = URL.createObjectURL(file);
+    onChange({
+      ...draft,
+      photoUrl,
+      photoFile: file,
+    });
+  };
+
+  const handlePhotoClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleRemovePhoto = () => {
+    onChange({
+      ...draft,
+      photoUrl: undefined,
+      photoFile: undefined,
+    });
+  };
+
   return (
     <div className="hw-screen-wrapper" style={{ backgroundColor: "#F5F1ED" }}>
       {/* Header */}
@@ -79,27 +164,79 @@ export function StartStoryScreen({ onSelectMode, onCancel, promptText, familyFro
           Every memory matters.<br />Start with your voice.
         </h2>
 
-        {/* Primary Options */}
-        <div className="space-y-4 mb-8">
-          {/* Record with photo */}
-          <button
-            onClick={() => onSelectMode("photo_audio")}
-            className="w-full bg-white rounded-2xl py-4 px-5 active:scale-[0.98] transition-transform shadow-sm"
-          >
-            <div className="flex items-center justify-center gap-4 mb-2">
-              <div className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0" style={{ backgroundColor: "#E8E8E8" }}>
-                <img src="/camera-icon.svg" alt="" className="w-8 h-8" />
-              </div>
-              <h3 className="font-semibold text-lg" style={{ color: "#2C3E50" }}>
-                Record with photo
-              </h3>
-            </div>
-            <p className="text-base text-center" style={{ color: "#6B7280", margin: 0, width: "100%", display: "block" }}>
-              Choose a photo, then tell its story.
-            </p>
-          </button>
+        {/* Photo Upload Section */}
+        <div className="mb-6">
+          <h3 className="font-semibold text-lg mb-2" style={{ color: "#2C3E50" }}>
+            Add a photo
+          </h3>
 
-          {/* Start recording (no photo) */}
+          {draft.photoUrl ? (
+            <div className="bg-white rounded-2xl p-4 shadow-sm">
+              <div className="relative rounded-xl overflow-hidden mb-3" style={{ aspectRatio: "4/3" }}>
+                <img
+                  src={draft.photoUrl}
+                  alt="Selected photo"
+                  className="w-full h-full object-cover"
+                />
+              </div>
+              <div className="flex gap-3">
+                <button
+                  onClick={handlePhotoClick}
+                  className="flex-1 py-2.5 rounded-lg font-medium text-sm"
+                  style={{ backgroundColor: "white", border: "2px solid #E5E7EB", color: "#2C3E50" }}
+                >
+                  Change photo
+                </button>
+                <button
+                  onClick={handleRemovePhoto}
+                  className="flex-1 py-2.5 rounded-lg font-medium text-sm"
+                  style={{ backgroundColor: "white", border: "2px solid #E5E7EB", color: "#DC2626" }}
+                >
+                  Remove
+                </button>
+              </div>
+            </div>
+          ) : (
+            <button
+              onClick={handlePhotoClick}
+              onDragOver={handleDragOver}
+              onDragEnter={handleDragOver}
+              onDragLeave={handleDragLeave}
+              onDrop={handleDrop}
+              className="w-full bg-white rounded-2xl py-8 px-5 active:scale-[0.98] transition-all shadow-sm border-2 border-dashed"
+              style={{
+                borderColor: isDragOver ? "#2C3E50" : "#D1D5DB",
+                backgroundColor: isDragOver ? "#E8F4F8" : "#FFFFFF",
+              }}
+            >
+              <div className="flex flex-col items-center">
+                <div
+                  className="w-12 h-12 rounded-full flex items-center justify-center mb-2 transition-colors duration-200"
+                  style={{ backgroundColor: isDragOver ? "#2C3E50" : "#E5E7EB" }}
+                >
+                  <Plus className="w-6 h-6 transition-colors duration-200" style={{ color: isDragOver ? "#FFFFFF" : "#6B7280" }} />
+                </div>
+                <p className="text-sm font-medium" style={{ color: "#6B7280" }}>
+                  Optional
+                </p>
+                <p className="text-base mt-1" style={{ color: isDragOver ? "#2C3E50" : "#6B7280" }}>
+                  {isDragOver ? "Drop your photo here" : "Tap to choose a photo"}
+                </p>
+              </div>
+            </button>
+          )}
+
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            onChange={handlePhotoSelect}
+            className="hidden"
+          />
+        </div>
+
+        {/* Start Recording Button */}
+        <div className="space-y-4 mb-8">
           <button
             onClick={() => onSelectMode("audio")}
             className="w-full bg-white rounded-2xl py-4 px-5 active:scale-[0.98] transition-transform shadow-sm"
@@ -113,7 +250,7 @@ export function StartStoryScreen({ onSelectMode, onCancel, promptText, familyFro
               </h3>
             </div>
             <p className="text-base text-center" style={{ color: "#6B7280", margin: 0, width: "100%", display: "block" }}>
-              Start now. Add photos any time.
+              {draft.photoUrl ? "Tell the story of your photo" : "Start now. Add photos any time."}
             </p>
           </button>
         </div>

@@ -54,6 +54,8 @@ export interface RecordFlowCallbacks {
 
 // Props for individual screen components
 export interface StartStoryScreenProps {
+  draft: Partial<StoryDraft>;
+  onChange: (draft: Partial<StoryDraft>) => void;
   onSelectMode: (mode: RecordingMode) => void;
   onCancel: () => void;
   promptText?: string | null; // Prompt question from prompts page
