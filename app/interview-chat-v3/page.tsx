@@ -53,7 +53,7 @@ export type AudioState = {
 
 // Start context URL parameter types
 type StartMode = 'question' | 'topic' | 'pearl_choice';
-type StartSource = 'featured' | 'family' | 'category' | 'curated';
+type StartSource = 'featured' | 'family' | 'category' | 'curated' | 'theme_selector';
 
 // Helper to sanitize untrusted URL parameters
 function sanitizeParam(value: string | null, maxLength: number): string | undefined {
@@ -252,7 +252,7 @@ function InterviewChatPageContent() {
   const startTitle = sanitizeParam(rawStartTitle, 80);
   const startPrompt = sanitizeParam(rawStartPrompt, 240);
   const startSource: StartSource | undefined =
-    rawStartSource === 'featured' || rawStartSource === 'family' || rawStartSource === 'category' || rawStartSource === 'curated'
+    rawStartSource === 'featured' || rawStartSource === 'family' || rawStartSource === 'category' || rawStartSource === 'curated' || rawStartSource === 'theme_selector'
       ? rawStartSource : undefined;
 
   // Compute hasStartContext
@@ -1206,13 +1206,18 @@ function InterviewChatPageContent() {
     // Start session timer
     setSessionStartTime(Date.now());
 
-    // Build Perl v3 instructions with start context and whisper
-    // Whisper is empty since interview_context doesn't exist on user table yet
+    // Build Perl v3 instructions with theme's first question
+    // If user came from URL with startPrompt, use that; otherwise use theme's first question
+    const themeFirstQuestion = getFirstMainPrompt(theme.id);
+    const effectiveStartPrompt = startPrompt || themeFirstQuestion;
+    const effectiveStartMode = startPrompt ? startMode : 'question'; // Use 'question' mode for theme selection
+    const effectiveStartTitle = startTitle || theme.title; // Use theme title as context
+
     const perlInstructionsV3 = buildPerlInstructionsV3({
-      startMode,
-      startTitle,
-      startPrompt,
-      startSource,
+      startMode: effectiveStartMode,
+      startTitle: effectiveStartTitle,
+      startPrompt: effectiveStartPrompt,
+      startSource: startSource || 'theme_selector',
       whisper: '', // Empty for now - no interview_context field exists
       userName: user?.name,
       isFirstInterview: user?.storyCount === 0,
@@ -2073,22 +2078,30 @@ function InterviewChatPageContent() {
 
         {/* Messages */}
         <div className="flex-1 overflow-y-auto px-4 py-4 space-y-3">
-          {messages.map((message) => (
-            <div key={message.id}>
-              {message.type === 'typing' ? (
-                <TypingIndicator />
-              ) : message.type === 'question-options' ? (
-                <QuestionOptions
-                  messageId={message.id}
-                  options={message.options || []}
-                  selectedOption={message.selectedOption}
-                  onSelect={handleQuestionSelect}
-                />
-              ) : (
-                <ChatMessage message={message} userName={user?.name} />
-              )}
-            </div>
-          ))}
+          {messages
+            .filter((message) => {
+              // Filter out empty Pearl messages (streaming artifacts)
+              if (message.sender === 'hw' && message.type === 'question' && !message.content.trim()) {
+                return false;
+              }
+              return true;
+            })
+            .map((message) => (
+              <div key={message.id}>
+                {message.type === 'typing' ? (
+                  <TypingIndicator />
+                ) : message.type === 'question-options' ? (
+                  <QuestionOptions
+                    messageId={message.id}
+                    options={message.options || []}
+                    selectedOption={message.selectedOption}
+                    onSelect={handleQuestionSelect}
+                  />
+                ) : (
+                  <ChatMessage message={message} userName={user?.name} />
+                )}
+              </div>
+            ))}
           <div ref={messagesEndRef} />
         </div>
 

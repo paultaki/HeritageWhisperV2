@@ -12,15 +12,23 @@ import { logger } from '@/lib/logger';
 const execAsync = promisify(exec);
 
 /**
- * Fix WebM files with broken duration metadata.
+ * Fix WebM files with broken duration metadata and optionally remove dead air.
  * 
  * MediaRecorder creates WebM files with incorrect duration in the header
  * (often showing as 0.059s). This endpoint uses FFmpeg to remux the file,
  * which fixes the duration metadata.
  * 
+ * Optionally removes silence/dead air from the recording using FFmpeg's
+ * silenceremove filter.
+ * 
  * POST /api/process-audio/fix-webm
- * Body: { audioUrl: string } - URL of the WebM file to fix
- * Returns: { url: string, durationSeconds: number } - URL of the fixed file
+ * Body: { 
+ *   audioUrl: string,           - URL of the WebM file to fix
+ *   removeSilence?: boolean,    - Whether to remove dead air (default: true)
+ *   silenceThreshold?: number,  - dB threshold for silence detection (default: -40)
+ *   minSilenceDuration?: number - Minimum silence duration to remove in seconds (default: 0.8)
+ * }
+ * Returns: { url: string, durationSeconds: number, originalDuration?: number } - URL of the fixed file
  */
 export async function POST(request: NextRequest) {
   try {
@@ -46,13 +54,18 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { audioUrl } = body;
+    const { 
+      audioUrl, 
+      removeSilence = true,  // Default to removing silence
+      silenceThreshold = -40, // dB threshold (audio below this is "silence")
+      minSilenceDuration = 0.8 // Minimum silence duration to remove (seconds)
+    } = body;
 
     if (!audioUrl) {
       return NextResponse.json({ error: 'audioUrl is required' }, { status: 400 });
     }
 
-    logger.info('[fix-webm] Processing:', audioUrl);
+    logger.info('[fix-webm] Processing:', audioUrl, { removeSilence, silenceThreshold, minSilenceDuration });
 
     // Setup temp directory
     const tempDir = join(process.cwd(), 'tmp', 'audio-processing');
@@ -73,29 +86,56 @@ export async function POST(request: NextRequest) {
 
     await writeFile(inputFilePath, buffer);
 
-    // Use FFmpeg to remux the file - this fixes the duration metadata
-    // The -fflags +genpts ensures proper timestamps are generated
-    // -c copy does a fast remux without re-encoding
-    const command = `ffmpeg -y -fflags +genpts -i "${inputFilePath}" -c copy -f webm "${outputFilePath}" 2>&1`;
-    
-    logger.info('[fix-webm] Running FFmpeg:', command);
+    // Get original duration before processing
+    let originalDuration = 0;
+    try {
+      const probeOriginal = `ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 "${inputFilePath}"`;
+      const { stdout: origDur } = await execAsync(probeOriginal);
+      originalDuration = parseFloat(origDur.trim()) || 0;
+      logger.info('[fix-webm] Original duration:', originalDuration, 'seconds');
+    } catch (e) {
+      logger.warn('[fix-webm] Could not probe original duration');
+    }
+
+    // Build FFmpeg command based on options
+    let command: string;
+
+    if (removeSilence) {
+      // Use silenceremove filter to remove dead air
+      // The filter removes silence from throughout the audio (not just start/end)
+      // - stop_periods=-1: Remove all silence occurrences
+      // - stop_duration: Minimum silence duration to remove (e.g., 0.8s)
+      // - stop_threshold: dB level below which audio is considered silence
+      // We also re-encode to ensure proper duration metadata
+      const silenceFilter = `silenceremove=stop_periods=-1:stop_duration=${minSilenceDuration}:stop_threshold=${silenceThreshold}dB`;
+      
+      command = `ffmpeg -y -i "${inputFilePath}" -af "${silenceFilter}" -c:a libopus -b:a 128k -f webm "${outputFilePath}" 2>&1`;
+      logger.info('[fix-webm] Running FFmpeg with silence removal');
+    } else {
+      // Just fix duration metadata without removing silence
+      // The -fflags +genpts ensures proper timestamps are generated
+      command = `ffmpeg -y -fflags +genpts -i "${inputFilePath}" -c copy -f webm "${outputFilePath}" 2>&1`;
+      logger.info('[fix-webm] Running FFmpeg (remux only, no silence removal)');
+    }
+
+    logger.debug('[fix-webm] Command:', command);
     
     try {
-      const { stdout, stderr } = await execAsync(command, { timeout: 60000 });
+      const { stdout, stderr } = await execAsync(command, { timeout: 180000 }); // 3 min timeout for silence removal
       logger.debug('[fix-webm] FFmpeg output:', stdout || stderr);
     } catch (ffmpegError: unknown) {
       // FFmpeg outputs to stderr even on success, so check if output file exists
       if (!existsSync(outputFilePath)) {
         logger.error('[fix-webm] FFmpeg failed:', ffmpegError);
         
-        // Try alternative approach: re-encode the audio
-        const reencodeCommand = `ffmpeg -y -i "${inputFilePath}" -c:a libopus -b:a 128k -f webm "${outputFilePath}" 2>&1`;
-        logger.info('[fix-webm] Trying re-encode:', reencodeCommand);
+        // Try fallback: re-encode without silence removal
+        const fallbackCommand = `ffmpeg -y -i "${inputFilePath}" -c:a libopus -b:a 128k -f webm "${outputFilePath}" 2>&1`;
+        logger.info('[fix-webm] Trying fallback (re-encode without silence removal)');
         
         try {
-          await execAsync(reencodeCommand, { timeout: 120000 });
-        } catch (reencodeError) {
-          logger.error('[fix-webm] Re-encode also failed:', reencodeError);
+          await execAsync(fallbackCommand, { timeout: 120000 });
+        } catch (fallbackError) {
+          logger.error('[fix-webm] Fallback also failed:', fallbackError);
           await unlink(inputFilePath).catch(() => {});
           return NextResponse.json({ error: 'FFmpeg processing failed' }, { status: 500 });
         }
@@ -143,11 +183,23 @@ export async function POST(request: NextRequest) {
     await unlink(inputFilePath).catch(() => {});
     await unlink(outputFilePath).catch(() => {});
 
-    logger.info('[fix-webm] Success! New URL:', publicUrlData.publicUrl);
+    // Calculate how much silence was removed
+    const silenceRemoved = originalDuration > 0 && durationSeconds > 0 
+      ? Math.round(originalDuration - durationSeconds)
+      : 0;
+    
+    logger.info('[fix-webm] Success!', {
+      newUrl: publicUrlData.publicUrl,
+      originalDuration,
+      newDuration: durationSeconds,
+      silenceRemoved: silenceRemoved > 0 ? `${silenceRemoved}s` : 'none',
+    });
 
     return NextResponse.json({
       url: publicUrlData.publicUrl,
       durationSeconds,
+      originalDuration,
+      silenceRemoved,
       originalUrl: audioUrl,
     });
 
