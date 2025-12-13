@@ -190,10 +190,31 @@ function InterviewReviewContent() {
       if (fetchedInterview.detectedStories?.parsedStories) {
         const initialEdits: StoryEdits = {};
         for (const story of fetchedInterview.detectedStories.parsedStories) {
+          // Parse year - handle cases like "1980s" or "early 1980s"
+          let storyYear: number | undefined = undefined;
+          if (story.suggestedYear) {
+            const yearMatch = String(story.suggestedYear).match(/\d{4}/);
+            if (yearMatch) {
+              const parsed = parseInt(yearMatch[0], 10);
+              if (parsed > 1800 && parsed < 2100) {
+                storyYear = parsed;
+              }
+            }
+          }
+
+          // Parse age - ensure it's a number
+          let storyAge: number | undefined = undefined;
+          if (story.suggestedAge) {
+            const parsed = parseInt(String(story.suggestedAge), 10);
+            if (!isNaN(parsed) && parsed > 0 && parsed < 150) {
+              storyAge = parsed;
+            }
+          }
+
           initialEdits[story.id] = {
             title: story.recommendedTitle,
-            storyYear: story.suggestedYear,
-            storyAge: story.suggestedAge,
+            storyYear,
+            storyAge,
             lifePhase: story.lifePhase,
             lessonLearned: story.wisdomSuggestion,
             photos: [],
@@ -325,7 +346,13 @@ function InterviewReviewContent() {
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.error || "Failed to save stories");
+        console.error('[InterviewReview] Save API error:', errorData);
+        // Show detailed errors if available
+        if (errorData.errors && errorData.errors.length > 0) {
+          console.error('[InterviewReview] Story errors:', errorData.errors);
+          throw new Error(`Failed to save: ${errorData.errors[0]}`);
+        }
+        throw new Error(errorData.details || errorData.error || "Failed to save stories");
       }
 
       const result = await response.json();

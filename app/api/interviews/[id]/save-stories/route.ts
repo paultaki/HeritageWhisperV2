@@ -101,6 +101,15 @@ export async function POST(
 
     for (const story of stories) {
       try {
+        logger.info('[Save Stories API] Processing story:', {
+          tempId: story.tempId,
+          title: story.title?.substring(0, 50),
+          hasTranscription: !!story.transcription,
+          transcriptionLength: story.transcription?.length,
+          audioUrl: story.audioUrl?.substring(0, 50),
+          durationSeconds: story.durationSeconds,
+        });
+
         // Validate required fields
         if (!story.title || !story.transcription) {
           errors.push(`Story ${story.tempId}: Missing title or transcription`);
@@ -108,22 +117,45 @@ export async function POST(
         }
 
         // Prepare story record - only include columns that exist in the stories table
+        // Note: created_at is automatically set by database default, so don't include it
+        
+        // Ensure duration is a valid integer
+        const durationSecs = typeof story.durationSeconds === 'number' && story.durationSeconds > 0
+          ? Math.round(story.durationSeconds)
+          : interview.duration_seconds || 0;
+
+        // Ensure story_year is a valid integer (sometimes it comes as string like "1980s")
+        let storyYear: number | null = null;
+        if (story.storyYear) {
+          const parsed = parseInt(String(story.storyYear), 10);
+          if (!isNaN(parsed) && parsed > 1800 && parsed < 2100) {
+            storyYear = parsed;
+          }
+        }
+
         const storyRecord: Record<string, any> = {
           user_id: user.id,
-          title: story.title,
+          title: story.title.trim(),
           transcription: story.transcription,
           audio_url: story.audioUrl || interview.full_audio_url, // Fallback to full interview audio
-          duration_seconds: story.durationSeconds || interview.duration_seconds,
-          story_year: story.storyYear || null,
-          life_phase: story.lifePhase || null,
-          lesson_learned: story.lessonLearned || null,
-          photos: story.photos || [],
+          duration_seconds: durationSecs,
           include_in_book: true,
           include_in_timeline: true,
           is_favorite: false,
-          recording_mode: saveAsFullInterview ? 'conversation_full' : 'conversation',
-          created_at: new Date().toISOString(),
+          recording_mode: 'audio', // Valid values: 'audio', 'text', 'photo_audio'
         };
+
+        // Only add optional fields if they have valid values
+        if (storyYear) storyRecord.story_year = storyYear;
+        if (story.lifePhase && typeof story.lifePhase === 'string') {
+          storyRecord.life_phase = story.lifePhase;
+        }
+        if (story.lessonLearned && typeof story.lessonLearned === 'string') {
+          storyRecord.lesson_learned = story.lessonLearned.trim();
+        }
+        if (story.photos && Array.isArray(story.photos) && story.photos.length > 0) {
+          storyRecord.photos = story.photos;
+        }
 
         // Note: source_interview_id, interview_start_ms, interview_end_ms, story_age
         // columns may not exist yet in the stories table. Skip them for now to avoid errors.
@@ -134,6 +166,8 @@ export async function POST(
         // ALTER TABLE stories ADD COLUMN story_age INTEGER;
 
         // Insert story
+        logger.info('[Save Stories API] Inserting story record:', JSON.stringify(storyRecord, null, 2));
+        
         const { data: createdStory, error: insertError } = await supabaseAdmin
           .from('stories')
           .insert(storyRecord)
@@ -141,7 +175,12 @@ export async function POST(
           .single();
 
         if (insertError) {
-          logger.error('[Save Stories API] Insert error for story:', story.tempId, insertError);
+          logger.error('[Save Stories API] Insert error for story:', story.tempId, {
+            message: insertError.message,
+            code: insertError.code,
+            details: insertError.details,
+            hint: insertError.hint,
+          });
           errors.push(`Story "${story.title}": ${insertError.message}`);
           continue;
         }
@@ -225,8 +264,9 @@ export async function POST(
     }, { status });
   } catch (err) {
     logger.error('[Save Stories API] Error:', err);
+    const errorMessage = err instanceof Error ? err.message : 'Unknown error';
     return NextResponse.json(
-      { error: 'Failed to save stories' },
+      { error: 'Failed to save stories', details: errorMessage },
       { status: 500 }
     );
   }
