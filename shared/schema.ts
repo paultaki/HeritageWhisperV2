@@ -999,6 +999,85 @@ export type StripeCustomer = typeof stripeCustomers.$inferSelect;
 export type InsertGiftCode = z.infer<typeof insertGiftCodeSchema>;
 export type GiftCode = typeof giftCodes.$inferSelect;
 
+// ============================================================================
+// INTERVIEW SYSTEM TABLES
+// ============================================================================
+
+// Interviews table - master archive of Pearl AI interviews
+export const interviews = pgTable("interviews", {
+  id: uuid("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
+  userId: uuid("user_id")
+    .references(() => users.id, { onDelete: "cascade" })
+    .notNull(),
+
+  // Audio artifacts
+  fullAudioUrl: text("full_audio_url").notNull(), // User-only audio (for story segments)
+  mixedAudioUrl: text("mixed_audio_url"), // Full conversation (user + Pearl)
+  durationSeconds: integer("duration_seconds").notNull(),
+
+  // Transcript with timestamps
+  transcriptJson: jsonb("transcript_json")
+    .$type<Array<{
+      id: string;
+      type: string;
+      content: string;
+      timestamp: string; // ISO format
+      sender: 'hw' | 'user';
+      audioDuration?: number;
+    }>>()
+    .notNull()
+    .default(sql`'[]'::jsonb`),
+
+  // Metadata
+  theme: text("theme"),
+  status: text("status").default("completed"), // 'completed', 'processing', 'archived'
+
+  // AI analysis results
+  detectedStories: jsonb("detected_stories").$type<{
+    parsedStories: Array<{
+      id: string;
+      recommendedTitle: string;
+      bridgedText: string;
+      rawTranscript: string;
+      messageIds: string[];
+      startTimestamp: string;
+      endTimestamp: string;
+      durationSeconds: number;
+      audioUrl?: string; // Sliced audio URL
+      suggestedYear?: number;
+      suggestedAge?: number;
+      lifePhase?: string;
+      wisdomSuggestion?: string;
+      peopleMentioned?: string[];
+      placesMentioned?: string[];
+    }>;
+    fullInterview: {
+      formattedTranscript: string;
+      totalDurationSeconds: number;
+    };
+    metadata: {
+      totalStoriesFound: number;
+      processedAt: string;
+    };
+  }>(),
+  storiesParsedAt: timestamp("stories_parsed_at"),
+
+  createdAt: timestamp("created_at").default(sql`NOW()`),
+  updatedAt: timestamp("updated_at").default(sql`NOW()`),
+});
+
+export const insertInterviewSchema = createInsertSchema(interviews).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+  storiesParsedAt: true,
+});
+
+export type InsertInterview = z.infer<typeof insertInterviewSchema>;
+export type Interview = typeof interviews.$inferSelect;
+
 export const chaptersRelations = relations(chapters, ({ many }) => ({
   stories: many(stories),
 }));

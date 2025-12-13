@@ -1,7 +1,8 @@
 # Pearl Interview System: Architecture & Implementation Plan
 
-> **Version:** 1.0
+> **Version:** 1.1
 > **Created:** December 11, 2025
+> **Last Updated:** December 13, 2025
 > **Status:** Reference Document for Development
 
 ---
@@ -93,7 +94,21 @@ Pearl is HeritageWhisper's AI interviewer that conducts flowing voice conversati
 
 **Key Insight:** The `userOnlyRecorder` in `use-realtime-interview.tsx` already captures just the user's voice - exactly what we need for story segments.
 
-### 1.3 Existing Story Analysis (`/api/analyze-stories`)
+### 1.3 Interruption Prevention (Auto-Mute Feature)
+
+| Aspect | Implementation |
+|--------|----------------|
+| **Problem** | Voice Activity Detection (VAD) triggers on background noise during Pearl's questions |
+| **Solution** | Auto-mute user microphone when Pearl starts speaking |
+| **Implementation** | `use-realtime-interview.tsx` lines 247-309 |
+| **Trigger** | `onAssistantResponseCreated` event mutes mic |
+| **Restore** | `onAssistantResponseComplete` event unmutes mic |
+| **Technical** | `toggleMic(boolean)` disables/enables audio track |
+| **UX Impact** | Transparent - no user action needed |
+
+**Key Insight:** Per OpenAI Realtime API best practices, always provide mute controls since VAD is "still sometimes buggy" with ambient noise. This prevents false interruptions from dogs, traffic, coughing, etc.
+
+### 1.4 Existing Story Analysis (`/api/analyze-stories`)
 
 The endpoint already exists and returns:
 
@@ -115,9 +130,9 @@ The endpoint already exists and returns:
 
 **Gap:** `start_time` and `end_time` are placeholders - the current transcript doesn't include real timestamps.
 
-### 1.4 Current Interview Flow End
+### 1.5 Current Interview Flow End
 
-When user clicks "Done" in `/app/interview-chat-v2/page.tsx`:
+When user clicks "Done" in `/app/interview-chat-v3/page.tsx`:
 
 1. Calls `/api/analyze-stories` with transcript
 2. If 1 story → Creates single story via `POST /api/stories`
@@ -1138,4 +1153,4 @@ COMMENT ON COLUMN stories.story_age IS 'Age of storyteller at time of story (alt
 ---
 
 *Document created: December 11, 2025*
-*Last updated: December 11, 2025*
+*Last updated: December 13, 2025 - Added auto-mute feature documentation*

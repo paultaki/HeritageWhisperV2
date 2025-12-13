@@ -494,6 +494,7 @@ function InterviewChatPageContent() {
   }, [messages]);
 
   // Handle confirmed completion - step 2: actually process
+  // NEW FLOW: Immediately persist audio to prevent data loss, then redirect to review page
   const handleConfirmedComplete = useCallback(async () => {
     setShowCompleteConfirm(false);
 
@@ -507,41 +508,137 @@ function InterviewChatPageContent() {
     setIsAnalyzing(true);
 
     try {
-      // 1. Get full transcript
-      const fullTranscript = messages
-        .filter(m => m.type !== 'system')
-        .map(m => `${m.sender === 'user' ? 'User' : 'Pearl'}: ${m.content}`)
-        .join('\n');
+      // Get auth token for API calls
+      const { data: { session } } = await supabase.auth.getSession();
+      const authToken = session?.access_token;
+      
+      if (!authToken) {
+        throw new Error('Not authenticated');
+      }
 
-      // 2. Analyze for stories
-      const response = await fetch('/api/analyze-stories', {
+      // 1. Get audio blobs
+      let userOnlyBlob: Blob | null = null;
+      let mixedBlob: Blob | null = null;
+      let finalDuration = 0;
+
+      if (isRealtimeEnabled) {
+        userOnlyBlob = getUserAudioBlob();
+        mixedBlob = getMixedAudioBlob();
+        finalDuration = recordingDuration;
+      } else {
+        userOnlyBlob = await combineAudioBlobs(audioState.chunks);
+        mixedBlob = userOnlyBlob; // In traditional mode, they're the same
+        finalDuration = audioState.totalDuration;
+      }
+
+      if (!userOnlyBlob) {
+        throw new Error('No audio recorded');
+      }
+
+      // 2. Upload user-only audio to Supabase Storage (CRITICAL: prevents data loss)
+      console.log('[InterviewChat] 📤 Uploading user-only audio...');
+      const userAudioFormData = new FormData();
+      userAudioFormData.append('audio', userOnlyBlob, 'user-only.webm');
+
+      const userAudioResponse = await fetch('/api/upload/audio', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Authorization': `Bearer ${authToken}`,
+        },
+        body: userAudioFormData,
+      });
+
+      if (!userAudioResponse.ok) {
+        const errorData = await userAudioResponse.json();
+        throw new Error(`Failed to upload user audio: ${errorData.error || userAudioResponse.statusText}`);
+      }
+
+      const userAudioData = await userAudioResponse.json();
+      const userAudioUrl = userAudioData.url;
+      console.log('[InterviewChat] ✅ User audio uploaded:', userAudioUrl);
+
+      // 3. Upload mixed audio (optional, for archival/debugging)
+      let mixedAudioUrl: string | null = null;
+      if (mixedBlob && mixedBlob !== userOnlyBlob) {
+        console.log('[InterviewChat] 📤 Uploading mixed audio...');
+        const mixedAudioFormData = new FormData();
+        mixedAudioFormData.append('audio', mixedBlob, 'mixed.webm');
+
+        const mixedAudioResponse = await fetch('/api/upload/audio', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${authToken}`,
+          },
+          body: mixedAudioFormData,
+        });
+
+        if (mixedAudioResponse.ok) {
+          const mixedAudioData = await mixedAudioResponse.json();
+          mixedAudioUrl = mixedAudioData.url;
+          console.log('[InterviewChat] ✅ Mixed audio uploaded:', mixedAudioUrl);
+        } else {
+          console.warn('[InterviewChat] ⚠️ Failed to upload mixed audio, continuing without it');
+        }
+      }
+
+      // 4. Prepare transcript JSON with timestamps
+      const transcriptJson = messages
+        .filter(m => m.type !== 'system' && m.type !== 'typing')
+        .map(m => ({
+          id: m.id,
+          type: m.type,
+          content: m.content,
+          timestamp: m.timestamp.toISOString(),
+          sender: m.sender,
+          audioDuration: m.audioDuration,
+        }));
+
+      // 5. Create interviews record (CRITICAL: persists data before redirect)
+      console.log('[InterviewChat] 📝 Creating interviews record...');
+      const createInterviewResponse = await fetch('/api/interviews', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${authToken}`,
+          'Content-Type': 'application/json',
+        },
         body: JSON.stringify({
-          transcript: fullTranscript,
-          userName: user?.name
+          fullAudioUrl: userAudioUrl,
+          mixedAudioUrl: mixedAudioUrl,
+          durationSeconds: finalDuration,
+          transcriptJson: transcriptJson,
+          theme: selectedTheme?.id || null,
         }),
       });
 
-      if (!response.ok) throw new Error('Analysis failed');
-
-      const result = await response.json();
-
-      if (result.stories && result.stories.length > 1) {
-        // Found multiple stories! Show modal
-        setDetectedStories(result.stories);
-        setShowSplitModal(true);
-        setIsAnalyzing(false);
-      } else {
-        // Just one story, proceed as normal
-        await proceedWithSingleStory(result.stories?.[0]);
+      if (!createInterviewResponse.ok) {
+        const errorData = await createInterviewResponse.json();
+        throw new Error(`Failed to create interview: ${errorData.error || createInterviewResponse.statusText}`);
       }
+
+      const interviewData = await createInterviewResponse.json();
+      const interviewId = interviewData.id;
+      console.log('[InterviewChat] ✅ Interview created:', interviewId);
+
+      // 6. Delete draft (no longer needed after successful save)
+      await deleteDraft();
+
+      // 7. Redirect to new review page
+      console.log('[InterviewChat] 🚀 Redirecting to review page...');
+      window.location.href = `/review/interview/${interviewId}`;
+
     } catch (error) {
-      console.error('Analysis error:', error);
-      // Fallback to single story flow
-      await proceedWithSingleStory();
+      console.error('[InterviewChat] ❌ Error completing interview:', error);
+      setIsAnalyzing(false);
+      
+      // Show user-friendly error message
+      alert(
+        error instanceof Error 
+          ? `Failed to save your interview: ${error.message}. Please try again.`
+          : 'Failed to save your interview. Please try again.'
+      );
     }
-  }, [messages, isRealtimeEnabled, status, isRecording, stopSession, stopTraditionalRecording, user?.name, audioState.chunks, audioState.totalDuration, recordingDuration, getMixedAudioBlob, getUserAudioBlob, proceedWithSingleStory]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [messages, isRealtimeEnabled, status, isRecording, stopSession, stopTraditionalRecording, selectedTheme, audioState.chunks, audioState.totalDuration, recordingDuration, getMixedAudioBlob, getUserAudioBlob]);
 
   // Redirect if not authenticated (only after loading completes)
   useEffect(() => {
