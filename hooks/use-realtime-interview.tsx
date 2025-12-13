@@ -248,6 +248,13 @@ export function useRealtimeInterview() {
           console.log('[RealtimeInterview] 🎙️ Pearl started speaking, creating new recorder...');
           pearlAudioChunksRef.current = [];
 
+          // MUTE USER MIC: Prevent background noise from interrupting Pearl
+          // Best practice per OpenAI Realtime API guide (Latent.Space)
+          if (realtimeHandlesRef.current) {
+            realtimeHandlesRef.current.toggleMic(false);
+            console.log('[RealtimeInterview] 🔇 Muted user mic (Pearl speaking)');
+          }
+
           // Signal to UI that Pearl started speaking (create empty message bubble)
           // Text will stream in via response.output_audio_transcript.delta events
           if (onAssistantTextDeltaCallbackRef.current) {
@@ -294,6 +301,12 @@ export function useRealtimeInterview() {
         // Pearl response complete - finalize audio recording (text already streamed)
         onAssistantResponseComplete: async () => {
           console.log('[RealtimeInterview] ✅ Pearl finished generating response (text already streamed)');
+
+          // UNMUTE USER MIC: Pearl finished speaking, user can respond
+          if (realtimeHandlesRef.current) {
+            realtimeHandlesRef.current.toggleMic(true);
+            console.log('[RealtimeInterview] 🔊 Unmuted user mic (Pearl finished)');
+          }
 
           // Stop recording to get a complete WebM file (for saving/playback, not for transcription)
           if (pearlAudioRecorderRef.current && pearlAudioRecorderRef.current.state === 'recording') {
