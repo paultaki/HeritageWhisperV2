@@ -120,7 +120,7 @@ export function FullInterviewCard({
       {/* Info note */}
       <div className="mt-4 p-3 bg-[var(--hw-primary-soft)] rounded-xl">
         <p className="text-sm text-[var(--hw-text-secondary)]">
-          <span className="font-medium text-[var(--hw-primary)]">Note:</span> This includes the full conversation, including Pearl&apos;s questions. Individual stories above have been edited to flow as standalone narratives.
+          <span className="font-medium text-[var(--hw-primary)]">Note:</span> This saves your voice recording along with the full transcript including Pearl&apos;s questions. Individual stories above have been edited to flow as standalone narratives.
         </p>
       </div>
     </div>

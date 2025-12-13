@@ -107,7 +107,7 @@ export async function POST(
           continue;
         }
 
-        // Prepare story record
+        // Prepare story record - only include columns that exist in the stories table
         const storyRecord: Record<string, any> = {
           user_id: user.id,
           title: story.title,
@@ -125,18 +125,13 @@ export async function POST(
           created_at: new Date().toISOString(),
         };
 
-        // Add source interview reference (these columns should exist per the plan)
-        // Note: If these columns don't exist yet, they'll be ignored by Supabase
-        storyRecord.source_interview_id = interviewId;
-        if (story.interviewStartMs !== undefined) {
-          storyRecord.interview_start_ms = story.interviewStartMs;
-        }
-        if (story.interviewEndMs !== undefined) {
-          storyRecord.interview_end_ms = story.interviewEndMs;
-        }
-        if (story.storyAge !== undefined) {
-          storyRecord.story_age = story.storyAge;
-        }
+        // Note: source_interview_id, interview_start_ms, interview_end_ms, story_age
+        // columns may not exist yet in the stories table. Skip them for now to avoid errors.
+        // TODO: Add these columns via migration:
+        // ALTER TABLE stories ADD COLUMN source_interview_id UUID REFERENCES interviews(id);
+        // ALTER TABLE stories ADD COLUMN interview_start_ms INTEGER;
+        // ALTER TABLE stories ADD COLUMN interview_end_ms INTEGER;
+        // ALTER TABLE stories ADD COLUMN story_age INTEGER;
 
         // Insert story
         const { data: createdStory, error: insertError } = await supabaseAdmin

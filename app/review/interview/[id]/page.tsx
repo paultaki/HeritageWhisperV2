@@ -77,6 +77,7 @@ function InterviewReviewContent() {
   const [isLoading, setIsLoading] = useState(true);
   const [isParsing, setIsParsing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [isFixingAudio, setIsFixingAudio] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   // Story editing state
@@ -134,6 +135,56 @@ function InterviewReviewContent() {
       }
 
       setInterview(fetchedInterview);
+
+      // 2b. Fix WebM audio if needed (broken duration metadata)
+      // This is a workaround for MediaRecorder WebM files with wrong duration
+      if (fetchedInterview.fullAudioUrl && !fetchedInterview.fullAudioUrl.includes('-fixed.webm')) {
+        setIsFixingAudio(true);
+        console.log('[InterviewReview] Attempting to fix WebM audio metadata...');
+        
+        try {
+          const fixResponse = await fetch('/api/process-audio/fix-webm', {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${authToken}`,
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ audioUrl: fetchedInterview.fullAudioUrl }),
+          });
+
+          if (fixResponse.ok) {
+            const fixData = await fixResponse.json();
+            console.log('[InterviewReview] ✅ Audio fixed! New URL:', fixData.url);
+            
+            // Update interview with fixed audio URL
+            fetchedInterview.fullAudioUrl = fixData.url;
+            if (fixData.durationSeconds) {
+              fetchedInterview.durationSeconds = fixData.durationSeconds;
+            }
+            
+            // Also update the database
+            await fetch(`/api/interviews/${interviewId}`, {
+              method: 'PATCH',
+              headers: {
+                'Authorization': `Bearer ${authToken}`,
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                fullAudioUrl: fixData.url,
+                durationSeconds: fixData.durationSeconds || fetchedInterview.durationSeconds,
+              }),
+            });
+            
+            setInterview({ ...fetchedInterview });
+          } else {
+            console.warn('[InterviewReview] Could not fix audio, using original');
+          }
+        } catch (fixError) {
+          console.warn('[InterviewReview] Audio fix failed:', fixError);
+        } finally {
+          setIsFixingAudio(false);
+        }
+      }
 
       // 3. Initialize story edits
       if (fetchedInterview.detectedStories?.parsedStories) {
@@ -298,14 +349,16 @@ function InterviewReviewContent() {
   };
 
   // Loading state
-  if (isAuthLoading || isLoading) {
+  if (isAuthLoading || isLoading || isFixingAudio) {
+    let loadingMessage = "Loading your stories...";
+    if (isParsing) loadingMessage = "Analyzing your conversation...";
+    else if (isFixingAudio) loadingMessage = "Preparing audio for playback...";
+
     return (
       <div className="hw-page flex items-center justify-center" style={{ background: "var(--hw-page-bg)", minHeight: "100vh" }}>
         <div className="text-center">
           <div className="w-12 h-12 border-4 border-[var(--hw-primary)]/20 border-t-[var(--hw-primary)] rounded-full mx-auto mb-4 animate-spin" />
-          <p className="text-[var(--hw-text-secondary)] text-lg">
-            {isParsing ? "Analyzing your conversation..." : "Loading your stories..."}
-          </p>
+          <p className="text-[var(--hw-text-secondary)] text-lg">{loadingMessage}</p>
         </div>
       </div>
     );
@@ -338,6 +391,23 @@ function InterviewReviewContent() {
 
   const { parsedStories, fullInterview } = interview.detectedStories;
   const storiesCount = parsedStories.length;
+
+  // Debug logging for audio URLs and story data
+  console.log('[InterviewReview] Interview data:', {
+    fullAudioUrl: interview.fullAudioUrl,
+    mixedAudioUrl: interview.mixedAudioUrl,
+    durationSeconds: interview.durationSeconds,
+  });
+  console.log('[InterviewReview] Parsed stories:', parsedStories.map(s => ({
+    id: s.id,
+    title: s.recommendedTitle,
+    durationSeconds: s.durationSeconds,
+    hasAudioUrl: !!s.audioUrl,
+  })));
+  console.log('[InterviewReview] Full interview:', {
+    totalDurationSeconds: fullInterview.totalDurationSeconds,
+    hasTranscript: !!fullInterview.formattedTranscript,
+  });
 
   return (
     <div className="hw-page" style={{ background: "var(--hw-page-bg)", minHeight: "100vh" }}>

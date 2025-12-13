@@ -128,6 +128,16 @@ export async function PATCH(
     if (body.stories_parsed_at !== undefined || body.storiesParsedAt !== undefined) {
       updates.stories_parsed_at = body.stories_parsed_at || body.storiesParsedAt;
     }
+    // Allow updating audio URLs (for WebM fix)
+    if (body.full_audio_url !== undefined || body.fullAudioUrl !== undefined) {
+      updates.full_audio_url = body.full_audio_url || body.fullAudioUrl;
+    }
+    if (body.mixed_audio_url !== undefined || body.mixedAudioUrl !== undefined) {
+      updates.mixed_audio_url = body.mixed_audio_url || body.mixedAudioUrl;
+    }
+    if (body.duration_seconds !== undefined || body.durationSeconds !== undefined) {
+      updates.duration_seconds = body.duration_seconds || body.durationSeconds;
+    }
 
     // 3. Update interview
     const { data: interview, error } = await supabaseAdmin

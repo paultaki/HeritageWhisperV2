@@ -501,6 +501,8 @@ function InterviewChatPageContent() {
     // Stop recording if active
     if (isRealtimeEnabled && status === 'connected') {
       stopSession();
+      // Give MediaRecorder time to process and fire onstop callback
+      await new Promise(resolve => setTimeout(resolve, 500));
     } else if (isRecording) {
       stopTraditionalRecording();
     }
@@ -516,23 +518,66 @@ function InterviewChatPageContent() {
         throw new Error('Not authenticated');
       }
 
-      // 1. Get audio blobs
+      // 1. Get audio blobs - need to wait for recorder to finalize after stopSession()
       let userOnlyBlob: Blob | null = null;
       let mixedBlob: Blob | null = null;
       let finalDuration = 0;
 
       if (isRealtimeEnabled) {
-        userOnlyBlob = getUserAudioBlob();
-        mixedBlob = getMixedAudioBlob();
+        // Wait for MediaRecorder to finalize blob (onStop callback is async)
+        // Poll for blob with timeout - increased timeout and added more logging
+        const maxWaitMs = 10000; // 10 seconds max wait
+        const pollIntervalMs = 200;
+        let waited = 0;
+        
+        console.log('[InterviewChat] ⏳ Waiting for audio blobs to be ready...');
+        
+        while (waited < maxWaitMs) {
+          userOnlyBlob = getUserAudioBlob();
+          mixedBlob = getMixedAudioBlob();
+          
+          // Check if we have valid blobs (size > 0)
+          // Note: A minute of webm audio is typically 500KB-1MB
+          if (userOnlyBlob && userOnlyBlob.size > 0) {
+            console.log('[InterviewChat] ✅ Audio blobs ready after', waited, 'ms');
+            console.log('[InterviewChat] 📊 User blob size:', (userOnlyBlob.size / 1024).toFixed(1), 'KB');
+            if (mixedBlob) {
+              console.log('[InterviewChat] 📊 Mixed blob size:', (mixedBlob.size / 1024).toFixed(1), 'KB');
+            }
+            break;
+          }
+          
+          if (waited % 1000 === 0 && waited > 0) {
+            console.log('[InterviewChat] ⏳ Still waiting for blobs...', waited, 'ms elapsed');
+          }
+          
+          await new Promise(resolve => setTimeout(resolve, pollIntervalMs));
+          waited += pollIntervalMs;
+        }
+        
+        // Final check and logging
+        if (!userOnlyBlob || userOnlyBlob.size === 0) {
+          console.error('[InterviewChat] ❌ User audio blob is empty after', waited, 'ms wait');
+          console.error('[InterviewChat] 💡 This usually means the MediaRecorder did not capture audio properly');
+        }
+        
         finalDuration = recordingDuration;
+        console.log('[InterviewChat] 📊 Recording duration from state:', finalDuration, 'seconds');
+        
+        // Warning if blob seems too small for the duration
+        const expectedMinSize = finalDuration * 5 * 1024; // ~5KB per second minimum
+        if (userOnlyBlob && userOnlyBlob.size < expectedMinSize && finalDuration > 10) {
+          console.warn('[InterviewChat] ⚠️ Audio blob seems small for duration. Expected ~' + 
+            (expectedMinSize / 1024).toFixed(0) + 'KB, got ' + (userOnlyBlob.size / 1024).toFixed(1) + 'KB');
+        }
       } else {
         userOnlyBlob = await combineAudioBlobs(audioState.chunks);
         mixedBlob = userOnlyBlob; // In traditional mode, they're the same
         finalDuration = audioState.totalDuration;
       }
 
-      if (!userOnlyBlob) {
-        throw new Error('No audio recorded');
+      if (!userOnlyBlob || userOnlyBlob.size === 0) {
+        throw new Error('No audio recorded or audio is empty');
       }
 
       // 2. Upload user-only audio to Supabase Storage (CRITICAL: prevents data loss)
@@ -554,8 +599,31 @@ function InterviewChatPageContent() {
       }
 
       const userAudioData = await userAudioResponse.json();
-      const userAudioUrl = userAudioData.url;
+      let userAudioUrl = userAudioData.url;
       console.log('[InterviewChat] ✅ User audio uploaded:', userAudioUrl);
+
+      // 2b. Fix WebM duration metadata (MediaRecorder creates files with broken duration)
+      console.log('[InterviewChat] 🔧 Fixing WebM duration metadata...');
+      try {
+        const fixResponse = await fetch('/api/process-audio/fix-webm', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${authToken}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ audioUrl: userAudioUrl }),
+        });
+
+        if (fixResponse.ok) {
+          const fixData = await fixResponse.json();
+          userAudioUrl = fixData.url;
+          console.log('[InterviewChat] ✅ WebM fixed, new URL:', userAudioUrl, 'duration:', fixData.durationSeconds, 's');
+        } else {
+          console.warn('[InterviewChat] ⚠️ Could not fix WebM duration, using original file');
+        }
+      } catch (fixError) {
+        console.warn('[InterviewChat] ⚠️ WebM fix failed:', fixError);
+      }
 
       // 3. Upload mixed audio (optional, for archival/debugging)
       let mixedAudioUrl: string | null = null;
@@ -576,22 +644,53 @@ function InterviewChatPageContent() {
           const mixedAudioData = await mixedAudioResponse.json();
           mixedAudioUrl = mixedAudioData.url;
           console.log('[InterviewChat] ✅ Mixed audio uploaded:', mixedAudioUrl);
+
+          // Fix mixed audio WebM duration too
+          try {
+            const fixMixedResponse = await fetch('/api/process-audio/fix-webm', {
+              method: 'POST',
+              headers: {
+                'Authorization': `Bearer ${authToken}`,
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({ audioUrl: mixedAudioUrl }),
+            });
+
+            if (fixMixedResponse.ok) {
+              const fixMixedData = await fixMixedResponse.json();
+              mixedAudioUrl = fixMixedData.url;
+              console.log('[InterviewChat] ✅ Mixed WebM fixed:', mixedAudioUrl);
+            }
+          } catch (fixMixedError) {
+            console.warn('[InterviewChat] ⚠️ Could not fix mixed WebM:', fixMixedError);
+          }
         } else {
           console.warn('[InterviewChat] ⚠️ Failed to upload mixed audio, continuing without it');
         }
       }
 
       // 4. Prepare transcript JSON with timestamps
-      const transcriptJson = messages
-        .filter(m => m.type !== 'system' && m.type !== 'typing')
-        .map(m => ({
-          id: m.id,
-          type: m.type,
-          content: m.content,
-          timestamp: m.timestamp.toISOString(),
-          sender: m.sender,
-          audioDuration: m.audioDuration,
-        }));
+      const filteredMessages = messages.filter(m => m.type !== 'system' && m.type !== 'typing');
+      const transcriptJson = filteredMessages.map(m => ({
+        id: m.id,
+        type: m.type,
+        content: m.content,
+        timestamp: m.timestamp.toISOString(),
+        sender: m.sender,
+        audioDuration: m.audioDuration,
+      }));
+
+      // Calculate actual duration from message timestamps (more reliable than recordingDuration state)
+      let calculatedDuration = finalDuration;
+      if (filteredMessages.length >= 2) {
+        const firstTimestamp = filteredMessages[0].timestamp.getTime();
+        const lastTimestamp = filteredMessages[filteredMessages.length - 1].timestamp.getTime();
+        calculatedDuration = Math.round((lastTimestamp - firstTimestamp) / 1000);
+        console.log('[InterviewChat] 📊 Calculated duration from timestamps:', calculatedDuration, 'seconds');
+      }
+      // Use the larger of the two (in case one is wrong)
+      const actualDuration = Math.max(finalDuration, calculatedDuration, 60); // At least 60 seconds
+      console.log('[InterviewChat] 📊 Final duration to save:', actualDuration, 'seconds (from timestamps:', calculatedDuration, ', from recordingDuration:', finalDuration, ')');
 
       // 5. Create interviews record (CRITICAL: persists data before redirect)
       console.log('[InterviewChat] 📝 Creating interviews record...');
@@ -604,7 +703,7 @@ function InterviewChatPageContent() {
         body: JSON.stringify({
           fullAudioUrl: userAudioUrl,
           mixedAudioUrl: mixedAudioUrl,
-          durationSeconds: finalDuration,
+          durationSeconds: actualDuration,
           transcriptJson: transcriptJson,
           theme: selectedTheme?.id || null,
         }),
