@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { StoryReviewCard } from "@/components/review/StoryReviewCard";
 import { FullInterviewCard } from "@/components/review/FullInterviewCard";
 import { formatDuration } from "@/lib/audioSlicer";
+import type { StoryPhoto } from "@/components/MultiPhotoUploader";
 
 interface ParsedStory {
   id: string;
@@ -62,7 +63,7 @@ interface StoryEdits {
     storyAge?: number;
     lifePhase?: string;
     lessonLearned?: string;
-    photos: any[];
+    photos: StoryPhoto[];
     included: boolean;
   };
 }
@@ -295,35 +296,90 @@ function InterviewReviewContent() {
         throw new Error("Not authenticated");
       }
 
-      // Prepare stories to save
-      const stories = saveAsFullInterview
-        ? [
-            {
-              tempId: "full-interview",
-              title: fullInterviewTitle,
-              transcription: interview.detectedStories?.fullInterview.formattedTranscript || "",
-              audioUrl: interview.mixedAudioUrl || interview.fullAudioUrl,
-              durationSeconds: interview.durationSeconds,
-              lessonLearned: "",
-              photos: [],
-            },
-          ]
-        : interview.detectedStories?.parsedStories
-            .filter(story => storyEdits[story.id]?.included)
-            .map(story => ({
-              tempId: story.id,
-              title: storyEdits[story.id].title,
-              transcription: story.bridgedText,
-              audioUrl: story.audioUrl || interview.fullAudioUrl,
-              durationSeconds: story.durationSeconds,
-              storyYear: storyEdits[story.id].storyYear,
-              storyAge: storyEdits[story.id].storyAge,
-              lifePhase: storyEdits[story.id].lifePhase,
-              lessonLearned: storyEdits[story.id].lessonLearned,
-              photos: storyEdits[story.id].photos,
-              interviewStartMs: new Date(story.startTimestamp).getTime(),
-              interviewEndMs: new Date(story.endTimestamp).getTime(),
-            })) || [];
+      // Helper function to upload a photo file
+      const uploadPhoto = async (photo: StoryPhoto): Promise<StoryPhoto> => {
+        // If no file, photo is already uploaded
+        if (!photo.file) return photo;
+
+        const formData = new FormData();
+        formData.append('photo', photo.file);
+
+        const response = await fetch('/api/upload/photo', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${authToken}`,
+          },
+          body: formData,
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to upload photo');
+        }
+
+        const data = await response.json();
+        
+        // Return photo with server paths (remove the file reference and blob URL)
+        return {
+          id: photo.id,
+          masterPath: data.masterPath || data.path,
+          displayPath: data.displayPath || data.url,
+          displayUrl: data.url,
+          transform: photo.transform,
+          isHero: photo.isHero,
+        };
+      };
+
+      // Upload any pending photos and prepare stories
+      const storiesWithUploadedPhotos = [];
+
+      if (saveAsFullInterview) {
+        storiesWithUploadedPhotos.push({
+          tempId: "full-interview",
+          title: fullInterviewTitle,
+          transcription: interview.detectedStories?.fullInterview.formattedTranscript || "",
+          audioUrl: interview.mixedAudioUrl || interview.fullAudioUrl,
+          durationSeconds: interview.durationSeconds,
+          lessonLearned: "",
+          photos: [],
+        });
+      } else {
+        const includedStories = interview.detectedStories?.parsedStories.filter(
+          story => storyEdits[story.id]?.included
+        ) || [];
+
+        for (const story of includedStories) {
+          const edits = storyEdits[story.id];
+          
+          // Upload any photos that have files (pending uploads)
+          const uploadedPhotos = [];
+          for (const photo of edits.photos || []) {
+            try {
+              const uploadedPhoto = await uploadPhoto(photo);
+              uploadedPhotos.push(uploadedPhoto);
+            } catch (err) {
+              console.error('[InterviewReview] Failed to upload photo:', err);
+              // Continue without the photo
+            }
+          }
+
+          storiesWithUploadedPhotos.push({
+            tempId: story.id,
+            title: edits.title,
+            transcription: story.bridgedText,
+            audioUrl: story.audioUrl || interview.fullAudioUrl,
+            durationSeconds: story.durationSeconds,
+            storyYear: edits.storyYear,
+            storyAge: edits.storyAge,
+            lifePhase: edits.lifePhase,
+            lessonLearned: edits.lessonLearned,
+            photos: uploadedPhotos,
+            interviewStartMs: new Date(story.startTimestamp).getTime(),
+            interviewEndMs: new Date(story.endTimestamp).getTime(),
+          });
+        }
+      }
+
+      const stories = storiesWithUploadedPhotos;
 
       if (stories.length === 0) {
         setError("Please select at least one story to save");
